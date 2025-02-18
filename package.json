@@ -1,0 +1,39 @@
+{
+  "name": "authentificationapi",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "dev1": "bun src/index.ts",
+    "dev": "bun run --watch src/index.ts",
+    "start": "npm run src/index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/dotenv": "6.1.1",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
+    "@types/pg": "^8.11.10",
+    "@types/sequelize": "^4.28.20",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "3.0.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "5.0.1",
+    "jsonwebtoken": "9.0.1",
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
+    "prettier": "^3.3.3",
+    "sequelize": "^6.37.5",
+    "sequelize-cli": "^6.6.2"
+  }
+}
