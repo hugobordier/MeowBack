@@ -1,7 +1,9 @@
+import type User from '../models/User';
 import AuthService from '../services/authService';
+import type { Request, Response } from 'express';
 
 export default class authController {
-  static async login(req, res) {
+  static async login(req: Request, res: Response) {
     const { email, mdp } = req.body;
 
     try {
@@ -15,25 +17,24 @@ export default class authController {
         sameSite: 'strict',
       });
       res.status(200).json({ accessToken });
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       res.status(401).json({ error: error.message });
     }
   }
 
-  static async register(req, res) {
-    const { pseudo, email, mdp } = req.body;
-
+  static async register(req: Request, res: Response) {
+    const { pseudo, email, mdp } = req.body as User;
     try {
       const user = await AuthService.registerUser(pseudo, email, mdp);
       res.status(200).json(user);
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       res.status(401).json({ error: error.message });
     }
   }
 
-  static async refresh(req, res) {
+  static async refresh(req: Request, res: Response) {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
@@ -54,7 +55,7 @@ export default class authController {
     }
   }
 
-  static async test(req, res) {
+  static async test(req: Request, res: Response) {
     try {
       res.status(200).json(req.user);
     } catch (error) {

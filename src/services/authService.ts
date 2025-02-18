@@ -6,8 +6,8 @@ import { UniqueConstraintError, ValidationError } from 'sequelize';
 
 dotenv.config();
 
-const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET;
+const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 
 export default class AuthService {
   static async loginUser(email: string, mdp: string) {

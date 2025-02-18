@@ -1,29 +1,34 @@
 import express from 'express';
 import cors from 'cors';
 import db from './config/config';
-import authRoutes from './routes/authRoutes';
 import cookieParser from 'cookie-parser';
+import swaggerUi from 'swagger-ui-express';
+import defaultRouter from './routes';
 
 const app = express();
 
 const port = 3000;
 
 app.use(cookieParser());
+app.use(express.json());
+app.use('/', defaultRouter.getRouter());
 
 app.use(
   cors({
-    origin: 'http://localhost:5173',
+    origin: '*',
     credentials: true,
   })
 );
 
-app.use(express.json());
+app.use(
+  '/swagger',
+  swaggerUi.serve,
+  swaggerUi.setup(defaultRouter.getSwaggerSpec())
+);
 
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
-
-app.use('/auth', authRoutes);
 
 async function startServer() {
   try {

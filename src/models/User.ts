@@ -6,6 +6,7 @@ class User extends Model {
   declare pseudo: string;
   declare email: string;
   declare mdp: string;
+  declare isAdmin: boolean;
 }
 
 User.init(
@@ -37,6 +38,10 @@ User.init(
       validate: {
         len: [1, 100],
       },
+    },
+    isAdmin: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true,
     },
   },
   {
