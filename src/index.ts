@@ -19,11 +19,12 @@ const allowedOrigins = [
   'exp://192.168.1.42:8081',
   'exp://172.20.10.3:8081',
   'exp://172.20.10.13:8081',
+  'https://meowback-production.up.railway.app',
 ];
 
 app.use(
   cors({
-    origin: '*',
+    origin: allowedOrigins,
     credentials: true,
   })
 );
