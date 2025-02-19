@@ -37,6 +37,11 @@ export class SwaggerRouter {
       servers: [
         {
           url: 'http://localhost:3000',
+          description: 'Local development server',
+        },
+        {
+          url: 'https://meowback-production.up.railway.app',
+          description: 'Production server',
         },
       ],
       paths: {},

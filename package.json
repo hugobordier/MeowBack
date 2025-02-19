@@ -2,6 +2,7 @@
   "name": "meowback",
   "type": "module",
   "scripts": {
+    "dev": "bun run --watch src/index.ts",
     "start": "bun i && bun run src/index.ts"
   },
   "devDependencies": {
