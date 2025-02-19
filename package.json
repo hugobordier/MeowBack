@@ -36,6 +36,7 @@
     "prettier": "^3.3.3",
     "sequelize": "^6.37.5",
     "sequelize-cli": "^6.6.2",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "vercel": "^41.1.4"
   }
 }
