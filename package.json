@@ -1,11 +1,9 @@
 {
-  "name": "authentificationapi",
-  "module": "index.ts",
+  "name": "meowback",
   "type": "module",
   "scripts": {
-    "dev1": "bun src/index.ts",
     "dev": "bun run --watch src/index.ts",
-    "start": "bun src/index.ts"
+    "start": "bun install && bun run start"
   },
   "devDependencies": {
     "@types/bun": "latest"
