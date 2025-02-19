@@ -23,10 +23,10 @@ export default class AuthService {
     }
 
     const accessToken = jwt.sign(user.dataValues, accessTokenSecret, {
-      expiresIn: '1m',
+      expiresIn: '60m',
     });
     const refreshToken = jwt.sign(user.dataValues, refreshTokenSecret, {
-      expiresIn: '10m',
+      expiresIn: '7d',
     });
 
     return { accessToken, refreshToken };

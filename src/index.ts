@@ -13,10 +13,18 @@ app.use(cookieParser());
 app.use(express.json());
 app.use('/', defaultRouter.getRouter());
 
+const allowedOrigins = [
+  'http://localhost:3000',
+  'exp://jmvvxtg-anonymous-8081.exp.direct',
+  'exp://192.168.1.42:8081',
+  'exp://172.20.10.3:8081',
+  'exp://172.20.10.13:8081',
+];
+
 app.use(
   cors({
     origin: '*',
-    credentials: true,
+    //credentials: true,
   })
 );
 
@@ -39,7 +47,7 @@ async function startServer() {
     await db.sync();
     console.log('Database synced successfully.');
 
-    app.listen(port, () => {
+    app.listen(port, '0.0.0.0', () => {
       console.log(`Server running on port ${port}`);
     });
   } catch (error) {
