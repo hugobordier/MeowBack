@@ -20,4 +20,6 @@ const db = new Sequelize(databaseUrl, {
 //   dialect: 'postgres',
 // });
 
+//test
+
 export default db;
