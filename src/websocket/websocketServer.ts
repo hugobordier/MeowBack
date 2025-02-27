@@ -24,7 +24,7 @@ export const initWebSocket = (server: http.Server): void => {
     });
 
     socket.on('message', (msg) => {
-      console.log(`Message reçu : ${msg}`);
+      console.log(`Message reçu : ${msg.content}`);
       io.emit('message', msg); // Envoie le message à tous les clients
     });
 
