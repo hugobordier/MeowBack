@@ -3,10 +3,8 @@ import http from 'http';
 import { handleChat } from './chatHandler.ts';
 import { handleUser } from './userHandler.ts';
 
-let io: Server;
-
 export const initWebSocket = (server: http.Server): void => {
-  io = new Server(server, {
+  const io = new Server(server, {
     cors: {
       origin: '*',
       methods: ['GET', 'POST'],
@@ -14,20 +12,30 @@ export const initWebSocket = (server: http.Server): void => {
   });
 
   console.log('✅ WebSocket server ready');
-  server.listen(3001, () => {
-    console.log('🚀 WebSocket server running on port 3001');
-  });
 
   io.on('connection', (socket) => {
     console.log(`🟢 Connexion WebSocket : ${socket.id}`);
 
-    handleChat(socket, io);
-    handleUser(socket, io);
+    // handleChat(socket, io);
+    // handleUser(socket, io);
+
+    socket.on('join', (username) => {
+      console.log(`${username} a rejoint le chat`);
+    });
+
+    socket.on('message', (msg) => {
+      console.log(`Message reçu : ${msg}`);
+      io.emit('message', msg); // Envoie le message à tous les clients
+    });
 
     socket.on('disconnect', () => {
       console.log(`🔴 Déconnexion WebSocket : ${socket.id}`);
     });
   });
-};
 
-export const getIO = (): Server => io;
+  io.engine.on('connection_error', (err) => {
+    console.log('🚨 Erreur WebSocket :', err);
+  });
+
+  console.log('📡 WebSocket server initialized !');
+};
