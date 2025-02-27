@@ -6,6 +6,7 @@ import express, {
 } from 'express';
 
 interface RouteOptions {
+  security?: boolean;
   description?: string;
   summary?: string;
   responses: {
@@ -45,6 +46,15 @@ export class SwaggerRouter {
         },
       ],
       paths: {},
+      components: {
+        securitySchemes: {
+          BearerAuth: {
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT',
+          },
+        },
+      },
     };
   }
 
@@ -127,6 +137,11 @@ export class SwaggerRouter {
                 },
               },
             },
+          }
+        : {}),
+      ...(options.security
+        ? {
+            security: [{ BearerAuth: [] }],
           }
         : {}),
     };
