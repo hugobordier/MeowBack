@@ -4,9 +4,17 @@ import db from './config/config';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import defaultRouter from './routes';
+import { Server, Socket } from 'socket.io';
+import http from 'http';
+import { initWebSocket } from './websocket/websocketServer';
 
 const app = express();
-
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+  },
+});
 const port = 3000;
 
 app.use(cookieParser());
@@ -48,8 +56,10 @@ async function startServer() {
     await db.sync();
     console.log('Database synced successfully.');
 
-    app.listen(port, '0.0.0.0', () => {
-      console.log(`Server running on port ${port}`);
+    initWebSocket(server);
+
+    server.listen(port, '0.0.0.0', () => {
+      console.log(`✅Server running on port ${port}`);
     });
   } catch (error) {
     console.error('Unable to connect to the database:', error);

@@ -4,7 +4,6 @@ import type { Request, Response } from 'express';
 
 export default class authController {
   static async login(req: Request, res: Response) {
-    console.log('test');
     const { email, mdp } = req.body;
 
     try {
