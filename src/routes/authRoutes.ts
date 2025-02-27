@@ -9,6 +9,7 @@ swaggerRouter.route('/register').post(
   {
     description: 'User registration',
     summary: 'Register a new user',
+    security: false,
     requestBody: {
       description: 'Request body containing the string to concatenate',
       required: true,
@@ -44,6 +45,7 @@ swaggerRouter.route('/login').post(
   {
     description: 'Authenticate a user and get an access token.',
     summary: 'Login with user credentials',
+    security: false,
     requestBody: {
       description: 'User login credentials',
       required: true,
@@ -86,17 +88,7 @@ swaggerRouter.route('/refresh').post(
   {
     description: 'Refresh the authentication token using a refresh token.',
     summary: 'Refresh authentication token',
-    requestBody: {
-      description: 'Refresh token to obtain new access token',
-      required: true,
-      schema: {
-        type: 'object',
-        properties: {
-          refreshToken: { type: 'string' },
-        },
-        required: ['refreshToken'],
-      },
-    },
+    security: false,
     responses: {
       '200': {
         description: 'New access token successfully issued.',
@@ -118,6 +110,7 @@ swaggerRouter.route('/test').get(
   {
     description: 'Test authentication and ensure user is logged in.',
     summary: 'Test user authentication',
+    security: true,
     responses: {
       '200': { description: 'User is authenticated and test successful.' },
       '401': { description: 'Unauthorized, user not authenticated.' },
