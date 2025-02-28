@@ -10,14 +10,14 @@ const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 
 export default class AuthService {
-  static async loginUser(email: string, mdp: string) {
+  static async loginUser(email: string, password: string) {
     const user = await User.findOne({ where: { email: email } });
 
     if (!user) {
       throw new Error('Utilisateur non trouvé');
     }
 
-    const validPassword = await bcrypt.compare(mdp, user.mdp);
+    const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
       throw new Error('Mot de passe incorrect');
     }
@@ -32,10 +32,57 @@ export default class AuthService {
     return { accessToken, refreshToken };
   }
 
-  static async registerUser(pseudo: string, email: string, mdp: string) {
+  static async registerUser(
+    username: string,
+    email: string,
+    password: string,
+    lastName: string,
+    firstName: string,
+    age: number,
+    birthDate: Date,
+    gender: string,
+    city: string,
+    country: string,
+    profilePicture: string | null,
+    bio: string | null,
+    bankInfo: string | null,
+    rating: number | null,
+    phoneNumber: string,
+    address: string,
+    identityDocument: string | null,
+    insuranceCertificate: string | null,
+    isAdmin: boolean | null
+  ) {
     try {
-      const hashedPassword = await bcrypt.hash(mdp, 10);
-      const user = await User.create({ pseudo, email, mdp: hashedPassword });
+      if (password.length < 1 || password.length > 100) {
+        throw new Error(
+          'Le mot de passe doit contenir entre 1 et 100 caractères.'
+        );
+      }
+      const hashedPassword = await bcrypt.hash(password, 10);
+      console.log(hashedPassword);
+      const user = await User.create({
+        username,
+        email,
+        password: hashedPassword,
+        lastName,
+        firstName,
+        age,
+        birthDate,
+        gender,
+        city,
+        country,
+        profilePicture,
+        bio,
+        bankInfo,
+        rating,
+        phoneNumber,
+        address,
+        identityDocument,
+        insuranceCertificate,
+        isAdmin,
+      });
+
       return user.dataValues;
     } catch (error) {
       if (error instanceof UniqueConstraintError) {
@@ -43,16 +90,16 @@ export default class AuthService {
       }
       if (error instanceof ValidationError) {
         const messages = error.errors.map((err) => {
-          if (err.path === 'pseudo') {
-            return 'Le pseudo doit contenir entre 3 et 25 caractères.';
+          switch (err.path) {
+            case 'username':
+              return 'Le pseudo doit contenir entre 3 et 25 caractères.';
+            case 'email':
+              return 'L’email n’est pas valide.';
+            case 'phoneNumber':
+              return 'Le numéro de téléphone n’est pas valide.';
+            default:
+              return err.message;
           }
-          if (err.path === 'email') {
-            return 'L’email n’est pas valide.';
-          }
-          if (err.path === 'mdp') {
-            return 'Le mot de passe doit contenir entre 1 et 100 caractères.';
-          }
-          return err.message; // Autres messages d’erreur génériques
         });
         throw new Error(messages.join(' '));
       }

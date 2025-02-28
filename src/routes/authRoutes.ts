@@ -1,37 +1,128 @@
-import express from 'express';
+import type { password } from 'bun';
 import AuthController from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 
 const swaggerRouter = new SwaggerRouter();
-
 swaggerRouter.route('/register').post(
   {
     description: 'User registration',
     summary: 'Register a new user',
     security: false,
     requestBody: {
-      description: 'Request body containing the string to concatenate',
+      description: 'Request body containing the user registration information',
       required: true,
       schema: {
         type: 'object',
         properties: {
-          pseudo: {
+          username: {
             type: 'string',
-            description: 'pseudo',
-            example: 'test',
+            description: 'The username of the user',
+            example: 'john_doe',
           },
           email: {
             type: 'string',
-            description: 'mail',
-            example: 'test@mail.fr',
+            description: 'The email address of the user',
+            example: 'john.doe@mail.com',
           },
-          mdp: {
+          password: {
             type: 'string',
-            description: 'mot de passe',
-            example: 'motdepasses',
+            description: 'The password for the user account',
+            example: 'securePassword123',
+          },
+          lastName: {
+            type: 'string',
+            description: 'The user’s last name',
+            example: 'Doe',
+          },
+          firstName: {
+            type: 'string',
+            description: 'The user’s first name',
+            example: 'John',
+          },
+          age: {
+            type: 'integer',
+            description: 'The user’s age',
+            example: 25,
+          },
+          birthDate: {
+            type: 'string',
+            format: 'date',
+            description: 'The user’s birth date',
+            example: '1998-05-15',
+          },
+          city: {
+            type: 'string',
+            description: 'The city where the user resides',
+            example: 'Paris',
+          },
+          country: {
+            type: 'string',
+            description: 'The country where the user resides',
+            example: 'France',
+          },
+          gender: {
+            type: 'string',
+            description: 'The gender of the user',
+            example: 'Male',
+          },
+          profilePicture: {
+            type: 'string',
+            description: 'URL to the user’s profile picture',
+            example: 'http://example.com/profile.jpg',
+          },
+          bio: {
+            type: 'string',
+            description: 'A short bio or description of the user',
+            example: 'Software developer passionate about tech.',
+          },
+          bankInfo: {
+            type: 'string',
+            description: 'The user’s bank information (sensitive)',
+            example: 'IBAN: FR7612345678901234567890123',
+          },
+          rating: {
+            type: 'number',
+            format: 'float',
+            description: 'The user’s rating (out of 5)',
+            example: 4.5,
+          },
+          phoneNumber: {
+            type: 'string',
+            description: 'The user’s phone number',
+            example: '06 12 34 56 78',
+          },
+          address: {
+            type: 'string',
+            description: 'The user’s postal address',
+            example: '10 Rue de la République, 75001 Paris',
+          },
+          identityDocument: {
+            type: 'string',
+            description: 'URL to the user’s identity document',
+            example: 'http://example.com/identity.jpg',
+          },
+          insuranceCertificate: {
+            type: 'string',
+            description: 'URL to the user’s insurance certificate',
+            example: 'http://example.com/insurance.jpg',
+          },
+          isAdmin: {
+            type: 'boolean',
+            description: 'Indicates if the user is an admin',
+            example: false,
           },
         },
+        required: [
+          'username',
+          'email',
+          'password',
+          'lastName',
+          'firstName',
+          'age',
+          'birthDate',
+          'phoneNumber',
+        ],
       },
     },
     responses: {
@@ -55,12 +146,12 @@ swaggerRouter.route('/login').post(
           email: {
             type: 'string',
             description: 'mail',
-            example: 'test@mail.fr',
+            example: 'john.doe@mail.com',
           },
-          mdp: {
+          password: {
             type: 'string',
             description: 'mot de passe',
-            example: 'motdepasses',
+            example: 'securePassword123',
           },
         },
         required: ['email', 'password'],
