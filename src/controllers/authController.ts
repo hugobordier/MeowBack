@@ -14,7 +14,7 @@ export default class authController {
       );
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
-        maxAge: 600 * 1000,
+        maxAge: 3600 * 1000 * 24 * 7,
         sameSite: 'strict',
       });
       res.status(200).json({ accessToken });

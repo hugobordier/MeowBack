@@ -21,10 +21,10 @@ export default class AuthService {
     if (!validPassword) {
       throw new Error('Mot de passe incorrect');
     }
-
     const accessToken = jwt.sign(user.dataValues, accessTokenSecret, {
-      expiresIn: '60m',
+      expiresIn: '1s',
     });
+    console.log(accessToken);
     const refreshToken = jwt.sign(user.dataValues, refreshTokenSecret, {
       expiresIn: '7d',
     });
@@ -113,10 +113,10 @@ export default class AuthService {
     const userId = decodedToken.userId as string;
 
     const accessToken = jwt.sign({ userId: userId }, accessTokenSecret, {
-      expiresIn: '1m',
+      expiresIn: '1h',
     });
     const newRefreshToken = jwt.sign({ userId: userId }, refreshTokenSecret, {
-      expiresIn: '10m',
+      expiresIn: '7d',
     });
 
     return { accessToken, newRefreshToken };
