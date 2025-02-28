@@ -4,12 +4,13 @@ import type { Request, Response } from 'express';
 
 export default class authController {
   static async login(req: Request, res: Response) {
-    const { email, mdp } = req.body;
+    const { email, password } = req.body;
 
     try {
+      console.log(password);
       const { accessToken, refreshToken } = await AuthService.loginUser(
         email,
-        mdp
+        password
       );
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
@@ -24,9 +25,49 @@ export default class authController {
   }
 
   static async register(req: Request, res: Response) {
-    const { pseudo, email, mdp } = req.body as User;
+    const {
+      username,
+      email,
+      password,
+      lastName,
+      firstName,
+      age,
+      birthDate,
+      gender,
+      city,
+      country,
+      profilePicture,
+      bio,
+      bankInfo,
+      rating,
+      phoneNumber,
+      address,
+      identityDocument,
+      insuranceCertificate,
+      isAdmin,
+    } = req.body as User;
     try {
-      const user = await AuthService.registerUser(pseudo, email, mdp);
+      const user = await AuthService.registerUser(
+        username,
+        email,
+        password,
+        lastName,
+        firstName,
+        age,
+        birthDate,
+        gender,
+        city,
+        country,
+        profilePicture,
+        bio,
+        bankInfo,
+        rating,
+        phoneNumber,
+        address,
+        identityDocument,
+        insuranceCertificate,
+        isAdmin
+      );
       res.status(200).json(user);
     } catch (error: any) {
       console.error(error);
