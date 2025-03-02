@@ -211,4 +211,69 @@ swaggerRouter.route('/test').get(
   authenticate
 );
 
+swaggerRouter.route('/forgot-password').post(
+  {
+    description: 'Send a password reset link to the user’s email address.',
+    summary: 'Forgot password',
+    security: false,
+    requestBody: {
+      description: 'User email address',
+      required: true,
+      schema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            description: 'The email address of the user',
+            example: 'email@email.com',
+          },
+        },
+        required: ['email'],
+      },
+    },
+    responses: {
+      '200': { description: 'Password reset link sent successfully.' },
+      '400': { description: 'Bad request, invalid email address.' },
+      '404': { description: 'Not found, user not found.' },
+    },
+  },
+
+  AuthController.forgotPassword
+);
+
+swaggerRouter.route('/verify-reset-code').post(
+  {
+    description: 'Verify the password reset code sent to the user’s email.',
+    summary: 'Verify reset code',
+    security: false,
+    requestBody: {
+      description: 'User email and reset code',
+      required: true,
+      schema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            description: 'The email address of the user',
+            example: 'email@email.com',
+          },
+          code: {
+            type: 'string',
+            description: 'The reset code received by the user',
+            example: '123456',
+          },
+        },
+        required: ['email', 'code'],
+      },
+    },
+    responses: {
+      '200': { description: 'Reset code is valid.' },
+      '400': { description: 'Bad request, invalid email or code.' },
+      '404': { description: 'Not found, user not found or code expired.' },
+    },
+  },
+
+  AuthController.verifyResetCode
+);
+
 export default swaggerRouter;
