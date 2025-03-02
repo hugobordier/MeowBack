@@ -22,6 +22,8 @@ class User extends Model {
   declare address: string;
   declare identityDocument: string;
   declare insuranceCertificate: string;
+  declare resetcode?: string;
+  declare resetcodeexpire?: Date;
 }
 
 User.init(
@@ -133,6 +135,14 @@ User.init(
     isAdmin: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    resetcode: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    resetcodeexpires: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {

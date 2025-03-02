@@ -3,6 +3,8 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 import User from '../models/User';
 import dotenv from 'dotenv';
 import { UniqueConstraintError, ValidationError } from 'sequelize';
+import { sendEmail } from '../utils/sendMail';
+import ApiError from '../utils/ApiError';
 
 dotenv.config();
 
@@ -21,9 +23,8 @@ export default class AuthService {
     if (!validPassword) {
       throw new Error('Mot de passe incorrect');
     }
-
     const accessToken = jwt.sign(user.dataValues, accessTokenSecret, {
-      expiresIn: '60m',
+      expiresIn: '1s',
     });
     const refreshToken = jwt.sign(user.dataValues, refreshTokenSecret, {
       expiresIn: '7d',
@@ -60,7 +61,6 @@ export default class AuthService {
         );
       }
       const hashedPassword = await bcrypt.hash(password, 10);
-      console.log(hashedPassword);
       const user = await User.create({
         username,
         email,
@@ -81,10 +81,12 @@ export default class AuthService {
         identityDocument,
         insuranceCertificate,
         isAdmin,
+        resetcode: null,
+        resetcodeexpires: null,
       });
 
       return user.dataValues;
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof UniqueConstraintError) {
         throw new Error('Email ou pseudo déjà utilisé');
       }
@@ -103,6 +105,7 @@ export default class AuthService {
         });
         throw new Error(messages.join(' '));
       }
+      console.log(error);
       throw new Error('Erreur lors de la création de l’utilisateur');
     }
   }
@@ -113,12 +116,53 @@ export default class AuthService {
     const userId = decodedToken.userId as string;
 
     const accessToken = jwt.sign({ userId: userId }, accessTokenSecret, {
-      expiresIn: '1m',
+      expiresIn: '1h',
     });
     const newRefreshToken = jwt.sign({ userId: userId }, refreshTokenSecret, {
-      expiresIn: '10m',
+      expiresIn: '7d',
     });
 
     return { accessToken, newRefreshToken };
+  }
+
+  static async forgotPassword(email: string) {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw new Error('Utilisateur non trouvé');
+    }
+
+    const resetcode = Math.floor(100000 + Math.random() * 900000).toString();
+    const resetcodeexpires = new Date(Date.now() + 1000 * 60 * 10);
+
+    await sendEmail(email, resetcode);
+
+    await user.update({ resetcode, resetcodeexpires });
+  }
+
+  static async verifyResetCode(
+    email: string,
+    code: string,
+    newPassword: string
+  ) {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      throw ApiError.notFound('User not found');
+    }
+    if (user.resetcode !== code) {
+      throw ApiError.badRequest('Incorrect reset code');
+    }
+
+    if (new Date(user.dataValues.resetcodeexpires) < new Date()) {
+      throw ApiError.badRequest('Reset code has expired');
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    await user.update({
+      password: hashedPassword,
+      resetcode: null,
+      resetcodeexpires: null,
+    });
+
+    return { message: 'Password successfully reset' };
   }
 }
