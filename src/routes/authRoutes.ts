@@ -262,8 +262,13 @@ swaggerRouter.route('/verify-reset-code').post(
             description: 'The reset code received by the user',
             example: '123456',
           },
+          password: {
+            type: 'string',
+            description: 'The rnew password',
+            example: 'password',
+          },
         },
-        required: ['email', 'code'],
+        required: ['email', 'code', 'password'],
       },
     },
     responses: {
