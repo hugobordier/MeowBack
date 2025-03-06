@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import User from '../models/User';
 import dotenv from 'dotenv';
-import { UniqueConstraintError, ValidationError } from 'sequelize';
+import { Op, UniqueConstraintError, ValidationError } from 'sequelize';
 import { sendEmail } from '../utils/sendMail';
 import ApiError from '../utils/ApiError';
 
@@ -24,7 +24,7 @@ export default class AuthService {
       throw new Error('Mot de passe incorrect');
     }
     const accessToken = jwt.sign(user.dataValues, accessTokenSecret, {
-      expiresIn: '1s',
+      expiresIn: '1h',
     });
     const refreshToken = jwt.sign(user.dataValues, refreshTokenSecret, {
       expiresIn: '7d',
@@ -164,5 +164,55 @@ export default class AuthService {
     });
 
     return { message: 'Password successfully reset' };
+  }
+
+  static async deleteUser(uuid: string) {
+    try {
+      const user = await User.findByPk(uuid);
+
+      if (!user) {
+        throw ApiError.notFound('No user found');
+      }
+      await user.destroy();
+
+      return { message: 'User sucessfully deleted' };
+    } catch (error: any) {
+      console.error(error);
+      throw ApiError.internal('An error occurred while deleting the user');
+    }
+  }
+
+  static async updateUser(userId: string, updateData: any) {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw { statusCode: 404, message: 'User not found' };
+    }
+
+    if (updateData.username) {
+      const existingUser = await User.findOne({
+        where: {
+          username: updateData.username,
+          id: { [Op.ne]: userId },
+        },
+      });
+
+      if (existingUser) {
+        throw { statusCode: 400, message: 'Username already taken' };
+      }
+    }
+
+    if (updateData.password) {
+      updateData.password = await bcrypt.hash(updateData.password, 10);
+    }
+
+    await user.update(updateData);
+
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      profilePicture: user.profilePicture,
+      updatedAt: user.updatedAt,
+    };
   }
 }

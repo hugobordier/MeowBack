@@ -124,9 +124,34 @@ export default class authController {
       res.status(200).json({ message: 'Reset code is valid' });
     } catch (error: any) {
       console.error(error);
-      res
-        .status(error.statusCode || 400)
-        .json(new ApiError(400, error.message));
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  static async deleteUser(req: Request, res: Response) {
+    try {
+      const uuid = req.user!.id;
+      await AuthService.deleteUser(uuid);
+      res.status(200).json({ message: 'User has been deleted successfully' });
+    } catch (error: any) {
+      console.error(error);
+      res.status(400).json({ error: error.message });
+    }
+  }
+
+  static async updateUser(req: Request, res: Response) {
+    try {
+      const userId = req.user!.id;
+      const updateData = req.body;
+
+      const updatedUser = await AuthService.updateUser(userId, updateData);
+      res.status(200).json({
+        message: 'User updated successfully',
+        user: updatedUser,
+      });
+    } catch (error: any) {
+      console.error(error);
+      res.status(error.statusCode || 500).json({ message: error.message });
     }
   }
 }

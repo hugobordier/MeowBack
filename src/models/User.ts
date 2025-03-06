@@ -24,6 +24,8 @@ class User extends Model {
   declare insuranceCertificate: string;
   declare resetcode?: string;
   declare resetcodeexpire?: Date;
+  declare createdAt: Date;
+  declare updatedAt: Date;
 }
 
 User.init(
@@ -148,6 +150,7 @@ User.init(
   {
     sequelize: db,
     tableName: 'users',
+    timestamps: true,
   }
 );
 
