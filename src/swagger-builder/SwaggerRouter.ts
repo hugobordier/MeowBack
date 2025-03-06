@@ -105,6 +105,17 @@ export class SwaggerRouter {
         self.router.delete(path, ...middlewares, handler);
         return self;
       },
+      patch(
+        options: RouteOptions,
+        handler: (req: Request, res: Response) => void,
+        ...middlewares: Array<
+          (req: Request, res: Response, next: NextFunction) => void
+        >
+      ) {
+        self.addSwaggerDoc('patch', path, options);
+        self.router.patch(path, ...middlewares, handler);
+        return self;
+      },
     };
   }
 

@@ -17,7 +17,7 @@ export const authenticate = (
   if (token) {
     jwt.verify(token, accessTokenSecret, (err, decoded) => {
       if (err) {
-        console.error(err);
+        console.error('ca va tester le refresh', err);
         const refreshToken = req.cookies['refreshToken'] as string;
         if (!refreshToken) {
           return res
