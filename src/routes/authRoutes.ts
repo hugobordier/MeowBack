@@ -198,7 +198,7 @@ swaggerRouter.route('/refresh').post(
   AuthController.refresh
 );
 
-swaggerRouter.route('/test').get(
+swaggerRouter.route('/me').get(
   {
     description: 'Test authentication and ensure user is logged in.',
     summary: 'Test user authentication',
