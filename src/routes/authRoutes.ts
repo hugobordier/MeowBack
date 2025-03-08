@@ -448,4 +448,18 @@ swaggerRouter.route('/update-user').patch(
   authenticate
 );
 
+swaggerRouter.route('/logout').post(
+  {
+    description: 'Log out the user and invalidate the refresh token.',
+    summary: 'Logout',
+    security: true,
+    responses: {
+      '200': { description: 'User logged out successfully.' },
+      '401': { description: 'Unauthorized, missing or invalid token.' },
+    },
+  },
+  AuthController.logout,
+  authenticate
+);
+
 export default swaggerRouter;
