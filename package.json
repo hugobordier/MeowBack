@@ -3,7 +3,8 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "start": "bun i && bun run src/index.ts"
+    "start": "bun i && bun run src/index.ts",
+    "build": "bun run src/genateModule.js"
   },
   "devDependencies": {
     "@types/bun": "latest"

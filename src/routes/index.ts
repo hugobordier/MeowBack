@@ -1,5 +1,6 @@
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import authRoutes from './authRoutes';
+import PetsitterRoutes from './PetsitterRoute';
 
 export interface IRoute {
   path: string;
@@ -12,6 +13,10 @@ const routes: IRoute[] = [
   {
     path: '/authRoutes',
     route: authRoutes,
+  },
+  {
+    path: '/PetsitterRoutes',
+    route: PetsitterRoutes,
   },
 ];
 

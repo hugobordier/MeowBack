@@ -1,4 +1,3 @@
-import type { password } from 'bun';
 import AuthController from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
