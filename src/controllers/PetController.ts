@@ -1,24 +1,41 @@
 import type { Request, Response } from 'express';
-
+import { petSchema } from "@/schema/PetSchema";
 import PetService from '@/services/PetService';
+import { ApiResponse } from '@utils/ApiResponse';
+import { ZodError } from 'zod'; 
+
 class PetController{
 
     static async createPet(req: Request, res: Response) {
       try {
-        const newPet = await PetService.createPet(req.body);
-        return res.status(201).json(newPet);
+        const validpet = petSchema.parse(req.body);
+        const newPet = await PetService.createPet(validpet);
+        return ApiResponse.created(res,"Animal créé avec succès",newPet);
+
       } catch (error) {
-        return res.status(400).json({ error: error instanceof Error ? error.message : "Erreur dans la création de l'animal" });
+        console.error(error);
+        if (error instanceof ZodError) {
+          return ApiResponse.badRequest(res,"Données incorrectes")  
+        }else{
+            return ApiResponse.internalServerError(res,"Erreur lors de la crétion de l'animal");
+        }
       }
     }
 
 
     static async getAllPets(req: Request, res: Response) {
       try {
-        const pets = await PetService.getAllPets();
-        return res.status(200).json(pets);
+
+        const page = parseInt(req.query.page as string) || 1;
+        const perPage = parseInt(req.query.perPage as string) || 10;
+
+        const {pets,total} = await PetService.getAllPets({page,perPage});
+        const pagination= ApiResponse.createPagination( total, page, perPage);
+
+        return ApiResponse.ok(res,"données récupérées", pets);
+
       } catch (error) {
-        return res.status(500).json({ error: "Erreur lors de la récupération des animaux" });
+        return ApiResponse.internalServerError(res,"Erreur lors de la récupération des animaux");
       }
     }
     
@@ -26,13 +43,19 @@ class PetController{
     static async getPetById(req: Request, res: Response) {
       try {
         const { id } = req.params;
-        const pet = await PetService.getPetById(id);
-        if (!pet) {
-          return res.status(404).json({ error: "Animal non trouvé" });
+
+        if (!id) {
+          return ApiResponse.badRequest(res, "ID de l'animal requis");
         }
-        return res.status(200).json(pet);
+
+        const pet = await PetService.getPetById(id);
+
+        if (!pet) {
+          return ApiResponse.notFound(res,"Animal non trouvé");
+        }
+        return ApiResponse.ok(res,"Animal récupéré",pet);
       } catch (error) {
-        return res.status(500).json({ error: "Erreur lors de la récupération de l'animal" });
+        return ApiResponse.internalServerError(res,"Erreur lors de la récupération de l'animal");
       }
     }
   
@@ -41,11 +64,11 @@ class PetController{
         const { id } = req.params;
         const updatedPet = await PetService.updatePet(id, req.body);
         if (!updatedPet) {
-          return res.status(404).json({ error: "Animal non trouvé" });
+          return ApiResponse.notFound(res,"Animal non trouvé");
         }
-        return res.status(200).json(updatedPet);
+        return ApiResponse.ok(res,"Animal récupéré",updatedPet);
       } catch (error) {
-        return res.status(500).json({ error: "Erreur lors de la mise à jour de l'animal" });
+        return ApiResponse.internalServerError(res,"Erreur lors de la mise à jour de l'animal");
       }
     }
   
@@ -54,11 +77,11 @@ class PetController{
         const { id } = req.params;
         const deleted = await PetService.deletePet(id);
         if (!deleted) {
-          return res.status(404).json({ error: "Animal non trouvé" });
+          return ApiResponse.notFound(res,"Animal non trouvé");
         }
-        return res.status(200).json({ message: "Animal supprimé avec succès" });
+        return ApiResponse.ok(res,"Animal supprimé avec succès" );
       } catch (error) {
-        return res.status(500).json({ error: "Erreur lors de la suppression de l'animal" });
+        return ApiResponse.internalServerError(res,"Erreur lors de la suppression de l'animal");
       }
     }
   }
