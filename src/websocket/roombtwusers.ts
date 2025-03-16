@@ -1,55 +1,60 @@
-import { WebSocketServer, WebSocket } from 'ws';
 
-const wss = new WebSocketServer({ port: 3000 });
+import { io } from '../index';
 
-// Structure pour stocker les rooms
-const rooms: { [key: string]: Set<WebSocket> } = {};
-
-wss.on('connection', (ws) => {
-    console.log('Nouvelle connexion WebSocket');
-
-    ws.on('message', (message) => {
-        try {
-            const data = JSON.parse(message.toString());
-
-            if (data.type === 'join') {
-                const room = data.room;
-                if (!rooms[room]) {
-                    rooms[room] = new Set();
-                }
-                rooms[room].add(ws);
-                console.log(`Client ajouté à la room: ${room}`);
-            }
-
-            if (data.type === 'leave') {
-                const room = data.room;
-                rooms[room]?.delete(ws);
-                console.log(`Client retiré de la room: ${room}`);
-            }
-
-            if (data.type === 'message') {
-                const room = data.room;
-                const text = data.text;
-
-                if (rooms[room]) {
-                    rooms[room].forEach(client => {
-                        if (client !== ws && client.readyState === WebSocket.OPEN) {
-                            client.send(JSON.stringify({ room, text }));
-                        }
-                    });
-                }
-            }
-        } catch (error) {
-            console.error('Erreur de traitement du message:', error);
-        }
+io.on('connection', (socket) => {
+    console.log(`User connected: ${socket.id}`);
+    
+    socket.onAny((event, ...args) => {
+        console.log(` Event received: ${event}`, args);
     });
 
-    ws.on('close', () => {
-        // Supprimer le client de toutes les rooms
-        for (const room in rooms) {
-            rooms[room].delete(ws);
-        }
+    // Rejoindre une room
+    socket.on('join_room', (room) => {
+      if (typeof room !== 'string' || room.trim() === "") {
+          socket.emit('error', 'Invalid room ID');
+          return;
+      }
+      socket.join(room);
+      console.log(`User ${socket.id} joined room ${room}`);
+      socket.emit('room_joined', `You have joined room ${room}`);
     });
-});
+  
+    // Quitter une room
+    socket.on('leave_room', (room) => {
+      socket.leave(room);
+      console.log(`User ${socket.id} left room ${room}`);
+      socket.emit('room_left', `You have left room ${room}`);
+    });
 
-console.log("Serveur WebSocket démarré sur ws://localhost:3000");
+
+
+  
+        // Recevoir un message
+        socket.on('message', (rawData) => {
+          try {
+              const parsedData = JSON.parse(rawData);
+              console.log(`Event received: ${parsedData.emit}`, parsedData.data);
+  
+              if (parsedData.emit === "send_message") {
+                  const { room, message } = parsedData.data;
+  
+                  if (!room || typeof message !== 'string' || message.trim() === "") {
+                      socket.emit('error', 'Invalid message data');
+                      return;
+                  }
+  
+                  console.log(`Message envoyé à la room ${room}: ${message}`);
+  
+                  // Envoyer le message aux autres utilisateurs de la room, sauf l'émetteur
+                  socket.to(room).emit("receive_message", { message, sender: socket.id });
+              }
+          } catch (error) {
+              console.error("Erreur de parsing du message:", error);
+              socket.emit('error', 'Invalid message format');
+          }
+      });
+  
+      socket.on('disconnect', () => {
+          console.log(`User disconnected: ${socket.id}`);
+      });
+  })

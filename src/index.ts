@@ -8,6 +8,7 @@ import { Server, Socket } from 'socket.io';
 import http from 'http';
 import { initWebSocket } from './websocket/websocketServer';
 
+
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -15,6 +16,9 @@ const io = new Server(server, {
     origin: '*',
   },
 });
+
+export { io, server };
+
 const port = 3000;
 
 app.use(cookieParser());
@@ -61,6 +65,8 @@ async function startServer() {
     server.listen(port, '0.0.0.0', () => {
       console.log(`✅Server running on port ${port}`);
     });
+
+    await import('./websocket/roombtwusers');
   } catch (error) {
     console.error('Unable to connect to the database:', error);
   }
