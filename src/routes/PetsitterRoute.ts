@@ -8,6 +8,7 @@ swaggerRouter.route('/').get(
   {
     description: 'Fetch data for Petsitter',
     summary: 'Retrieve Petsitter data',
+    tags: ['Petsitter'],
     security: true,
     responses: {
       '200': {

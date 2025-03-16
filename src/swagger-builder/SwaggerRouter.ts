@@ -9,6 +9,7 @@ interface RouteOptions {
   security?: boolean;
   description?: string;
   summary?: string;
+  tags?: string[];
   responses: {
     [statusCode: string]: {
       description: string;
@@ -127,6 +128,7 @@ export class SwaggerRouter {
     this.swaggerSpec.paths[path][method] = {
       summary: options.summary,
       description: options.description,
+      tags: options.tags || ['zdefault'],
       responses: Object.fromEntries(
         Object.entries(options.responses).map(([status, details]) => [
           status,
