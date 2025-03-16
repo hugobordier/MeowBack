@@ -151,7 +151,7 @@ swaggerRouter.route('/login').post(
           password: {
             type: 'string',
             description: 'mot de passe',
-            example: 'securePassword123',
+            example: 'SecurePassword123',
           },
         },
         required: ['email', 'password'],
