@@ -1,14 +1,13 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '../config/config';
-import type { AvailabilityDay, TimeInterval } from '@/types/type';
-
+import type { AvailabilityDay } from '@/types/type';
 class PetSitter extends Model {
   declare id: string;
   declare user_id: string;
   declare bio: string;
   declare experience: number;
   declare hourly_rate: number;
-  declare availability: AvailabilityDay[];
+  declare availability: AvailabilityDay[] | null;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -78,7 +77,7 @@ PetSitter.init(
               throw new Error('Intervals must be an array.');
             }
 
-            entry.intervals.forEach((interval: TimeInterval) => {
+            entry.intervals.forEach((interval) => {
               if (
                 !interval.start_time ||
                 !interval.end_time ||
@@ -96,9 +95,6 @@ PetSitter.init(
             });
           });
         },
-      },
-      get() {
-        return this.getDataValue('availability') ?? [];
       },
     },
   },

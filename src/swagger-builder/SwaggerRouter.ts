@@ -10,6 +10,14 @@ interface RouteOptions {
   description?: string;
   summary?: string;
   tags?: string[];
+  parameters?: {
+    name: string;
+    in: 'path' | 'query' | 'header' | 'cookie';
+    description?: string;
+    required?: boolean;
+    schema?: any;
+    example?: any;
+  }[];
   responses: {
     [statusCode: string]: {
       description: string;
@@ -61,6 +69,8 @@ export class SwaggerRouter {
 
   route(path: string) {
     const self = this;
+    const pathParams = this.extractPathParams(path);
+
     return {
       post(
         options: RouteOptions,
@@ -69,7 +79,7 @@ export class SwaggerRouter {
           (req: Request, res: Response, next: NextFunction) => void
         >
       ) {
-        self.addSwaggerDoc('post', path, options);
+        self.addSwaggerDoc('post', path, options, pathParams);
         self.router.post(path, ...middlewares, handler!);
         return self;
       },
@@ -80,7 +90,7 @@ export class SwaggerRouter {
           (req: Request, res: Response, next: NextFunction) => void
         >
       ) {
-        self.addSwaggerDoc('get', path, options);
+        self.addSwaggerDoc('get', path, options, pathParams);
         self.router.get(path, ...middlewares, handler);
         return self;
       },
@@ -91,7 +101,7 @@ export class SwaggerRouter {
           (req: Request, res: Response, next: NextFunction) => void
         >
       ) {
-        self.addSwaggerDoc('put', path, options);
+        self.addSwaggerDoc('put', path, options, pathParams);
         self.router.put(path, ...middlewares, handler);
         return self;
       },
@@ -102,7 +112,7 @@ export class SwaggerRouter {
           (req: Request, res: Response, next: NextFunction) => void
         >
       ) {
-        self.addSwaggerDoc('delete', path, options);
+        self.addSwaggerDoc('delete', path, options, pathParams);
         self.router.delete(path, ...middlewares, handler);
         return self;
       },
@@ -113,22 +123,65 @@ export class SwaggerRouter {
           (req: Request, res: Response, next: NextFunction) => void
         >
       ) {
-        self.addSwaggerDoc('patch', path, options);
+        self.addSwaggerDoc('patch', path, options, pathParams);
         self.router.patch(path, ...middlewares, handler);
         return self;
       },
     };
   }
 
-  private addSwaggerDoc(method: string, path: string, options: RouteOptions) {
-    if (!this.swaggerSpec.paths[path]) {
-      this.swaggerSpec.paths[path] = {};
+  private extractPathParams(
+    path: string
+  ): { name: string; required: boolean }[] {
+    const params: { name: string; required: boolean }[] = [];
+    const segments = path.split('/');
+
+    for (const segment of segments) {
+      if (segment.startsWith(':')) {
+        const paramName = segment.substring(1);
+        params.push({
+          name: paramName,
+          required: true,
+        });
+      }
     }
 
-    this.swaggerSpec.paths[path][method] = {
+    return params;
+  }
+
+  private addSwaggerDoc(
+    method: string,
+    path: string,
+    options: RouteOptions,
+    pathParams: { name: string; required: boolean }[]
+  ) {
+    const swaggerPath = path.replace(/\:([^\/]+)/g, '{$1}');
+
+    if (!this.swaggerSpec.paths[swaggerPath]) {
+      this.swaggerSpec.paths[swaggerPath] = {};
+    }
+
+    const mergedParams = [...(options.parameters || [])];
+
+    for (const param of pathParams) {
+      if (!mergedParams.some((p) => p.name === param.name && p.in === 'path')) {
+        mergedParams.push({
+          name: param.name,
+          in: 'path',
+          required: param.required,
+          description: `${param.name} parameter`,
+          schema: {
+            type: 'string',
+          },
+        });
+      }
+    }
+
+    this.swaggerSpec.paths[swaggerPath][method] = {
       summary: options.summary,
       description: options.description,
-      tags: options.tags || ['zdefault'],
+      tags: options.tags,
+      parameters: mergedParams.length > 0 ? mergedParams : undefined,
       responses: Object.fromEntries(
         Object.entries(options.responses).map(([status, details]) => [
           status,
@@ -165,7 +218,9 @@ export class SwaggerRouter {
 
     const subSpec = router.getSwaggerSpec().paths;
     for (const route in subSpec) {
-      this.swaggerSpec.paths[`${path}${route}`] = subSpec[route];
+      const basePath = path.endsWith('/') ? path.slice(0, -1) : path;
+      const subPath = route.startsWith('/') ? route : `/${route}`;
+      this.swaggerSpec.paths[`${basePath}${subPath}`] = subSpec[route];
     }
   }
 
