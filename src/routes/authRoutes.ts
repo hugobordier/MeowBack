@@ -8,6 +8,7 @@ swaggerRouter.route('/register').post(
   {
     description: 'User registration',
     summary: 'Register a new user',
+    tags: ['Auth'],
     security: false,
     requestBody: {
       description: 'Request body containing the user registration information',
@@ -137,6 +138,7 @@ swaggerRouter.route('/login').post(
     description: 'Authenticate a user and get an access token.',
     summary: 'Login with user credentials',
     security: false,
+    tags: ['Auth'],
     requestBody: {
       description: 'User login credentials',
       required: true,
@@ -151,7 +153,7 @@ swaggerRouter.route('/login').post(
           password: {
             type: 'string',
             description: 'mot de passe',
-            example: 'securePassword123',
+            example: 'SecurePassword123',
           },
         },
         required: ['email', 'password'],
@@ -201,6 +203,7 @@ swaggerRouter.route('/me').get(
   {
     description: 'Test authentication and ensure user is logged in.',
     summary: 'Test user authentication',
+    tags: ['Auth'],
     security: true,
     responses: {
       '200': { description: 'User is authenticated and test successful.' },
@@ -215,6 +218,7 @@ swaggerRouter.route('/forgot-password').post(
   {
     description: 'Send a password reset link to the user’s email address.',
     summary: 'Forgot password',
+    tags: ['Auth'],
     security: false,
     requestBody: {
       description: 'User email address',
@@ -246,6 +250,7 @@ swaggerRouter.route('/verify-reset-code').post(
     description: 'Verify the password reset code sent to the user’s email.',
     summary: 'Verify reset code',
     security: false,
+    tags: ['Auth'],
     requestBody: {
       description: 'User email and reset code',
       required: true,
@@ -285,6 +290,7 @@ swaggerRouter.route('/delete-user').delete(
   {
     description: 'Delete a user account by their email.',
     summary: 'Delete user account',
+    tags: ['Auth'],
     security: true,
     responses: {
       '200': { description: 'User deleted successfully.' },
@@ -301,6 +307,7 @@ swaggerRouter.route('/update-user').patch(
     description:
       'Update user information. The user can update one or multiple fields.',
     summary: 'Update user',
+    tags: ['Auth'],
     security: true,
     requestBody: {
       description:
@@ -451,6 +458,7 @@ swaggerRouter.route('/logout').post(
   {
     description: 'Log out the user and invalidate the refresh token.',
     summary: 'Logout',
+    tags: ['Auth'],
     security: true,
     responses: {
       '200': { description: 'User logged out successfully.' },

@@ -24,7 +24,6 @@ export default class AuthService {
       throw new Error('Mot de passe incorrect');
     }
 
-    console.log(typeof user.dataValues.id);
     const accessToken = jwt.sign(user.dataValues, accessTokenSecret, {
       expiresIn: '1h',
     });
