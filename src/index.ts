@@ -4,10 +4,9 @@ import db from './config/config';
 import cookieParser from 'cookie-parser';
 import swaggerUi from 'swagger-ui-express';
 import defaultRouter from './routes';
-import { Server } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import http from 'http';
 import { initWebSocket } from './websocket/websocketServer';
-
 
 const app = express();
 const server = http.createServer(app);
@@ -16,6 +15,7 @@ const io = new Server(server, {
     origin: '*',
   },
 });
+
 
 export { io, server };
 
@@ -28,7 +28,6 @@ app.use('/', defaultRouter.getRouter());
 const allowedOrigins = [
   'http://localhost:3000',
   'exp://jmvvxtg-anonymous-8081.exp.direct',
-  'exp://grr9zza-kikipaul-8081.exp.direct',
   'exp://192.168.1.42:8081',
   'exp://172.20.10.3:8081',
   'exp://172.20.10.13:8081',
