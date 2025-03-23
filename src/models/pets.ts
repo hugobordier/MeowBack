@@ -10,7 +10,7 @@ class pets extends Model {
   declare allergy: string;
   declare weight: number;
   declare diet: string;
-  declare description: string;
+  declare description: string;  
   declare photo_url: string;
   declare gender : string;
   declare neutered: boolean;
@@ -80,7 +80,7 @@ pets.init(
     },
     gender: {
       type: DataTypes.ENUM('Male', 'Female', 'hermaphrodite'), 
-      allowNull: true,
+      allowNull: false,
     },
     neutered: {
       type: DataTypes.BOOLEAN, 
@@ -99,7 +99,7 @@ pets.init(
   {
     sequelize: db,
     tableName: 'pets', 
-    timestamps: true,
+    timestamps: false,
   }
 );
   

@@ -238,6 +238,7 @@ export class SwaggerRouter {
   getSwaggerSpec() {
     return this.swaggerSpec;
   }
+  
 }
 
 export default SwaggerRouter;
