@@ -2,6 +2,7 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
 import type User from '../models/User';
+import ApiError from '@utils/ApiError';
 
 dotenv.config();
 
@@ -47,6 +48,7 @@ export const authenticate = (
       }
     });
   } else {
-    return res.status(401).json({ error: 'Accès interdit, pas de token' });
+    // return res.status(401).json({ error: 'Accès interdit, pas de token' });
+    throw ApiError.unauthorized('Accès interdit, pas de token');
   }
 };

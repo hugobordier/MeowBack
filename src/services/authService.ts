@@ -21,7 +21,7 @@ export default class AuthService {
 
     const validPassword = await bcrypt.compare(password, user.password);
     if (!validPassword) {
-      throw new Error('Mot de passe incorrect');
+      throw new Error('Mot de passe ou email incorrect');
     }
 
     const accessToken = jwt.sign(user.dataValues, accessTokenSecret, {
@@ -52,7 +52,6 @@ export default class AuthService {
     phoneNumber: string,
     address: string,
     identityDocument: string | null,
-    insuranceCertificate: string | null,
     isAdmin: boolean | null
   ) {
     try {
@@ -80,7 +79,6 @@ export default class AuthService {
         phoneNumber,
         address,
         identityDocument,
-        insuranceCertificate,
         isAdmin,
         resetcode: null,
         resetcodeexpires: null,

@@ -103,11 +103,6 @@ swaggerRouter.route('/register').post(
             description: 'URL to the user’s identity document',
             example: 'http://example.com/identity.jpg',
           },
-          insuranceCertificate: {
-            type: 'string',
-            description: 'URL to the user’s insurance certificate',
-            example: 'http://example.com/insurance.jpg',
-          },
           isAdmin: {
             type: 'boolean',
             description: 'Indicates if the user is an admin',
@@ -403,11 +398,6 @@ swaggerRouter.route('/update-user').patch(
             type: 'string',
             description: 'Updated identity document URL',
             example: 'http://example.com/new_identity.jpg',
-          },
-          insuranceCertificate: {
-            type: 'string',
-            description: 'Updated insurance certificate URL',
-            example: 'http://example.com/new_insurance.jpg',
           },
         },
       },
