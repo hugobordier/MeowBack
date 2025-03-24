@@ -44,7 +44,6 @@ export default class authController {
       phoneNumber,
       address,
       identityDocument,
-      insuranceCertificate,
       isAdmin,
     } = req.body as User;
     try {
@@ -66,7 +65,6 @@ export default class authController {
         phoneNumber,
         address,
         identityDocument,
-        insuranceCertificate,
         isAdmin
       );
       res.status(200).json(user);

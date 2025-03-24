@@ -52,7 +52,6 @@ export default class AuthService {
     phoneNumber: string,
     address: string,
     identityDocument: string | null,
-    insuranceCertificate: string | null,
     isAdmin: boolean | null
   ) {
     try {
@@ -80,7 +79,6 @@ export default class AuthService {
         phoneNumber,
         address,
         identityDocument,
-        insuranceCertificate,
         isAdmin,
         resetcode: null,
         resetcodeexpires: null,

@@ -21,7 +21,6 @@ class User extends Model {
   declare phoneNumber: string;
   declare address: string;
   declare identityDocument: string;
-  declare insuranceCertificate: string;
   declare resetcode?: string;
   declare resetcodeexpire?: Date;
   declare createdAt: Date;
@@ -127,10 +126,6 @@ User.init(
       allowNull: true,
     },
     identityDocument: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    insuranceCertificate: {
       type: DataTypes.STRING,
       allowNull: true,
     },
