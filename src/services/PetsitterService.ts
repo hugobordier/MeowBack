@@ -278,7 +278,6 @@ class PetSitterService {
         limit,
         offset,
       };
-
       if (criteria.search) {
         queryOptions.include = [
           {
@@ -297,11 +296,7 @@ class PetSitterService {
         ];
       }
 
-      const { count, rows } = await PetSitter.findAndCountAll({
-        where: whereClause,
-        limit,
-        offset,
-      });
+      const { count, rows } = await PetSitter.findAndCountAll(queryOptions);
 
       const petsitterWithUser = await Promise.all(
         rows.map(async (r) => {
