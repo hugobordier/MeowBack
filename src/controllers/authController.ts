@@ -1,6 +1,7 @@
 import type User from '../models/User';
 import AuthService from '../services/authService';
 import type { Request, Response } from 'express';
+import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
 
 export default class authController {
@@ -17,11 +18,10 @@ export default class authController {
         maxAge: 3600 * 1000 * 24 * 7,
         sameSite: 'strict',
       });
-      res.status(200).json({ accessToken });
+      return res.status(200).json({ accessToken });
     } catch (error: any) {
       console.error(error);
-
-      res.status(401).json({ error: error.message });
+      return ApiResponse.unauthorized(res, error.message);
     }
   }
 
@@ -67,10 +67,10 @@ export default class authController {
         identityDocument,
         isAdmin
       );
-      res.status(200).json(user);
+      return ApiResponse.created(res, 'User registered successfully', user);
     } catch (error: any) {
       console.error(error);
-      res.status(401).json({ error: error.message });
+      return ApiResponse.badRequest(res, error.message);
     }
   }
 
@@ -78,7 +78,7 @@ export default class authController {
     const refreshToken = req.cookies.refreshToken;
 
     if (!refreshToken) {
-      return res.status(403).json({ error: 'No refresh token found' });
+      return ApiResponse.forbidden(res, 'No refresh token found');
     }
 
     try {
@@ -89,18 +89,23 @@ export default class authController {
         maxAge: 600 * 1000,
         sameSite: 'strict',
       });
-      res.json({ accessToken });
+      return ApiResponse.ok(res, 'Token refreshed successfully', {
+        accessToken,
+      });
     } catch (error) {
-      res.status(403).json({ error: 'Invalid refresh token' });
+      return ApiResponse.forbidden(res, 'Invalid refresh token');
     }
   }
 
   static async test(req: Request, res: Response) {
     try {
-      res.status(200).json(req.user);
+      return ApiResponse.ok(res, 'User data retrieved successfully', req.user);
     } catch (error) {
       console.error(error);
-      throw new ApiError(500, 'Impossible de refresh');
+      throw new ApiError(
+        HttpStatusCode.INTERNAL_SERVER_ERROR,
+        'Impossible de refresh'
+      );
     }
   }
 
@@ -108,10 +113,10 @@ export default class authController {
     try {
       const { email } = req.body;
       await AuthService.forgotPassword(email);
-      res.status(200).json({ message: 'Email sent' });
+      return ApiResponse.ok(res, 'Email sent');
     } catch (error: any) {
       console.error(error);
-      res.status(401).json({ error: error.message });
+      return ApiResponse.badRequest(res, error.message);
     }
   }
 
@@ -119,10 +124,10 @@ export default class authController {
     try {
       const { email, code, password } = req.body;
       await AuthService.verifyResetCode(email, code, password);
-      res.status(200).json({ message: 'Reset code is valid' });
+      return ApiResponse.ok(res, 'Reset code is valid');
     } catch (error: any) {
       console.error(error);
-      res.status(400).json({ error: error.message });
+      return ApiResponse.badRequest(res, error.message);
     }
   }
 
@@ -130,10 +135,10 @@ export default class authController {
     try {
       const uuid = req.user!.id;
       await AuthService.deleteUser(uuid);
-      res.status(200).json({ message: 'User has been deleted successfully' });
+      return ApiResponse.ok(res, 'User has been deleted successfully');
     } catch (error: any) {
       console.error(error);
-      res.status(400).json({ error: error.message });
+      return ApiResponse.badRequest(res, error.message);
     }
   }
 
@@ -143,18 +148,17 @@ export default class authController {
       const updateData = req.body;
 
       const updatedUser = await AuthService.updateUser(userId, updateData);
-      res.status(200).json({
-        message: 'User updated successfully',
+      return ApiResponse.ok(res, 'User updated successfully', {
         user: updatedUser,
       });
     } catch (error: any) {
       console.error(error);
-      res.status(error.statusCode || 500).json({ message: error.message });
+      return ApiResponse.internalServerError(res, error.message);
     }
   }
 
   static async logout(req: Request, res: Response) {
     res.clearCookie('refreshToken');
-    res.status(200).json({ message: 'User has been logged out' });
+    return ApiResponse.ok(res, 'User has been logged out');
   }
 }

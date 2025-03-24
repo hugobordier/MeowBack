@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import UserService from '../services/UserService';
+import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 
 class UserController {
   static async getUserProfile(req: Request, res: Response) {
@@ -9,15 +10,17 @@ class UserController {
       const user = await UserService.getUserById(userId);
 
       if (!user) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
-      return res.status(200).json(user);
+      return ApiResponse.ok(res, 'Utilisateur trouvé', user);
     } catch (error: any) {
       console.error('Error in getUserProfile:', error);
-      return res
-        .status(500)
-        .json({ message: 'Erreur serveur', error: error.message });
+      return ApiResponse.internalServerError(
+        res,
+        'Erreur serveur',
+        error.message
+      );
     }
   }
 
@@ -28,7 +31,7 @@ class UserController {
       const user = await UserService.getUserById(id);
 
       if (!user) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
       const publicUser = {
@@ -47,12 +50,14 @@ class UserController {
         phoneNumber: user.phoneNumber,
       };
 
-      return res.status(200).json(publicUser);
+      return ApiResponse.ok(res, 'Utilisateur trouvé', publicUser);
     } catch (error: any) {
       console.error('Error in getUserById:', error);
-      return res
-        .status(500)
-        .json({ message: 'Erreur serveur', error: error.message });
+      return ApiResponse.internalServerError(
+        res,
+        'Erreur serveur',
+        error.message
+      );
     }
   }
 
@@ -68,24 +73,21 @@ class UserController {
         search
       );
 
-      const totalPages = Math.ceil(totalItems / limit);
+      const pagination = ApiResponse.createPagination(totalItems, page, limit);
 
-      return res.status(200).json({
-        sucess: true,
-        message: 'données récupérees avec succes',
+      return ApiResponse.ok(
+        res,
+        'Données récupérées avec succès',
         users,
-        pagination: {
-          totalItems,
-          totalPages,
-          currentPage: page,
-          itemsPerPage: limit,
-        },
-      });
+        pagination
+      );
     } catch (error: any) {
       console.error('Error in getAllUsers:', error);
-      return res
-        .status(500)
-        .json({ message: 'Erreur serveur', error: error.message });
+      return ApiResponse.internalServerError(
+        res,
+        'Erreur serveur',
+        error.message
+      );
     }
   }
 
@@ -102,7 +104,7 @@ class UserController {
       const updatedUser = await UserService.updateUser(userId, updateData);
 
       if (!updatedUser) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
       const userResponse = {
@@ -116,22 +118,23 @@ class UserController {
         updatedAt: updatedUser.updatedAt,
       };
 
-      return res.status(200).json({
-        message: 'Utilisateur mis à jour avec succès',
-        user: userResponse,
-      });
+      return ApiResponse.ok(
+        res,
+        'Utilisateur mis à jour avec succès',
+        userResponse
+      );
     } catch (error: any) {
       console.error('Error in updateUser:', error);
 
       if (error.name === 'ValidationError') {
-        return res
-          .status(400)
-          .json({ message: 'Données invalides', errors: error.errors });
+        return ApiResponse.badRequest(res, 'Données invalides', error.errors);
       }
 
-      return res
-        .status(500)
-        .json({ message: 'Erreur serveur', error: error.message });
+      return ApiResponse.internalServerError(
+        res,
+        'Erreur serveur',
+        error.message
+      );
     }
   }
 
@@ -141,15 +144,17 @@ class UserController {
       const userId = req.user!.id;
 
       if (newPassword !== confirmPassword) {
-        return res
-          .status(400)
-          .json({ message: 'Les mots de passe ne correspondent pas' });
+        return ApiResponse.badRequest(
+          res,
+          'Les mots de passe ne correspondent pas'
+        );
       }
 
       if (newPassword.length < 8) {
-        return res.status(400).json({
-          message: 'Le mot de passe doit contenir au moins 8 caractères',
-        });
+        return ApiResponse.badRequest(
+          res,
+          'Le mot de passe doit contenir au moins 8 caractères'
+        );
       }
 
       const isPasswordChanged = await UserService.changePassword(
@@ -159,19 +164,17 @@ class UserController {
       );
 
       if (!isPasswordChanged) {
-        return res
-          .status(401)
-          .json({ message: 'Mot de passe actuel incorrect' });
+        return ApiResponse.unauthorized(res, 'Mot de passe actuel incorrect');
       }
 
-      return res
-        .status(200)
-        .json({ message: 'Mot de passe mis à jour avec succès' });
+      return ApiResponse.ok(res, 'Mot de passe mis à jour avec succès');
     } catch (error: any) {
       console.error('Error in changePassword:', error);
-      return res
-        .status(500)
-        .json({ message: 'Erreur serveur', error: error.message });
+      return ApiResponse.internalServerError(
+        res,
+        'Erreur serveur',
+        error.message
+      );
     }
   }
 
@@ -185,17 +188,17 @@ class UserController {
       const result = await UserService.deleteUser(userId);
 
       if (!result.success) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
-      return res
-        .status(200)
-        .json({ message: 'Utilisateur supprimé avec succès' });
+      return ApiResponse.ok(res, 'Utilisateur supprimé avec succès');
     } catch (error: any) {
       console.error('Error in deleteUser:', error);
-      return res
-        .status(500)
-        .json({ message: 'Erreur serveur', error: error.message });
+      return ApiResponse.internalServerError(
+        res,
+        'Erreur serveur',
+        error.message
+      );
     }
   }
 
@@ -209,17 +212,17 @@ class UserController {
       const result = await UserService.deleteUser(id);
 
       if (!result.success) {
-        return res.status(404).json({ message: 'Utilisateur non trouvé' });
+        return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
-      return res
-        .status(200)
-        .json({ message: 'Utilisateur supprimé avec succès' });
+      return ApiResponse.ok(res, 'Utilisateur supprimé avec succès');
     } catch (error: any) {
       console.error('Error in adminDeleteUser:', error);
-      return res
-        .status(500)
-        .json({ message: 'Erreur serveur', error: error.message });
+      return ApiResponse.internalServerError(
+        res,
+        'Erreur serveur',
+        error.message
+      );
     }
   }
 }

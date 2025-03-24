@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import PetSitterService from '../services/PetsitterService';
 import PetSitter from '@/models/PetSitter';
 
@@ -11,71 +12,50 @@ class PetSitterController {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
 
+      let petsitters, totalItems;
+
       if (minRate || maxRate || minExperience || dayAvailable || search) {
         console.log('search');
-        const { petsitters, totalItems } =
-          await PetSitterService.searchPetSitters(
-            {
-              minHourlyRate: minRate
-                ? parseFloat(minRate as string)
-                : undefined,
-              maxHourlyRate: maxRate
-                ? parseFloat(maxRate as string)
-                : undefined,
-              minExperience: minExperience
-                ? parseInt(minExperience as string)
-                : undefined,
-              dayAvailability: dayAvailable as string,
-              search: search as string,
-            },
-            page,
-            limit
-          );
-        const totalPages = Math.ceil(totalItems / limit);
-        return res.status(200).json({
-          success: true,
-          message: 'Données récupérées avec succès',
-          petsitters,
-          pagination: {
-            totalItems,
-            totalPages,
-            currentPage: page,
-            itemsPerPage: limit,
+        ({ petsitters, totalItems } = await PetSitterService.searchPetSitters(
+          {
+            minHourlyRate: minRate ? parseFloat(minRate as string) : undefined,
+            maxHourlyRate: maxRate ? parseFloat(maxRate as string) : undefined,
+            minExperience: minExperience
+              ? parseInt(minExperience as string)
+              : undefined,
+            dayAvailability: dayAvailable as string,
+            search: search as string,
           },
-        });
+          page,
+          limit
+        ));
       } else {
         console.log('pas de search');
-        const { petsitters, totalItems } =
-          await PetSitterService.getAllPetSitters(page, limit);
-
-        const totalPages = Math.ceil(totalItems / limit);
-
-        return res.status(200).json({
-          success: true,
-          message: 'Données récupérées avec succès',
-          petsitters,
-          pagination: {
-            totalItems,
-            totalPages,
-            currentPage: page,
-            itemsPerPage: limit,
-          },
-        });
+        ({ petsitters, totalItems } = await PetSitterService.getAllPetSitters(
+          page,
+          limit
+        ));
       }
+
+      // Create pagination metadata
+      const pagination = ApiResponse.createPagination(totalItems, page, limit);
+
+      // Use ApiResponse to send successful response
+      return ApiResponse.ok(
+        res,
+        'Données récupérées avec succès',
+        { petsitters },
+        pagination
+      );
     } catch (error) {
       console.error('Error in getPetSitters controller:', error);
 
-      if (error instanceof Error) {
-        return res.status(500).json({
-          success: false,
-          message: error.message || 'Erreur interne du serveur',
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        message: 'Erreur interne du serveur',
-      });
+      // Use ApiResponse for error handling
+      return ApiResponse.internalServerError(
+        res,
+        error instanceof Error ? error.message : 'Erreur interne du serveur',
+        { error }
+      );
     }
   }
 
@@ -87,26 +67,19 @@ class PetSitterController {
       req.params.id !== '{id}'
         ? req.params.id
         : (await PetSitterService.getPetSitterByUserId(req.user!.id))?.id;
+
     try {
       if (!id) {
-        return res.status(400).json({
-          success: false,
-          message: 'ID du petsitter requis',
-        });
+        return ApiResponse.badRequest(res, 'ID du petsitter requis');
       }
 
       const petsitter = await PetSitterService.getPetSitterById(id);
 
       if (!petsitter) {
-        return res.status(404).json({
-          success: false,
-          message: `Petsitter avec ID ${id} non trouvé`,
-        });
+        return ApiResponse.notFound(res, `Petsitter avec ID ${id} non trouvé`);
       }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Données récupérées avec succès',
+      return ApiResponse.ok(res, 'Données récupérées avec succès', {
         petsitter,
       });
     } catch (error) {
@@ -115,17 +88,11 @@ class PetSitterController {
         error
       );
 
-      if (error instanceof Error) {
-        return res.status(500).json({
-          success: false,
-          message: error.message || 'Erreur interne du serveur',
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        message: 'Erreur interne du serveur',
-      });
+      return ApiResponse.internalServerError(
+        res,
+        error instanceof Error ? error.message : 'Erreur interne du serveur',
+        { error }
+      );
     }
   }
 
@@ -133,28 +100,23 @@ class PetSitterController {
     req: Request,
     res: Response
   ): Promise<Response> {
-    const id = req.params.id !== '{id}' ? req.params.id : req.user!.id; //work even if there isnt params BAM deux en un la route est trop cool j'ai dead ca
+    const id = req.params.id !== '{id}' ? req.params.id : req.user!.id;
 
     try {
       if (!id) {
-        return res.status(400).json({
-          success: false,
-          message: 'ID utilisateur requis',
-        });
+        return ApiResponse.badRequest(res, 'ID utilisateur requis');
       }
 
       const petsitter = await PetSitterService.getPetSitterByUserId(id);
 
       if (!petsitter) {
-        return res.status(404).json({
-          success: false,
-          message: `Aucun petsitter trouvé pour l'utilisateur avec ID ${id}`,
-        });
+        return ApiResponse.notFound(
+          res,
+          `Aucun petsitter trouvé pour l'utilisateur avec ID ${id}`
+        );
       }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Données récupérées avec succès',
+      return ApiResponse.ok(res, 'Données récupérées avec succès', {
         petsitter,
       });
     } catch (error) {
@@ -163,17 +125,11 @@ class PetSitterController {
         error
       );
 
-      if (error instanceof Error) {
-        return res.status(500).json({
-          success: false,
-          message: error.message || 'Erreur interne du serveur',
-        });
-      }
-
-      return res.status(500).json({
-        success: false,
-        message: 'Erreur interne du serveur',
-      });
+      return ApiResponse.internalServerError(
+        res,
+        error instanceof Error ? error.message : 'Erreur interne du serveur',
+        { error }
+      );
     }
   }
 
@@ -182,35 +138,32 @@ class PetSitterController {
       const { bio, hourly_rate, experience, availability } = req.body;
 
       if (!req.user || !req.user.id) {
-        return res.status(401).json({
-          success: false,
-          message: 'Utilisateur non authentifié ou ID utilisateur manquant',
-        });
+        return ApiResponse.unauthorized(
+          res,
+          'Utilisateur non authentifié ou ID utilisateur manquant'
+        );
       }
 
       const user_id = req.user.id;
 
       if (hourly_rate === undefined) {
-        return res.status(400).json({
-          success: false,
-          message: 'Le tarif horaire est requis',
-        });
+        return ApiResponse.badRequest(res, 'Le tarif horaire est requis');
       }
 
       const parsedHourlyRate = parseFloat(hourly_rate);
       if (isNaN(parsedHourlyRate) || parsedHourlyRate < 0) {
-        return res.status(400).json({
-          success: false,
-          message: 'Le tarif horaire doit être un nombre positif',
-        });
+        return ApiResponse.badRequest(
+          res,
+          'Le tarif horaire doit être un nombre positif'
+        );
       }
 
       const parsedExperience = experience ? parseInt(experience) : 0;
       if (isNaN(parsedExperience) || parsedExperience < 0) {
-        return res.status(400).json({
-          success: false,
-          message: "L'expérience doit être un nombre positif",
-        });
+        return ApiResponse.badRequest(
+          res,
+          "L'expérience doit être un nombre positif"
+        );
       }
 
       const newPetSitter = await PetSitterService.createPetSitter(
@@ -221,9 +174,7 @@ class PetSitterController {
         availability || []
       );
 
-      return res.status(201).json({
-        success: true,
-        message: 'Petsitter créé avec succès',
+      return ApiResponse.created(res, 'Petsitter créé avec succès', {
         petsitter: {
           id: newPetSitter.id,
           user_id: newPetSitter.user_id,
@@ -235,30 +186,22 @@ class PetSitterController {
 
       if (error instanceof Error) {
         if (error.message.includes("existe déjà pour l'utilisateur")) {
-          return res.status(409).json({
-            success: false,
-            message: error.message,
-          });
+          return ApiResponse.badRequest(res, error.message);
         }
 
         // Pour les erreurs de validation
         if (error.message.includes('Validation')) {
-          return res.status(400).json({
-            success: false,
-            message: error.message,
-          });
+          return ApiResponse.badRequest(res, error.message);
         }
 
-        return res.status(500).json({
-          success: false,
-          message: error.message || 'Erreur lors de la création du petsitter',
-        });
+        return ApiResponse.internalServerError(
+          res,
+          error.message || 'Erreur lors de la création du petsitter',
+          { error }
+        );
       }
 
-      return res.status(500).json({
-        success: false,
-        message: 'Erreur interne du serveur',
-      });
+      return ApiResponse.internalServerError(res, 'Erreur interne du serveur');
     }
   }
 
@@ -271,10 +214,7 @@ class PetSitterController {
 
     try {
       if (!id) {
-        return res.status(400).json({
-          success: false,
-          message: 'ID du petsitter requis',
-        });
+        return ApiResponse.badRequest(res, 'ID du petsitter requis');
       }
 
       // Préparation des données à mettre à jour
@@ -287,10 +227,10 @@ class PetSitterController {
       if (updateData.hourly_rate !== undefined) {
         const parsedRate = parseFloat(updateData.hourly_rate);
         if (isNaN(parsedRate) || parsedRate < 0) {
-          return res.status(400).json({
-            success: false,
-            message: 'Le tarif horaire doit être un nombre positif',
-          });
+          return ApiResponse.badRequest(
+            res,
+            'Le tarif horaire doit être un nombre positif'
+          );
         }
         petSitterData.hourly_rate = parsedRate;
       }
@@ -298,10 +238,10 @@ class PetSitterController {
       if (updateData.experience !== undefined) {
         const parsedExp = parseInt(updateData.experience);
         if (isNaN(parsedExp) || parsedExp < 0) {
-          return res.status(400).json({
-            success: false,
-            message: "L'expérience doit être un nombre positif",
-          });
+          return ApiResponse.badRequest(
+            res,
+            "L'expérience doit être un nombre positif"
+          );
         }
         petSitterData.experience = parsedExp;
       }
@@ -314,15 +254,10 @@ class PetSitterController {
         await PetSitterService.updatePetSitter(id, petSitterData);
 
       if (!updated) {
-        return res.status(404).json({
-          success: false,
-          message: `Petsitter avec ID ${id} non trouvé`,
-        });
+        return ApiResponse.notFound(res, `Petsitter avec ID ${id} non trouvé`);
       }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Petsitter mis à jour avec succès',
+      return ApiResponse.ok(res, 'Petsitter mis à jour avec succès', {
         petsitter: updatedPetSitter,
       });
     } catch (error) {
@@ -330,23 +265,17 @@ class PetSitterController {
 
       if (error instanceof Error) {
         if (error.message.includes('Validation')) {
-          return res.status(400).json({
-            success: false,
-            message: error.message,
-          });
+          return ApiResponse.badRequest(res, error.message);
         }
 
-        return res.status(500).json({
-          success: false,
-          message:
-            error.message || 'Erreur lors de la mise à jour du petsitter',
-        });
+        return ApiResponse.internalServerError(
+          res,
+          error.message || 'Erreur lors de la mise à jour du petsitter',
+          { error }
+        );
       }
 
-      return res.status(500).json({
-        success: false,
-        message: 'Erreur interne du serveur',
-      });
+      return ApiResponse.internalServerError(res, 'Erreur interne du serveur');
     }
   }
 
@@ -358,40 +287,28 @@ class PetSitterController {
 
     try {
       if (!id) {
-        return res.status(400).json({
-          success: false,
-          message: 'ID du petsitter requis',
-        });
+        return ApiResponse.badRequest(res, 'ID du petsitter requis');
       }
 
       const deleted = await PetSitterService.deletePetSitter(id);
 
       if (!deleted) {
-        return res.status(404).json({
-          success: false,
-          message: `Petsitter avec ID ${id} non trouvé`,
-        });
+        return ApiResponse.notFound(res, `Petsitter avec ID ${id} non trouvé`);
       }
 
-      return res.status(200).json({
-        success: true,
-        message: 'Petsitter supprimé avec succès',
-      });
+      return ApiResponse.ok(res, 'Petsitter supprimé avec succès');
     } catch (error) {
       console.error(`Error in deletePetSitter controller for ID ${id}:`, error);
 
       if (error instanceof Error) {
-        return res.status(500).json({
-          success: false,
-          message:
-            error.message || 'Erreur lors de la suppression du petsitter',
-        });
+        return ApiResponse.internalServerError(
+          res,
+          error.message || 'Erreur lors de la suppression du petsitter',
+          { error }
+        );
       }
 
-      return res.status(500).json({
-        success: false,
-        message: 'Erreur interne du serveur',
-      });
+      return ApiResponse.internalServerError(res, 'Erreur interne du serveur');
     }
   }
 }
