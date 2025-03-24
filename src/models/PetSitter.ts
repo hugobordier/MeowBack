@@ -1,6 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '../config/config';
 import type { AvailabilityDay } from '@/types/type';
+import User from './User';
 class PetSitter extends Model {
   declare id: string;
   declare user_id: string;
@@ -104,5 +105,8 @@ PetSitter.init(
     timestamps: true,
   }
 );
+
+User.hasOne(PetSitter, { foreignKey: 'user_id', as: 'petsitter' });
+PetSitter.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
 
 export default PetSitter;

@@ -56,8 +56,6 @@ class UserController {
     }
   }
 
-  /**
-   */
   static async getAllUsers(req: Request, res: Response) {
     try {
       const page = parseInt(req.query.page as string) || 1;
@@ -73,6 +71,8 @@ class UserController {
       const totalPages = Math.ceil(totalItems / limit);
 
       return res.status(200).json({
+        sucess: true,
+        message: 'données récupérees avec succes',
         users,
         pagination: {
           totalItems,

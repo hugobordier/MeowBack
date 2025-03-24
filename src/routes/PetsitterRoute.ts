@@ -12,6 +12,36 @@ swaggerRouter.route('/').get(
     security: true,
     parameters: [
       {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
+      },
+      {
+        name: 'search',
+        in: 'query',
+        required: false,
+        description:
+          'Terme de recherche (recherche dans username, email, firstName, lastName)',
+        schema: {
+          type: 'string',
+        },
+      },
+      {
         name: 'minRate',
         in: 'query',
         required: false,

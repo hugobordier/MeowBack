@@ -1,33 +1,67 @@
 import type { Request, Response } from 'express';
 import PetSitterService from '../services/PetsitterService';
-import type PetSitter from '@/models/PetSitter';
+import PetSitter from '@/models/PetSitter';
 
 class PetSitterController {
   static async getPetSitters(req: Request, res: Response): Promise<Response> {
     try {
-      const { minRate, maxRate, minExperience, dayAvailable } = req.query;
+      const { minRate, maxRate, minExperience, dayAvailable, search } =
+        req.query;
 
-      let petsitters: PetSitter[];
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 10;
 
-      if (minRate || maxRate || minExperience || dayAvailable) {
-        petsitters = await PetSitterService.searchPetSitters({
-          minHourlyRate: minRate ? parseFloat(minRate as string) : undefined,
-          maxHourlyRate: maxRate ? parseFloat(maxRate as string) : undefined,
-          minExperience: minExperience
-            ? parseInt(minExperience as string)
-            : undefined,
-          dayAvailability: dayAvailable as string,
+      if (minRate || maxRate || minExperience || dayAvailable || search) {
+        console.log('search');
+        const { petsitters, totalItems } =
+          await PetSitterService.searchPetSitters(
+            {
+              minHourlyRate: minRate
+                ? parseFloat(minRate as string)
+                : undefined,
+              maxHourlyRate: maxRate
+                ? parseFloat(maxRate as string)
+                : undefined,
+              minExperience: minExperience
+                ? parseInt(minExperience as string)
+                : undefined,
+              dayAvailability: dayAvailable as string,
+              search: search as string,
+            },
+            page,
+            limit
+          );
+        const totalPages = Math.ceil(totalItems / limit);
+        return res.status(200).json({
+          success: true,
+          message: 'Données récupérées avec succès',
+          petsitters,
+          pagination: {
+            totalItems,
+            totalPages,
+            currentPage: page,
+            itemsPerPage: limit,
+          },
         });
       } else {
-        petsitters = await PetSitterService.getAllPetSitters();
-      }
+        console.log('pas de search');
+        const { petsitters, totalItems } =
+          await PetSitterService.getAllPetSitters(page, limit);
 
-      return res.status(200).json({
-        success: true,
-        message: 'Données récupérées avec succès',
-        count: petsitters.length,
-        petsitters,
-      });
+        const totalPages = Math.ceil(totalItems / limit);
+
+        return res.status(200).json({
+          success: true,
+          message: 'Données récupérées avec succès',
+          petsitters,
+          pagination: {
+            totalItems,
+            totalPages,
+            currentPage: page,
+            itemsPerPage: limit,
+          },
+        });
+      }
     } catch (error) {
       console.error('Error in getPetSitters controller:', error);
 
