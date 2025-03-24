@@ -409,20 +409,15 @@ swaggerRouter.route('/profilePicture').patch(
     tags: ['User'],
     security: true,
     requestBody: {
-      description: 'Fichier de photo de profil à télécharger',
+      contentType: 'multipart/form-data',
       required: true,
-      content: {
-        'multipart/form-data': {
-          schema: {
-            type: 'object',
-            properties: {
-              file: {
-                type: 'string',
-                format: 'binary',
-                description: 'Fichier image pour la photo de profil',
-              },
-            },
-            required: ['file'],
+      description: 'Fichier de photo de profil à télécharger',
+      schema: {
+        type: 'object',
+        properties: {
+          file: {
+            type: 'string',
+            format: 'binary',
           },
         },
       },
@@ -464,18 +459,6 @@ swaggerRouter.route('/profilePicture').patch(
             message: {
               type: 'string',
               example: "Token d'authentification manquant ou invalide",
-            },
-          },
-        },
-      },
-      '403': {
-        description: 'Accès refusé (rôle utilisateur requis)',
-        schema: {
-          type: 'object',
-          properties: {
-            message: {
-              type: 'string',
-              example: "Vous n'avez pas les permissions nécessaires",
             },
           },
         },

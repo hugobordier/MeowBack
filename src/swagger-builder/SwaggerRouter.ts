@@ -28,6 +28,11 @@ interface RouteOptions {
     description?: string;
     required?: boolean;
     schema?: any;
+    contentType?:
+      | 'application/json'
+      | 'multipart/form-data'
+      | 'application/xml'
+      | string;
   };
 }
 
@@ -177,6 +182,8 @@ export class SwaggerRouter {
       }
     }
 
+    const contentType = options.requestBody?.contentType || 'application/json';
+
     this.swaggerSpec.paths[swaggerPath][method] = {
       summary: options.summary,
       description: options.description,
@@ -198,7 +205,7 @@ export class SwaggerRouter {
             requestBody: {
               required: options.requestBody.required || false,
               content: {
-                'application/json': {
+                [contentType]: {
                   schema: options.requestBody.schema,
                 },
               },
