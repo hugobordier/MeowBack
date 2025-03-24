@@ -1,6 +1,7 @@
 import { Op } from 'sequelize';
 import User from '../models/User';
 import bcrypt from 'bcryptjs';
+import CloudinaryService from './CloudinaryService';
 
 class UserService {
   static async getUserById(id: string) {
@@ -142,6 +143,37 @@ class UserService {
     } catch (error) {
       console.error('Error in UserService.changePassword:', error);
       return false;
+    }
+  }
+
+  static async updateProfilePicture(userId: string, file: Express.Multer.File) {
+    try {
+      const user = await User.findByPk(userId);
+
+      if (!user) {
+        return { success: false, message: 'Utilisateur non trouvé' };
+      }
+
+      // Utiliser le CloudinaryService pour uploader l'image
+      const uploadResult = await CloudinaryService.uploadImage(file, {
+        folder: 'profile_pictures',
+      });
+
+      // Mettre à jour l'URL de l'image de profil dans la base de données
+      await user.update({
+        profilePicture: uploadResult.secure_url, // Utilisation de l'URL sécurisée fournie par Cloudinary
+      });
+
+      return { success: true, profilePicture: uploadResult.secure_url };
+    } catch (error) {
+      console.error(
+        "Erreur lors de la mise à jour de l'image de profil:",
+        error
+      );
+      return {
+        success: false,
+        message: "Une erreur est survenue lors de l'upload",
+      };
     }
   }
 }

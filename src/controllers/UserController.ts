@@ -225,6 +225,40 @@ class UserController {
       );
     }
   }
+  static async updateProfilePicture(req: Request, res: Response) {
+    const userId = req.user!.id; // On récupère l'ID de l'utilisateur depuis les paramètres de l'URL
+    const file = req.file; // Le fichier envoyé dans la requête
+
+    if (!file) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Aucun fichier image fourni' });
+    }
+
+    try {
+      // Appeler la méthode UserService pour mettre à jour l'image de profil
+      const result = await UserService.updateProfilePicture(userId, file);
+
+      if (result.success) {
+        return res
+          .status(200)
+          .json({ success: true, profilePicture: result.profilePicture });
+      } else {
+        return res
+          .status(400)
+          .json({ success: false, message: result.message });
+      }
+    } catch (error) {
+      console.error(
+        "Erreur lors de la mise à jour de l'image de profil:",
+        error
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Erreur serveur lors de la mise à jour de l'image de profil",
+      });
+    }
+  }
 }
 
 export default UserController;
