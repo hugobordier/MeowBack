@@ -8,7 +8,6 @@ import { Server } from 'socket.io';
 import http from 'http';
 import { initWebSocket } from './websocket/websocketServer';
 
-
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
