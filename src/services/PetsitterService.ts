@@ -1,11 +1,37 @@
 import type { AvailabilityDay } from '@/types/type';
 import PetSitter from '../models/PetSitter';
 import { Op, ValidationError } from 'sequelize';
+import UserService from './UserService';
+import User from '@/models/User';
 
 class PetSitterService {
-  static async getAllPetSitters(): Promise<PetSitter[]> {
+  static async getAllPetSitters(
+    page: any,
+    limit: any
+  ): Promise<{
+    petsitters: { petsitter: PetSitter; user: User | null }[];
+    totalItems: number;
+  }> {
+    const offset = (page - 1) * limit;
     try {
-      return await PetSitter.findAll();
+      const { count, rows } = await PetSitter.findAndCountAll({
+        limit,
+        offset,
+      });
+
+      const petsitterWithUser = await Promise.all(
+        rows.map(async (r) => {
+          const user = await UserService.getUserById(r.user_id);
+          return {
+            petsitter: r,
+            user,
+          };
+        })
+      );
+      return {
+        petsitters: petsitterWithUser,
+        totalItems: count,
+      };
     } catch (error) {
       console.error('Error in getAllPetSitters:', error);
       if (error instanceof Error) {
@@ -205,12 +231,24 @@ class PetSitterService {
     }
   }
 
-  static async searchPetSitters(criteria: {
-    minHourlyRate?: number;
-    maxHourlyRate?: number;
-    minExperience?: number;
-    dayAvailability?: string;
-  }): Promise<PetSitter[]> {
+  static async searchPetSitters(
+    criteria: {
+      minHourlyRate?: number;
+      maxHourlyRate?: number;
+      minExperience?: number;
+      dayAvailability?: string;
+      search?: string;
+    },
+    page: any,
+    limit: any
+  ): Promise<{
+    petsitters: {
+      petsitter: PetSitter;
+      user: User | null;
+    }[];
+    totalItems: number;
+  }> {
+    const offset = (page - 1) * limit;
     try {
       const whereClause: any = {};
 
@@ -235,9 +273,44 @@ class PetSitterService {
         };
       }
 
-      return await PetSitter.findAll({
+      const queryOptions: any = {
         where: whereClause,
-      });
+        limit,
+        offset,
+      };
+      if (criteria.search) {
+        queryOptions.include = [
+          {
+            model: User,
+            as: 'user',
+            required: true,
+            where: {
+              [Op.or]: [
+                { username: { [Op.like]: `%${criteria.search}%` } },
+                { email: { [Op.like]: `%${criteria.search}%` } },
+                { lastName: { [Op.like]: `%${criteria.search}%` } },
+                { firstName: { [Op.like]: `%${criteria.search}%` } },
+              ],
+            },
+          },
+        ];
+      }
+
+      const { count, rows } = await PetSitter.findAndCountAll(queryOptions);
+
+      const petsitterWithUser = await Promise.all(
+        rows.map(async (r) => {
+          const user = await UserService.getUserById(r.user_id);
+          return {
+            petsitter: r,
+            user,
+          };
+        })
+      );
+      return {
+        petsitters: petsitterWithUser,
+        totalItems: count,
+      };
     } catch (error) {
       console.error('Error in searchPetSitters:', error);
       if (error instanceof Error) {
