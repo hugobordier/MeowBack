@@ -13,7 +13,11 @@ const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 
 export default class AuthService {
   static async loginUser(email: string, password: string) {
-    const user = await User.findOne({ where: { email: email } });
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [{ email: email }, { username: email }],
+      },
+    });
 
     if (!user) {
       throw new Error('Utilisateur non trouvé');
