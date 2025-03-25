@@ -486,4 +486,65 @@ swaggerRouter.route('/profilePicture').patch(
   authenticate
 );
 
+swaggerRouter.route('/profilePicture').delete(
+  {
+    description: "Supprime la photo de profil de l'utilisateur connecté",
+    summary: 'Supprimer la photo de profil',
+    tags: ['User'],
+    security: true,
+    responses: {
+      '200': {
+        description: 'Photo de profil supprimée avec succès',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Photo de profil supprimée avec succès',
+            },
+          },
+        },
+      },
+      '401': {
+        description: 'Non autorisé (token manquant ou invalide)',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: "Token d'authentification manquant ou invalide",
+            },
+          },
+        },
+      },
+      '404': {
+        description: 'Aucune photo de profil à supprimer',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Aucune photo de profil trouvée pour cet utilisateur',
+            },
+          },
+        },
+      },
+      '500': {
+        description: 'Erreur serveur',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Erreur interne du serveur',
+            },
+          },
+        },
+      },
+    },
+  },
+  UserController.deleteProfilePicture,
+  authenticate
+);
+
 export default swaggerRouter;

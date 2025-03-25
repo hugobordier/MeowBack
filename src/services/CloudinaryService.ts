@@ -1,5 +1,5 @@
 import type { UploadApiResponse, UploadApiOptions } from 'cloudinary';
-import cloudinary from '@/config/cloudinary.config';
+import cloudinary, { FolderName } from '@/config/cloudinary.config';
 
 class CloudinaryService {
   /**
@@ -10,6 +10,7 @@ class CloudinaryService {
    */
   static async uploadImage(
     file: Express.Multer.File,
+    name: string,
     options: UploadApiOptions = {}
   ): Promise<UploadApiResponse> {
     try {
@@ -23,7 +24,7 @@ class CloudinaryService {
       return await new Promise((resolve, reject) => {
         cloudinary.uploader
           .upload_stream(
-            { ...mergedOptions, public_id: file.originalname }, // Options pour Cloudinary
+            { ...mergedOptions, public_id: name }, // Options pour Cloudinary
             (error, result) => {
               if (error) reject(error);
               else if (result) resolve(result);

@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import UserService from '../services/UserService';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
+import { FolderName } from '@/config/cloudinary.config';
 
 class UserController {
   static async getUserProfile(req: Request, res: Response) {
@@ -230,33 +231,47 @@ class UserController {
     const file = req.file;
 
     if (!file) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Aucun fichier image fourni' });
+      return ApiResponse.badRequest(res, 'Aucun fichier image fourni');
     }
 
     try {
-      // Appeler la méthode UserService pour mettre à jour l'image de profil
       const result = await UserService.updateProfilePicture(userId, file);
 
       if (result.success) {
-        return res
-          .status(200)
-          .json({ success: true, profilePicture: result.profilePicture });
+        return ApiResponse.ok(res, 'Image bien importée', {
+          profilePicture: result.profilePicture,
+        });
       } else {
-        return res
-          .status(400)
-          .json({ success: false, message: result.message });
+        return ApiResponse.badRequest(res, result.message);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(
         "Erreur lors de la mise à jour de l'image de profil:",
         error
       );
-      return res.status(500).json({
-        success: false,
-        message: "Erreur serveur lors de la mise à jour de l'image de profil",
-      });
+      return ApiResponse.internalServerError(res, error.message);
+    }
+  }
+
+  static async deleteProfilePicture(req: Request, res: Response) {
+    const userId = req.user!.id;
+
+    try {
+      const result = await UserService.deleteProfilePicture(userId);
+
+      if (result.success) {
+        return ApiResponse.ok(res, 'Image bien supprimée', {
+          profilePicture: result.profilePicture,
+        });
+      } else {
+        return ApiResponse.badRequest(res, result.message);
+      }
+    } catch (error: any) {
+      console.error(
+        "Erreur lors de la mise à jour de l'image de profil:",
+        error
+      );
+      return ApiResponse.internalServerError(res, error.message);
     }
   }
 }

@@ -33,6 +33,8 @@ const multipleImageUpload = multer({
   },
 }).array('files', 5);
 
+//Middleware qui sert a la validation du documenet envoyé ( pour eviter les .exe par exemple)
+
 export const uploadMiddleware = (
   req: Request,
   res: Response,

@@ -9,4 +9,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET as string,
 });
 
+export enum FolderName {
+  PROFILE_PICTURES = 'profile_pictures',
+  PET_PICTURES = 'pet_pictures',
+  MESSAGE_PICTURES = 'message_pictures',
+  PETSITTER_PICTURES = 'petsitter_pictures',
+}
+
 export default cloudinary;
