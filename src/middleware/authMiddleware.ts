@@ -48,7 +48,7 @@ export const authenticate = (
       }
     });
   } else {
-    // return res.status(401).json({ error: 'Accès interdit, pas de token' });
-    throw ApiError.unauthorized('Accès interdit, pas de token');
+    return res.status(401).json({ error: 'Accès interdit, pas de token' });
+    //throw ApiError.unauthorized('Accès interdit, pas de token');
   }
 };

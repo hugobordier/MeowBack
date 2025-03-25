@@ -2,6 +2,10 @@ import UserController from '../controllers/UserController';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import { authenticate } from '../middleware/authMiddleware';
 import adminAuth from '@/middleware/adminAuth';
+import {
+  multipleUploadMiddleware,
+  uploadMiddleware,
+} from '@/middleware/uploadMiddleware';
 //import { adminAuth } from '../middleware/adminMiddleware'; a implem
 
 const swaggerRouter = new SwaggerRouter();
@@ -400,6 +404,86 @@ swaggerRouter.route('/admin/delete/:id').delete(
   UserController.adminDeleteUser,
   authenticate,
   adminAuth
+);
+
+swaggerRouter.route('/profilePicture').patch(
+  {
+    description: "Mettre à jour la photo de profil de l'utilisateur",
+    summary: 'Mettre à jour la photo de profil',
+    tags: ['User'],
+    security: true,
+    requestBody: {
+      contentType: 'multipart/form-data',
+      required: true,
+      description: 'Fichier de photo de profil à télécharger',
+      schema: {
+        type: 'object',
+        properties: {
+          file: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+    responses: {
+      '200': {
+        description: 'Photo de profil mise à jour avec succès',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Photo de profil mise à jour avec succès',
+            },
+            profilePictureUrl: {
+              type: 'string',
+              example: 'https://example.com/uploads/profile-picture.jpg',
+            },
+          },
+        },
+      },
+      '400': {
+        description: 'Requête invalide (fichier manquant ou format incorrect)',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Format de fichier invalide ou taille maximale dépassée',
+            },
+          },
+        },
+      },
+      '401': {
+        description: 'Non autorisé (token manquant ou invalide)',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: "Token d'authentification manquant ou invalide",
+            },
+          },
+        },
+      },
+      '500': {
+        description: 'Erreur serveur',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Erreur interne du serveur',
+            },
+          },
+        },
+      },
+    },
+  },
+  UserController.updateProfilePicture,
+  uploadMiddleware,
+  authenticate
 );
 
 export default swaggerRouter;
