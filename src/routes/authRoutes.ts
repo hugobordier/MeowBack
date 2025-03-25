@@ -52,61 +52,10 @@ swaggerRouter.route('/register').post(
             description: 'The user’s birth date',
             example: '1998-05-15',
           },
-          city: {
-            type: 'string',
-            description: 'The city where the user resides',
-            example: 'Paris',
-          },
-          country: {
-            type: 'string',
-            description: 'The country where the user resides',
-            example: 'France',
-          },
-          gender: {
-            type: 'string',
-            description: 'The gender of the user',
-            example: 'Male',
-          },
-          profilePicture: {
-            type: 'string',
-            description: 'URL to the user’s profile picture',
-            example: 'http://example.com/profile.jpg',
-          },
-          bio: {
-            type: 'string',
-            description: 'A short bio or description of the user',
-            example: 'Software developer passionate about tech.',
-          },
-          bankInfo: {
-            type: 'string',
-            description: 'The user’s bank information (sensitive)',
-            example: 'IBAN: FR7612345678901234567890123',
-          },
-          rating: {
-            type: 'number',
-            format: 'float',
-            description: 'The user’s rating (out of 5)',
-            example: 4.5,
-          },
           phoneNumber: {
             type: 'string',
             description: 'The user’s phone number',
             example: '06 12 34 56 78',
-          },
-          address: {
-            type: 'string',
-            description: 'The user’s postal address',
-            example: '10 Rue de la République, 75001 Paris',
-          },
-          identityDocument: {
-            type: 'string',
-            description: 'URL to the user’s identity document',
-            example: 'http://example.com/identity.jpg',
-          },
-          isAdmin: {
-            type: 'boolean',
-            description: 'Indicates if the user is an admin',
-            example: false,
           },
         },
         required: [
