@@ -298,11 +298,6 @@ swaggerRouter.route('/update').patch(
             description: "URL du document d'identité mis à jour",
             example: 'http://example.com/new_identity.jpg',
           },
-          insuranceCertificate: {
-            type: 'string',
-            description: "URL du certificat d'assurance mis à jour",
-            example: 'http://example.com/new_insurance.jpg',
-          },
         },
       },
     },
