@@ -1,7 +1,8 @@
-FROM oven/bun:latest
+FROM oven/bun:1.2.5
+
 
 # Définir le répertoire de travail
-WORKDIR /
+WORKDIR /src
 
 # Copier les fichiers du projet dans le conteneur
 COPY . .
