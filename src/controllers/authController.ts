@@ -26,8 +26,16 @@ export default class authController {
   }
 
   static async register(req: Request, res: Response) {
-    const { username, email, password, lastName, firstName, age, phoneNumber } =
-      req.body as User;
+    const {
+      username,
+      email,
+      password,
+      lastName,
+      firstName,
+      age,
+      birthDate,
+      phoneNumber,
+    } = req.body as User;
     try {
       const user = await AuthService.registerUser(
         username,
@@ -36,6 +44,7 @@ export default class authController {
         lastName,
         firstName,
         age,
+        birthDate,
         phoneNumber
       );
       return ApiResponse.created(res, 'User registered successfully', user);
