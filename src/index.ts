@@ -43,7 +43,6 @@ app.use(
 
 app.use(
   '/swagger',
-  () => console.log("c'est quoi ce truc de con"),
   swaggerUi.serve,
   swaggerUi.setup(defaultRouter.getSwaggerSpec())
 );
