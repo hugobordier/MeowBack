@@ -127,6 +127,13 @@ export default class authController {
       const userId = req.user!.id;
       const updateData = req.body;
 
+      if (!updateData || Object.keys(updateData).length === 0) {
+        return ApiResponse.badRequest(
+          res,
+          'Aucune donnée fournie pour la mise à jour.'
+        );
+      }
+
       const updatedUser = await AuthService.updateUser(userId, updateData);
       return ApiResponse.ok(res, 'User updated successfully', {
         user: updatedUser,
