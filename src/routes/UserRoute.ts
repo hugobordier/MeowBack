@@ -2,6 +2,10 @@ import UserController from '../controllers/UserController';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import { authenticate } from '../middleware/authMiddleware';
 import adminAuth from '@/middleware/adminAuth';
+import {
+  multipleUploadMiddleware,
+  uploadMiddleware,
+} from '@/middleware/uploadMiddleware';
 //import { adminAuth } from '../middleware/adminMiddleware'; a implem
 
 const swaggerRouter = new SwaggerRouter();
@@ -478,6 +482,7 @@ swaggerRouter.route('/profilePicture').patch(
     },
   },
   UserController.updateProfilePicture,
+  uploadMiddleware,
   authenticate
 );
 

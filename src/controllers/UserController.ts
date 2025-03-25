@@ -226,8 +226,8 @@ class UserController {
     }
   }
   static async updateProfilePicture(req: Request, res: Response) {
-    const userId = req.user!.id; // On récupère l'ID de l'utilisateur depuis les paramètres de l'URL
-    const file = req.file; // Le fichier envoyé dans la requête
+    const userId = req.user!.id;
+    const file = req.file;
 
     if (!file) {
       return res
