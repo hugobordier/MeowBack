@@ -2,10 +2,9 @@ import UserController from '../controllers/UserController';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import { authenticate } from '../middleware/authMiddleware';
 import adminAuth from '@/middleware/adminAuth';
-import {
-  multipleUploadMiddleware,
-  uploadMiddleware,
-} from '@/middleware/uploadMiddleware';
+import { uploadMiddleware } from '@/middleware/uploadMiddleware';
+import { validateSchema } from '@/middleware/validateSchema';
+import { updateUserSchema } from '@/schema/UserSchema';
 //import { adminAuth } from '../middleware/adminMiddleware'; a implem
 
 const swaggerRouter = new SwaggerRouter();
@@ -262,11 +261,6 @@ swaggerRouter.route('/update').patch(
             description: 'Genre mis à jour',
             example: 'Male',
           },
-          profilePicture: {
-            type: 'string',
-            description: 'URL de la photo de profil mise à jour',
-            example: 'http://example.com/new_profile.jpg',
-          },
           bio: {
             type: 'string',
             description: 'Biographie mise à jour',
@@ -292,11 +286,6 @@ swaggerRouter.route('/update').patch(
             type: 'string',
             description: 'Adresse postale mise à jour',
             example: '15 Avenue des Champs-Élysées, 75008 Paris',
-          },
-          identityDocument: {
-            type: 'string',
-            description: "URL du document d'identité mis à jour",
-            example: 'http://example.com/new_identity.jpg',
           },
         },
       },
@@ -340,7 +329,8 @@ swaggerRouter.route('/update').patch(
     },
   },
   UserController.updateUser,
-  authenticate
+  authenticate,
+  validateSchema(updateUserSchema)
 );
 
 swaggerRouter.route('/delete').delete(
