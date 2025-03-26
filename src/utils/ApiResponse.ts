@@ -1,4 +1,5 @@
 import type { Response } from 'express';
+import type ApiError from './ApiError';
 
 export enum HttpStatusCode {
   OK = 200,
@@ -198,5 +199,25 @@ export class ApiResponse {
       currentPage,
       itemsPerPage,
     };
+  }
+
+  static handleApiError(res: Response, error: ApiError): Response {
+    switch (error.statusCode) {
+      case 400:
+        return ApiResponse.badRequest(res, error.message, error.details);
+      case 401:
+        return ApiResponse.unauthorized(res, error.message);
+      case 403:
+        return ApiResponse.forbidden(res, error.message);
+      case 404:
+        return ApiResponse.notFound(res, error.message);
+      case 500:
+      default:
+        return ApiResponse.internalServerError(
+          res,
+          error.message,
+          error.details
+        );
+    }
   }
 }

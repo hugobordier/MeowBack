@@ -1,9 +1,15 @@
-import { Op } from 'sequelize';
+import {
+  ForeignKeyConstraintError,
+  Op,
+  UniqueConstraintError,
+  ValidationError,
+} from 'sequelize';
 import User from '../models/User';
 import bcrypt from 'bcryptjs';
 import CloudinaryService from './CloudinaryService';
 import path from 'path';
 import { FolderName } from '@/config/cloudinary.config';
+import ApiError from '@utils/ApiError';
 
 class UserService {
   static async getUserById(id: string) {
@@ -68,11 +74,35 @@ class UserService {
     const user = await User.findByPk(userId);
 
     if (!user) {
-      return null;
+      throw ApiError.notFound(`User not found with id : ${userId}`);
     }
+    try {
+      await user.update(updateData);
+      return user;
+    } catch (error) {
+      if (error instanceof ValidationError) {
+        const validationErrors = error.errors.map((err) => ({
+          field: err.path,
+          message: err.message,
+        }));
+        throw ApiError.badRequest('Validation failed', { validationErrors });
+      }
 
-    await user.update(updateData);
-    return user;
+      if (error instanceof UniqueConstraintError) {
+        const duplicateFields = error.errors.map((err) => err.path);
+        throw ApiError.conflict(
+          `Duplicate values for: ${duplicateFields.join(', ')}`
+        );
+      }
+
+      if (error instanceof ForeignKeyConstraintError) {
+        throw ApiError.badRequest('Invalid reference to related entity');
+      }
+
+      throw ApiError.internal(
+        'An unexpected error occurred during user update'
+      );
+    }
   }
 
   static async deleteUser(userId: string) {

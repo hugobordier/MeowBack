@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import UserService from '../services/UserService';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import { FolderName } from '@/config/cloudinary.config';
+import ApiError from '@utils/ApiError';
+import type User from '@/models/User';
 
 class UserController {
   static async getUserProfile(req: Request, res: Response) {
@@ -97,6 +99,8 @@ class UserController {
       const userId = req.user!.id;
       const updateData = { ...req.body };
 
+      delete updateData.identityDocument;
+      delete updateData.profilePicture;
       delete updateData.password;
       delete updateData.isAdmin;
       delete updateData.createdAt;
@@ -114,7 +118,6 @@ class UserController {
         email: updatedUser.email,
         lastName: updatedUser.lastName,
         firstName: updatedUser.firstName,
-        profilePicture: updatedUser.profilePicture,
         bio: updatedUser.bio,
         updatedAt: updatedUser.updatedAt,
       };
@@ -125,12 +128,10 @@ class UserController {
         userResponse
       );
     } catch (error: any) {
-      console.error('Error in updateUser:', error);
-
-      if (error.name === 'ValidationError') {
-        return ApiResponse.badRequest(res, 'Données invalides', error.errors);
+      if (error instanceof ApiError) {
+        return ApiResponse.handleApiError(res, error);
       }
-
+      console.error('Error in deleteUser:', error);
       return ApiResponse.internalServerError(
         res,
         'Erreur serveur',
@@ -194,6 +195,9 @@ class UserController {
 
       return ApiResponse.ok(res, 'Utilisateur supprimé avec succès');
     } catch (error: any) {
+      if (error instanceof ApiError) {
+        return ApiResponse.handleApiError(res, error);
+      }
       console.error('Error in deleteUser:', error);
       return ApiResponse.internalServerError(
         res,
