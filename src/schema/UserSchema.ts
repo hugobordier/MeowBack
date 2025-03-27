@@ -46,7 +46,6 @@ export const updateUserSchema = z
     city: z.string().optional(),
     country: z.string().optional(),
     gender: z.enum(['Male', 'Female', 'Other', 'Helicopter']).optional(),
-    profilePicture: z.string().url().optional(),
     bio: z.string().optional(),
     bankInfo: z.string().optional(),
     rating: z.number().min(0).max(5).optional(),
@@ -55,11 +54,12 @@ export const updateUserSchema = z
       .regex(/^[0-9+()\s-]+$/i, 'Invalid phone number')
       .optional(),
     address: z.string().optional(),
-    identityDocument: z.string().optional(),
-    isAdmin: z.boolean().default(false).optional(),
-    resetcode: z.string().optional(),
-    resetcodeexpires: z.string().optional(),
-    createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
+  })
+  .strict();
+
+export const loginSchema = z
+  .object({
+    email: z.string().email(),
+    password: z.string().min(8).max(100),
   })
   .strict();

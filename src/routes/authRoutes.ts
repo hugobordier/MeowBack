@@ -2,6 +2,8 @@ import AuthController from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import authController from '../controllers/authController';
+import { validateSchema } from '@/middleware/validateSchema';
+import { loginSchema, userSchema } from '@/schema/UserSchema';
 
 const swaggerRouter = new SwaggerRouter();
 swaggerRouter.route('/register').post(
@@ -75,7 +77,8 @@ swaggerRouter.route('/register').post(
       '400': { description: 'Bad request' },
     },
   },
-  AuthController.register
+  AuthController.register,
+  validateSchema(userSchema)
 );
 swaggerRouter.route('/login').post(
   {
@@ -118,7 +121,8 @@ swaggerRouter.route('/login').post(
       '401': { description: 'Unauthorized, authentication failed.' },
     },
   },
-  AuthController.login
+  AuthController.login,
+  validateSchema(loginSchema)
 );
 
 // swaggerRouter.route('/refresh').post(
