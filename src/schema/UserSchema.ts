@@ -60,6 +60,6 @@ export const updateUserSchema = z
 export const loginSchema = z
   .object({
     email: z.string(),
-    password: z.string().min(8).max(100),
+    password: z.string(),
   })
   .strict();
