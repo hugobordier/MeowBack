@@ -237,6 +237,41 @@ class UserService {
       };
     }
   }
+
+  static async updateIdentityDocument(
+    userId: string,
+    file: Express.Multer.File
+  ) {
+    try {
+      const user = await User.findByPk(userId);
+
+      if (!user) {
+        return { success: false, message: 'Utilisateur non trouvé' };
+      }
+
+      const fileExtension = path.extname(file.originalname);
+      const newFileName = `${userId}${fileExtension}`;
+      file.originalname = newFileName;
+
+      const uploadResult = await CloudinaryService.uploadImage(file, userId, {
+        folder: FolderName.IDENTITY_DOCUMENT as string,
+      });
+
+      await user.update({
+        profilePicture: uploadResult.secure_url,
+      });
+
+      return { success: true, profilePicture: uploadResult.secure_url };
+    } catch (error: any) {
+      console.error(
+        "Erreur lors de la mise à jour de l'image de profil:",
+        error
+      );
+      throw ApiError.badRequest(
+        error.message || "Erreur lors de la mise à jour de l'image de profil"
+      );
+    }
+  }
 }
 
 export default UserService;

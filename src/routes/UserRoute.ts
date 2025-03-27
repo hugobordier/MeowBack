@@ -532,4 +532,84 @@ swaggerRouter.route('/profilePicture').delete(
   authenticate
 );
 
+swaggerRouter.route('/identityDoc').patch(
+  {
+    description: "Enregistrer un document d'identité de l'utilisateur",
+    summary: "Téléverser un document d'identité",
+    tags: ['User'],
+    security: true,
+    requestBody: {
+      contentType: 'multipart/form-data',
+      required: true,
+      description: "Fichier du document d'identité à télécharger",
+      schema: {
+        type: 'object',
+        properties: {
+          file: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+      },
+    },
+    responses: {
+      '200': {
+        description: "Document d'identité enregistré avec succès",
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: "Document d'identité enregistré avec succès",
+            },
+            documentUrl: {
+              type: 'string',
+              example: 'https://example.com/uploads/identity-document.jpg',
+            },
+          },
+        },
+      },
+      '400': {
+        description: 'Requête invalide (fichier manquant ou format incorrect)',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Format de fichier invalide ou taille maximale dépassée',
+            },
+          },
+        },
+      },
+      '401': {
+        description: 'Non autorisé (token manquant ou invalide)',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: "Token d'authentification manquant ou invalide",
+            },
+          },
+        },
+      },
+      '500': {
+        description: 'Erreur serveur',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Erreur interne du serveur',
+            },
+          },
+        },
+      },
+    },
+  },
+  UserController.uploadIdentityDocument,
+  uploadMiddleware,
+  authenticate
+);
+
 export default swaggerRouter;

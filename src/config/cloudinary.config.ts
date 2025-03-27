@@ -14,6 +14,7 @@ export enum FolderName {
   PET_PICTURES = 'pet_pictures',
   MESSAGE_PICTURES = 'message_pictures',
   PETSITTER_PICTURES = 'petsitter_pictures',
+  IDENTITY_DOCUMENT = 'identity_document',
 }
 
 export default cloudinary;

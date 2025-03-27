@@ -28,24 +28,28 @@ export const authenticate = (
           );
         }
 
-        jwt.verify(refreshToken, refreshTokenSecret, (err, decodedRefresh) => {
-          if (err) {
-            return ApiResponse.unauthorized(
-              res,
-              'Accès interdit,refresh token invalide'
-            );
+        jwt.verify(
+          refreshToken,
+          refreshTokenSecret,
+          async (err, decodedRefresh) => {
+            if (err) {
+              return ApiResponse.unauthorized(
+                res,
+                'Accès interdit,refresh token invalide'
+              );
+            }
+            const { iat, exp, ...userData } = decodedRefresh as JwtPayload;
+
+            const newAccessToken = jwt.sign(userData, accessTokenSecret, {
+              expiresIn: '1h',
+            });
+            res.setHeader('Authorization', `Bearer ${newAccessToken}`);
+
+            req.user = (await UserService.getUserById(userData.id)) as User;
+
+            next();
           }
-          const { iat, exp, ...userData } = decodedRefresh as JwtPayload;
-
-          const newAccessToken = jwt.sign(userData, accessTokenSecret, {
-            expiresIn: '1h',
-          });
-          res.setHeader('Authorization', `Bearer ${newAccessToken}`);
-
-          req.user = userData as User;
-
-          next();
-        });
+        );
       } else {
         const { iat, exp, ...userData } = decoded as JwtPayload;
         req.user = (await UserService.getUserById(userData.id)) as User;

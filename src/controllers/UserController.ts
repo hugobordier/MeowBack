@@ -1,9 +1,7 @@
 import type { Request, Response } from 'express';
 import UserService from '../services/UserService';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
-import { FolderName } from '@/config/cloudinary.config';
 import ApiError from '@utils/ApiError';
-import type User from '@/models/User';
 
 class UserController {
   static async getUserProfile(req: Request, res: Response) {
@@ -255,6 +253,33 @@ class UserController {
 
       if (result.success) {
         return ApiResponse.ok(res, 'Image bien supprimée', {
+          profilePicture: result.profilePicture,
+        });
+      } else {
+        return ApiResponse.badRequest(res, result.message);
+      }
+    } catch (error: any) {
+      console.error(
+        "Erreur lors de la mise à jour de l'image de profil:",
+        error
+      );
+      return ApiResponse.internalServerError(res, error.message);
+    }
+  }
+
+  static async uploadIdentityDocument(req: Request, res: Response) {
+    const file = req.file;
+    const userId = req.user!.id;
+
+    if (!file) {
+      return ApiResponse.badRequest(res, 'Aucun fichier image fourni');
+    }
+
+    try {
+      const result = await UserService.updateIdentityDocument(userId, file);
+
+      if (result.success) {
+        return ApiResponse.ok(res, 'Image bien importée', {
           profilePicture: result.profilePicture,
         });
       } else {

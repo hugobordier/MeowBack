@@ -28,10 +28,10 @@ export default class AuthService {
       throw new Error('Mot de passe ou email incorrect');
     }
 
-    const accessToken = jwt.sign(user.dataValues, accessTokenSecret, {
+    const accessToken = jwt.sign({ id: user.id }, accessTokenSecret, {
       expiresIn: '1h',
     });
-    const refreshToken = jwt.sign(user.dataValues, refreshTokenSecret, {
+    const refreshToken = jwt.sign({ id: user.id }, refreshTokenSecret, {
       expiresIn: '7d',
     });
 
