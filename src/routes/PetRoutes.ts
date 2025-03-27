@@ -49,7 +49,8 @@ swaggerRouter.route('/Create').post(
       '400': { description: 'Bad request' },
     },
   },
-  PetController.createPet
+  PetController.createPet,
+  authenticate
 );
 
   
@@ -72,7 +73,8 @@ swaggerRouter.route('/Create').post(
         '500': { description: 'Internal server error'}
       },
     },
-    PetController.getPetById
+    PetController.getPetById,
+    authenticate
   );
 
   swaggerRouter.route('/pets').get(
@@ -85,7 +87,8 @@ swaggerRouter.route('/Create').post(
         '500': { description: 'Internal server error' },
       },
     },
-    PetController.getAllPets
+    PetController.getAllPets,
+    authenticate
   );
   
   swaggerRouter.route('/Update/:id').put(
@@ -167,7 +170,8 @@ swaggerRouter.route('/Create').post(
         '500': { description: 'Internal server error' },
       },
     },
-    PetController.updatePet
+    PetController.updatePet,
+    authenticate
   );
 
   swaggerRouter.route('/pets/:id').delete(
@@ -188,7 +192,8 @@ swaggerRouter.route('/Create').post(
         '404': { description: 'Pet not found' },
       },
     },
-    PetController.deletePet
+    PetController.deletePet,
+    authenticate
   );
   
   
