@@ -133,9 +133,10 @@ export class ApiResponse {
    */
   static unauthorized(
     res: Response,
-    message: string = 'Unauthorized'
+    message: string = 'Unauthorized',
+    data?: any
   ): Response {
-    const responseData = this.createResponseObject(false, message);
+    const responseData = this.createResponseObject(false, message, data);
     return this.sendResponse(res, HttpStatusCode.UNAUTHORIZED, responseData);
   }
 
@@ -144,8 +145,12 @@ export class ApiResponse {
    * @param res Express response object
    * @param message Error message
    */
-  static forbidden(res: Response, message: string = 'Forbidden'): Response {
-    const responseData = this.createResponseObject(false, message);
+  static forbidden(
+    res: Response,
+    message: string = 'Forbidden',
+    data?: any
+  ): Response {
+    const responseData = this.createResponseObject(false, message, data);
     return this.sendResponse(res, HttpStatusCode.FORBIDDEN, responseData);
   }
 
@@ -156,9 +161,10 @@ export class ApiResponse {
    */
   static notFound(
     res: Response,
-    message: string = 'Resource not found'
+    message: string = 'Resource not found',
+    data?: any
   ): Response {
-    const responseData = this.createResponseObject(false, message);
+    const responseData = this.createResponseObject(false, message, data);
     return this.sendResponse(res, HttpStatusCode.NOT_FOUND, responseData);
   }
 
@@ -206,11 +212,11 @@ export class ApiResponse {
       case 400:
         return ApiResponse.badRequest(res, error.message, error.details);
       case 401:
-        return ApiResponse.unauthorized(res, error.message);
+        return ApiResponse.unauthorized(res, error.message, error.details);
       case 403:
-        return ApiResponse.forbidden(res, error.message);
+        return ApiResponse.forbidden(res, error.message, error.details);
       case 404:
-        return ApiResponse.notFound(res, error.message);
+        return ApiResponse.notFound(res, error.message, error.details);
       case 500:
       default:
         return ApiResponse.internalServerError(

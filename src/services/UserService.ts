@@ -10,6 +10,7 @@ import CloudinaryService from './CloudinaryService';
 import path from 'path';
 import { FolderName } from '@/config/cloudinary.config';
 import ApiError from '@utils/ApiError';
+import { IDVerificationService } from '@/config/idAnalyzer.config';
 
 class UserService {
   static async getUserById(id: string) {
@@ -238,30 +239,49 @@ class UserService {
     }
   }
 
-  static async updateIdentityDocument(
-    userId: string,
-    file: Express.Multer.File
-  ) {
+  static async updateIdentityDocument(user: User, file: Express.Multer.File) {
     try {
-      const user = await User.findByPk(userId);
+      const response = await IDVerificationService.verifyID(file, user);
 
-      if (!user) {
-        return { success: false, message: 'Utilisateur non trouvé' };
+      console.log('jmet le rep ici', response);
+
+      if (!response.authenticationScore || response.authenticationScore < 0.5) {
+        throw ApiError.badRequest(
+          "Le document n'est pas valide ",
+          response.errors
+        );
       }
 
+      if (!response.isNameMatch) {
+        throw ApiError.badRequest(
+          'Le nom ou le prénom ne correspondent pas, veuillez verifié vos informations personnels',
+          response.errors
+        );
+      }
+
+      if (!response.isAgeVerified) {
+        throw ApiError.badRequest(
+          "L'age ne correspond pas, veuillez verifié vos informations personnel",
+          response.errors
+        );
+      }
       const fileExtension = path.extname(file.originalname);
-      const newFileName = `${userId}${fileExtension}`;
+      const newFileName = `${user.id}${fileExtension}`;
       file.originalname = newFileName;
 
-      const uploadResult = await CloudinaryService.uploadImage(file, userId, {
-        folder: FolderName.IDENTITY_DOCUMENT as string,
-      });
+      const uploadResult = await CloudinaryService.uploadImage(
+        response.croppedDocument ? response.croppedDocument : file,
+        user.id,
+        {
+          folder: FolderName.IDENTITY_DOCUMENT as string,
+        }
+      );
 
       await user.update({
-        profilePicture: uploadResult.secure_url,
+        identityDocument: uploadResult.secure_url,
       });
 
-      return { success: true, profilePicture: uploadResult.secure_url };
+      return { success: true, identityDocument: uploadResult.secure_url };
     } catch (error: any) {
       console.error(
         "Erreur lors de la mise à jour de l'image de profil:",

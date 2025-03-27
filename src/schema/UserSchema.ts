@@ -98,7 +98,7 @@ export const updateUserSchema = z
 
 export const loginSchema = z
   .object({
-    email: z.string().email("L'adresse e-mail est invalide"),
+    email: z.string(),
     password: z
       .string()
       .min(8, 'Le mot de passe doit contenir au moins 8 caractères'),

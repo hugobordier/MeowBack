@@ -6,15 +6,11 @@ import ApiError from '@utils/ApiError';
 class UserController {
   static async getUserProfile(req: Request, res: Response) {
     try {
-      const userId = req.user!.id;
-
-      const user = await UserService.getUserById(userId);
-
-      if (!user) {
+      if (req.user) {
         return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
-      return ApiResponse.ok(res, 'Utilisateur trouvé', user);
+      return ApiResponse.ok(res, 'Utilisateur trouvé', req.user);
     } catch (error: any) {
       console.error('Error in getUserProfile:', error);
       return ApiResponse.internalServerError(
@@ -269,27 +265,37 @@ class UserController {
 
   static async uploadIdentityDocument(req: Request, res: Response) {
     const file = req.file;
-    const userId = req.user!.id;
+    if (!req.user) {
+      return ApiResponse.notFound(res, 'User not found');
+    }
+    const user = req.user;
 
     if (!file) {
       return ApiResponse.badRequest(res, 'Aucun fichier image fourni');
     }
 
     try {
-      const result = await UserService.updateIdentityDocument(userId, file);
+      const result = await UserService.updateIdentityDocument(user, file);
 
       if (result.success) {
         return ApiResponse.ok(res, 'Image bien importée', {
-          profilePicture: result.profilePicture,
+          identityDocument: result.identityDocument,
         });
       } else {
-        return ApiResponse.badRequest(res, result.message);
+        return ApiResponse.badRequest(
+          res,
+          'Document non valide , veuillez réessayer'
+        );
       }
     } catch (error: any) {
       console.error(
         "Erreur lors de la mise à jour de l'image de profil:",
         error
       );
+      if (error instanceof ApiError) {
+        console.log('ca passe ici hein');
+        return ApiResponse.handleApiError(res, error);
+      }
       return ApiResponse.internalServerError(res, error.message);
     }
   }
