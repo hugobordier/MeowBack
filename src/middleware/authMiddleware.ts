@@ -2,7 +2,8 @@ import jwt, { type JwtPayload } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import type { Request, Response, NextFunction } from 'express';
 import type User from '../models/User';
-import ApiError from '@utils/ApiError';
+import { ApiResponse } from '@utils/ApiResponse';
+import UserService from '@/services/UserService';
 
 dotenv.config();
 
@@ -16,19 +17,23 @@ export const authenticate = (
 ) => {
   const token = req.headers['authorization']?.split(' ')[1];
   if (token) {
-    jwt.verify(token, accessTokenSecret, (err, decoded) => {
+    jwt.verify(token, accessTokenSecret, async (err, decoded) => {
       if (err) {
         console.error('ca va tester le refresh');
         const refreshToken = req.cookies['refreshToken'] as string;
         if (!refreshToken) {
-          return res
-            .status(401)
-            .json({ error: 'Accès interdit, pas de refresh token' });
+          return ApiResponse.unauthorized(
+            res,
+            'Accès interdit, pas de refresh token'
+          );
         }
 
         jwt.verify(refreshToken, refreshTokenSecret, (err, decodedRefresh) => {
           if (err) {
-            return res.status(401).json({ error: 'Refresh token invalide' });
+            return ApiResponse.unauthorized(
+              res,
+              'Accès interdit,refresh token invalide'
+            );
           }
           const { iat, exp, ...userData } = decodedRefresh as JwtPayload;
 
@@ -43,7 +48,7 @@ export const authenticate = (
         });
       } else {
         const { iat, exp, ...userData } = decoded as JwtPayload;
-        req.user = decoded as User;
+        req.user = (await UserService.getUserById(userData.id)) as User;
         next();
       }
     });

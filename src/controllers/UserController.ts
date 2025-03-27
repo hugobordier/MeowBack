@@ -112,20 +112,10 @@ class UserController {
         return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
-      const userResponse = {
-        id: updatedUser.id,
-        username: updatedUser.username,
-        email: updatedUser.email,
-        lastName: updatedUser.lastName,
-        firstName: updatedUser.firstName,
-        bio: updatedUser.bio,
-        updatedAt: updatedUser.updatedAt,
-      };
-
       return ApiResponse.ok(
         res,
         'Utilisateur mis à jour avec succès',
-        userResponse
+        updatedUser
       );
     } catch (error: any) {
       if (error instanceof ApiError) {
