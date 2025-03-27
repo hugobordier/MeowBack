@@ -9,7 +9,12 @@ export const validateSchema =
       next();
     } catch (error) {
       if (error instanceof ZodError) {
-        return ApiResponse.badRequest(res, 'Invalid request data', {
+        const stringError = error.errors
+          .map((e) => {
+            return e.message;
+          })
+          .join(',');
+        return ApiResponse.badRequest(res, stringError, {
           error: error.errors,
         });
       }
