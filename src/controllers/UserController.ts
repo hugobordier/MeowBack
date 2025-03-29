@@ -293,7 +293,31 @@ class UserController {
         error
       );
       if (error instanceof ApiError) {
-        console.log('ca passe ici hein');
+        return ApiResponse.handleApiError(res, error);
+      }
+      return ApiResponse.internalServerError(res, error.message);
+    }
+  }
+
+  static async deleteIdentityDocument(req: Request, res: Response) {
+    const userId = req.user!.id;
+
+    try {
+      const result = await UserService.deleteIdentityDocument(userId);
+
+      if (result.success) {
+        return ApiResponse.ok(res, 'Image bien supprimée', {
+          identityDocument: result.identityDocument,
+        });
+      } else {
+        return ApiResponse.badRequest(res, result.message);
+      }
+    } catch (error: any) {
+      console.error(
+        "Erreur lors de la supressoin du document d'identité :",
+        error
+      );
+      if (error instanceof ApiError) {
         return ApiResponse.handleApiError(res, error);
       }
       return ApiResponse.internalServerError(res, error.message);

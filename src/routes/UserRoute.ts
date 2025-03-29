@@ -612,4 +612,65 @@ swaggerRouter.route('/identityDoc').patch(
   authenticate
 );
 
+swaggerRouter.route('/identityDoc').delete(
+  {
+    description: "Supprimer le document d'identité de l'utilisateur",
+    summary: "Supprimer un document d'identité",
+    tags: ['User'],
+    security: true,
+    responses: {
+      '200': {
+        description: "Document d'identité supprimé avec succès",
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: "Document d'identité supprimé avec succès",
+            },
+          },
+        },
+      },
+      '400': {
+        description: 'Requête invalide',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Aucun document à supprimer ou requête incorrecte',
+            },
+          },
+        },
+      },
+      '401': {
+        description: 'Non autorisé (token manquant ou invalide)',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: "Token d'authentification manquant ou invalide",
+            },
+          },
+        },
+      },
+      '500': {
+        description: 'Erreur serveur',
+        schema: {
+          type: 'object',
+          properties: {
+            message: {
+              type: 'string',
+              example: 'Erreur interne du serveur',
+            },
+          },
+        },
+      },
+    },
+  },
+  UserController.deleteIdentityDocument,
+  authenticate
+);
+
 export default swaggerRouter;
