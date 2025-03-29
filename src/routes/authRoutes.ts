@@ -1,7 +1,6 @@
 import AuthController from '../controllers/authController';
 import { authenticate } from '../middleware/authMiddleware';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
-import authController from '../controllers/authController';
 import { validateSchema } from '@/middleware/validateSchema';
 import { loginSchema, userSchema } from '@/schema/UserSchema';
 
