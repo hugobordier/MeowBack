@@ -1,7 +1,10 @@
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import authRoutes from './authRoutes';
 import PetsitterRoutes from './PetsitterRoute';
+<<<<<<< HEAD
 import UserRoutes from './UserRoute';
+=======
+>>>>>>> origin/hippo/crudpet
 import PetRoutes from './PetRoutes';
 
 export interface IRoute {
@@ -20,10 +23,13 @@ const routes: IRoute[] = [
     path: '/Petsitter',
     route: PetsitterRoutes,
   },
+<<<<<<< HEAD
   {
     path: '/User',
     route: UserRoutes,
   },
+=======
+>>>>>>> origin/hippo/crudpet
   {path:'/PetsRoutes',
     route: PetRoutes,
   }

@@ -2,11 +2,14 @@ import type { AvailabilityDay } from '@/types/type';
 import pets from '@/models/pets';
 import { Op, ValidationError } from 'sequelize';
 
+<<<<<<< HEAD
 interface PetsResponse {
   pets: pets[];  
   total: number; 
 }
 
+=======
+>>>>>>> origin/hippo/crudpet
 class PetService {
     static async createPet(data: Partial<pets>): Promise<pets> {
         try {
@@ -133,6 +136,7 @@ class PetService {
       }
     
 
+<<<<<<< HEAD
       static async getAllPets({ page, perPage }: { page: number, perPage: number }): Promise<PetsResponse> {
         try {
           const offset = (page - 1) * perPage;
@@ -143,6 +147,11 @@ class PetService {
             pets : listPets,
             total : totalpets
           };
+=======
+      static async getAllPets(): Promise<pets[]> {
+        try {
+          return await pets.findAll();
+>>>>>>> origin/hippo/crudpet
         } catch (error) {
           console.error("Erreur dans getAllPets:", error);
           throw error;
