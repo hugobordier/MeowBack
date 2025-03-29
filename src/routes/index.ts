@@ -26,8 +26,7 @@ const routes: IRoute[] = [
     path: '/User',
     route: UserRoutes,
   },
-  {
-    path:'/PetsRoutes',
+  {path:'/PetsRoutes',
     route: PetRoutes,
   },
   {
