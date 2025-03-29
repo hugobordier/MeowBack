@@ -15,7 +15,6 @@ class PetSitterController {
       let petsitters, totalItems;
 
       if (minRate || maxRate || minExperience || dayAvailable || search) {
-        console.log('search');
         ({ petsitters, totalItems } = await PetSitterService.searchPetSitters(
           {
             minHourlyRate: minRate ? parseFloat(minRate as string) : undefined,
@@ -30,7 +29,6 @@ class PetSitterController {
           limit
         ));
       } else {
-        console.log('pas de search');
         ({ petsitters, totalItems } = await PetSitterService.getAllPetSitters(
           page,
           limit

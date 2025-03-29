@@ -1,6 +1,7 @@
 import PetsitterController from '../controllers/PetsitterController';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import { authenticate } from '../middleware/authMiddleware';
+import petSitterAuth from '@/middleware/petSitterAuth';
 
 const swaggerRouter = new SwaggerRouter();
 
@@ -428,7 +429,8 @@ swaggerRouter.route('/').post(
     },
   },
   PetsitterController.createPetSitter,
-  authenticate
+  authenticate,
+  petSitterAuth
 );
 
 swaggerRouter.route('/:id').patch(
@@ -543,7 +545,8 @@ swaggerRouter.route('/:id').patch(
     },
   },
   PetsitterController.updatePetSitter,
-  authenticate
+  authenticate,
+  petSitterAuth
 );
 
 swaggerRouter.route('/:id').delete(
