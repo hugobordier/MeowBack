@@ -8,14 +8,7 @@ class PetSitterRatingController {
     try {
       const { pet_sitter_id, rating } = req.body;
 
-      if (!req.user || !req.user.id) {
-        return ApiResponse.unauthorized(
-          res,
-          'Utilisateur non authentifié ou ID utilisateur manquant'
-        );
-      }
-
-      const user_id = req.user.id;
+      const user_id = req.user!.id;
 
       if (rating === undefined) {
         return ApiResponse.badRequest(res, 'La note est requise');
@@ -50,7 +43,6 @@ class PetSitterRatingController {
           return ApiResponse.badRequest(res, error.message);
         }
 
-        // Pour les erreurs de validation
         if (error.message.includes('Validation')) {
           return ApiResponse.badRequest(res, error.message);
         }

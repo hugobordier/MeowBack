@@ -124,27 +124,28 @@ swaggerRouter.route('/login').post(
   validateSchema(loginSchema)
 );
 
-// swaggerRouter.route('/refresh').post(
-//   {
-//     description: 'Refresh the authentication token using a refresh token.',
-//     summary: 'Refresh authentication token',
-//     security: false,
-//     responses: {
-//       '200': {
-//         description: 'New access token successfully issued.',
-//         schema: {
-//           type: 'object',
-//           properties: {
-//             accessToken: { type: 'string' },
-//           },
-//         },
-//       },
-//       '400': { description: 'Bad request, invalid refresh token.' },
-//       '401': { description: 'Unauthorized, invalid or expired refresh token.' },
-//     },
-//   },
-//   AuthController.refresh
-// );
+swaggerRouter.route('/refresh').post(
+  {
+    description: 'Refresh the authentication token using a refresh token.',
+    summary: 'Refresh authentication token',
+    security: false,
+    tags: ['Auth'],
+    responses: {
+      '200': {
+        description: 'New access token successfully issued.',
+        schema: {
+          type: 'object',
+          properties: {
+            accessToken: { type: 'string' },
+          },
+        },
+      },
+      '400': { description: 'Bad request, invalid refresh token.' },
+      '401': { description: 'Unauthorized, invalid or expired refresh token.' },
+    },
+  },
+  AuthController.refresh
+);
 
 swaggerRouter.route('/me').get(
   {
@@ -232,159 +233,6 @@ swaggerRouter.route('/verify-reset-code').post(
 
   AuthController.verifyResetCode
 );
-
-// swaggerRouter.route('/delete-user').delete(
-//   {
-//     description: 'Delete a user account by their email.',
-//     summary: 'Delete user account',
-//     tags: ['Auth'],
-//     security: true,
-//     responses: {
-//       '200': { description: 'User deleted successfully.' },
-//       '400': { description: 'Bad request, invalid email.' },
-//       '404': { description: 'Not found, user not found.' },
-//     },
-//   },
-//   AuthController.deleteUser,
-//   authenticate
-// );
-
-// swaggerRouter.route('/update-user').patch(
-//   {
-//     description:
-//       'Update user information. The user can update one or multiple fields.',
-//     summary: 'Update user',
-//     tags: ['Auth'],
-//     security: true,
-//     requestBody: {
-//       description:
-//         'Fields to update (send only the fields that need to be modified)',
-//       required: true,
-//       schema: {
-//         type: 'object',
-//         properties: {
-//           username: {
-//             type: 'string',
-//             description: 'New username (must be unique)',
-//             example: 'new_johndoe',
-//           },
-//           email: {
-//             type: 'string',
-//             format: 'email',
-//             description: 'New email',
-//             example: 'new.email@mail.com',
-//           },
-//           password: {
-//             type: 'string',
-//             description: 'New password',
-//             example: 'NewSecurePassword123',
-//           },
-//           lastName: {
-//             type: 'string',
-//             description: 'Updated last name',
-//             example: 'Doe',
-//           },
-//           firstName: {
-//             type: 'string',
-//             description: 'Updated first name',
-//             example: 'John',
-//           },
-//           age: {
-//             type: 'integer',
-//             description: 'Updated age',
-//             example: 26,
-//           },
-//           birthDate: {
-//             type: 'string',
-//             format: 'date',
-//             description: 'Updated birth date',
-//             example: '1997-10-20',
-//           },
-//           city: {
-//             type: 'string',
-//             description: 'Updated city',
-//             example: 'Lyon',
-//           },
-//           country: {
-//             type: 'string',
-//             description: 'Updated country',
-//             example: 'France',
-//           },
-//           gender: {
-//             type: 'string',
-//             description: 'Updated gender',
-//             example: 'Male',
-//           },
-//           bio: {
-//             type: 'string',
-//             description: 'Updated bio',
-//             example: 'Tech enthusiast and full-stack developer.',
-//           },
-//           bankInfo: {
-//             type: 'string',
-//             description: 'Updated bank information (sensitive)',
-//             example: 'IBAN: FR7612345678901234567890123',
-//           },
-//           rating: {
-//             type: 'number',
-//             format: 'float',
-//             description: 'Updated rating (out of 5)',
-//             example: 4.8,
-//           },
-//           phoneNumber: {
-//             type: 'string',
-//             description: 'Updated phone number',
-//             example: '06 98 76 54 32',
-//           },
-//           address: {
-//             type: 'string',
-//             description: 'Updated postal address',
-//             example: '15 Avenue des Champs-Élysées, 75008 Paris',
-//           },
-//         },
-//       },
-//     },
-//     responses: {
-//       '200': {
-//         description: 'User updated successfully',
-//         schema: {
-//           type: 'object',
-//           properties: {
-//             message: {
-//               type: 'string',
-//               example: 'User updated successfully',
-//             },
-//             user: {
-//               type: 'object',
-//               properties: {
-//                 id: {
-//                   type: 'string',
-//                   example: '123e4567-e89b-12d3-a456-426614174000',
-//                 },
-//                 username: { type: 'string', example: 'new_johndoe' },
-//                 email: { type: 'string', example: 'new.email@mail.com' },
-//                 profilePicture: {
-//                   type: 'string',
-//                   example: 'http://example.com/new_profile.jpg',
-//                 },
-//                 updatedAt: { type: 'string', format: 'date-time' },
-//               },
-//             },
-//           },
-//         },
-//       },
-//       '400': {
-//         description: 'Bad request (invalid fields or username already taken)',
-//       },
-//       '401': { description: 'Unauthorized (missing or invalid token)' },
-//       '404': { description: 'User not found' },
-//       '500': { description: 'Internal server error' },
-//     },
-//   },
-
-//   authController.updateUser,
-//   authenticate
-// );
 
 swaggerRouter.route('/logout').post(
   {

@@ -3,6 +3,7 @@ import authRoutes from './authRoutes';
 import PetsitterRoutes from './PetsitterRoute';
 import UserRoutes from './UserRoute';
 import PetSitterRatingRoute from './PetSitterRatingRoute';
+import PetSitterReviewRoute from './PetSitterReviewRoute';
 
 export interface IRoute {
   path: string;
@@ -27,6 +28,10 @@ const routes: IRoute[] = [
   {
     path: '/petSitterRating',
     route: PetSitterRatingRoute,
+  },
+  {
+    path: '/petSitterReview',
+    route: PetSitterReviewRoute,
   },
 ];
 

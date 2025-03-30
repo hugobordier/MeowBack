@@ -2,6 +2,7 @@ import PetSitterRating from '../models/PetSitterRating';
 import { ValidationError } from 'sequelize';
 import User from '@/models/User';
 import ApiError from '@utils/ApiError';
+import PetSitterService from './PetsitterService';
 
 class PetSitterRatingService {
   static async createRating(
@@ -14,6 +15,12 @@ class PetSitterRatingService {
         throw ApiError.badRequest(
           'ID utilisateur et ID pet sitter requis pour créer une évaluation'
         );
+      }
+
+      const petsitter = await PetSitterService.getPetSitterById(pet_sitter_id);
+
+      if (!petsitter) {
+        throw ApiError.badRequest(`Aucun petsitter pour l'id ${pet_sitter_id}`);
       }
 
       const existingRating = await PetSitterRating.findOne({
