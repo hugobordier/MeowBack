@@ -6,7 +6,7 @@ import ApiError from '@utils/ApiError';
 class UserController {
   static async getUserProfile(req: Request, res: Response) {
     try {
-      if (req.user) {
+      if (!req.user) {
         return ApiResponse.notFound(res, 'Utilisateur non trouvé');
       }
 
