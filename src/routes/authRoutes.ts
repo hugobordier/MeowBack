@@ -245,8 +245,7 @@ swaggerRouter.route('/logout').post(
       '401': { description: 'Unauthorized, missing or invalid token.' },
     },
   },
-  AuthController.logout,
-  authenticate
+  AuthController.logout
 );
 
 export default swaggerRouter;
