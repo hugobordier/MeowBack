@@ -69,9 +69,7 @@ export default class authController {
         maxAge: 3600 * 1000 * 24 * 7,
         sameSite: 'strict',
       });
-      return ApiResponse.ok(res, 'Token refreshed successfully', {
-        accessToken,
-      });
+      return res.status(200).json({ accessToken });
     } catch (error) {
       return ApiResponse.forbidden(res, 'Invalid refresh token');
     }
