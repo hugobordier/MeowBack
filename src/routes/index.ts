@@ -1,11 +1,10 @@
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import authRoutes from './authRoutes';
 import PetsitterRoutes from './PetsitterRoute';
-<<<<<<< HEAD
 import UserRoutes from './UserRoute';
-=======
->>>>>>> origin/hippo/crudpet
 import PetRoutes from './PetRoutes';
+import PetSitterRatingRoute from './PetSitterRatingRoute';
+import PetSitterReviewRoute from './PetSitterReviewRoute';
 
 export interface IRoute {
   path: string;
@@ -23,16 +22,22 @@ const routes: IRoute[] = [
     path: '/Petsitter',
     route: PetsitterRoutes,
   },
-<<<<<<< HEAD
   {
     path: '/User',
     route: UserRoutes,
   },
-=======
->>>>>>> origin/hippo/crudpet
-  {path:'/PetsRoutes',
+  {
+    path:'/PetsRoutes',
     route: PetRoutes,
-  }
+  },
+  {
+    path: '/petSitterRating',
+    route: PetSitterRatingRoute,
+  },
+  {
+    path: '/petSitterReview',
+    route: PetSitterReviewRoute,
+  },
 ];
 
 routes.forEach((r) => {

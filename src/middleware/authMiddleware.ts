@@ -19,37 +19,7 @@ export const authenticate = (
   if (token) {
     jwt.verify(token, accessTokenSecret, async (err, decoded) => {
       if (err) {
-        console.error('ca va tester le refresh');
-        const refreshToken = req.cookies['refreshToken'] as string;
-        if (!refreshToken) {
-          return ApiResponse.unauthorized(
-            res,
-            'Accès interdit, pas de refresh token'
-          );
-        }
-
-        jwt.verify(
-          refreshToken,
-          refreshTokenSecret,
-          async (err, decodedRefresh) => {
-            if (err) {
-              return ApiResponse.unauthorized(
-                res,
-                'Accès interdit,refresh token invalide'
-              );
-            }
-            const { iat, exp, ...userData } = decodedRefresh as JwtPayload;
-
-            const newAccessToken = jwt.sign(userData, accessTokenSecret, {
-              expiresIn: '1h',
-            });
-            res.setHeader('Authorization', `Bearer ${newAccessToken}`);
-
-            req.user = (await UserService.getUserById(userData.id)) as User;
-
-            next();
-          }
-        );
+        return res.status(401).json({ error: 'Accès interdit, pas de token' });
       } else {
         const { iat, exp, ...userData } = decoded as JwtPayload;
         req.user = (await UserService.getUserById(userData.id)) as User;

@@ -217,7 +217,7 @@ class UserService {
       const user = await User.findByPk(userId);
 
       if (!user) {
-        return { success: false, message: 'Utilisateur non trouvé' };
+        throw ApiError.notFound('Utilisateur non trouvé');
       }
 
       const publicId = FolderName.PROFILE_PICTURES + '/' + userId;
@@ -290,6 +290,33 @@ class UserService {
       throw ApiError.badRequest(
         error.message || "Erreur lors de la mise à jour de l'image de profil"
       );
+    }
+  }
+
+  static async deleteIdentityDocument(userId: string) {
+    try {
+      const user = await User.findByPk(userId);
+
+      if (!user) {
+        throw ApiError.notFound('Utilisateur non trouvé');
+      }
+
+      const publicId = FolderName.IDENTITY_DOCUMENT + '/' + userId;
+
+      await CloudinaryService.deleteImage(publicId);
+
+      await user.update({ identityDocument: null });
+
+      return { success: true, identityDocument: null };
+    } catch (error: any) {
+      console.error(
+        "Erreur lors de la mise à jour de l'image de profil:",
+        error
+      );
+      return {
+        success: false,
+        message: `Une erreur est survenue lors de l'upload : ${error.message}`,
+      };
     }
   }
 }

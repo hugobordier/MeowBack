@@ -1,12 +1,15 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '../config/config';
+import User from './User';
+import PetSitter from './PetSitter';
 
 class PetSitterReview extends Model {
   declare id: string;
-  declare pet_sitter_id: string | null;
-  declare user_id: string | null;
+  declare pet_sitter_id: string;
+  declare user_id: string;
   declare message: string;
   declare createdAt: Date;
+  declare updatedAt: Date;
 }
 
 PetSitterReview.init(
@@ -18,7 +21,7 @@ PetSitterReview.init(
     },
     pet_sitter_id: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: 'pet_sitters',
         key: 'id',
@@ -27,7 +30,7 @@ PetSitterReview.init(
     },
     user_id: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: 'users',
         key: 'id',
@@ -38,11 +41,6 @@ PetSitterReview.init(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    createdAt: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
   },
   {
     sequelize: db,
@@ -50,5 +48,17 @@ PetSitterReview.init(
     timestamps: true,
   }
 );
+
+User.hasMany(PetSitterReview, { foreignKey: 'user_id', as: 'reviews' });
+PetSitterReview.belongsTo(User, { foreignKey: 'user_id', as: 'user' });
+
+PetSitter.hasMany(PetSitterReview, {
+  foreignKey: 'pet_sitter_id',
+  as: 'reviews',
+});
+PetSitterReview.belongsTo(PetSitter, {
+  foreignKey: 'pet_sitter_id',
+  as: 'petSitter',
+});
 
 export default PetSitterReview;

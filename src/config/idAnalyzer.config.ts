@@ -4,6 +4,7 @@ import type User from '@/models/User';
 import dotenv from 'dotenv';
 import { Buffer } from 'buffer';
 import { Readable } from 'stream';
+import ApiError from '@utils/ApiError';
 
 dotenv.config();
 
@@ -92,6 +93,12 @@ class IDVerificationService {
       }
 
       const response = await coreAPI.scan(scanOptions);
+
+      if (response.credit < 3) {
+        throw ApiError.internal(
+          'Plus que 3 credit , il faut changer la clé API'
+        );
+      }
 
       console.log(response);
 

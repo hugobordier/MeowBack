@@ -105,13 +105,14 @@ export default class AuthService {
 
   static async refreshAccessToken(refreshToken: string) {
     const decodedToken = jwt.verify(refreshToken, refreshTokenSecret);
-    //@ts-ignore
-    const userId = decodedToken.userId as string;
 
-    const accessToken = jwt.sign({ userId: userId }, accessTokenSecret, {
+    //@ts-ignore
+    const userId = decodedToken.id as string;
+
+    const accessToken = jwt.sign({ id: userId }, accessTokenSecret, {
       expiresIn: '1h',
     });
-    const newRefreshToken = jwt.sign({ userId: userId }, refreshTokenSecret, {
+    const newRefreshToken = jwt.sign({ id: userId }, refreshTokenSecret, {
       expiresIn: '7d',
     });
 
