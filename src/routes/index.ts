@@ -2,6 +2,7 @@ import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import authRoutes from './authRoutes';
 import PetsitterRoutes from './PetsitterRoute';
 import UserRoutes from './UserRoute';
+import PetRoutes from './PetRoutes';
 import PetSitterRatingRoute from './PetSitterRatingRoute';
 import PetSitterReviewRoute from './PetSitterReviewRoute';
 
@@ -24,6 +25,9 @@ const routes: IRoute[] = [
   {
     path: '/User',
     route: UserRoutes,
+  },
+  {path:'/PetsRoutes',
+    route: PetRoutes,
   },
   {
     path: '/petSitterRating',
