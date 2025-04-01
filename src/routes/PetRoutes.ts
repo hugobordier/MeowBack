@@ -1,10 +1,12 @@
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import PetController from '../controllers/PetController';
 import { authenticate } from '@/middleware/authMiddleware';
+import { validateSchema } from '@/middleware/validateSchema';
+import { petPatchSchema, petSchema } from '@/schema/PetSchema';
 
 const swaggerRouter = new SwaggerRouter();
 
-swaggerRouter.route('/Create').post(
+swaggerRouter.route('/').post(
   {
     description: 'Create a new pet',
     summary: 'Add a new pet',
@@ -28,11 +30,6 @@ swaggerRouter.route('/Create').post(
           gender: { type: 'string', enum: ['Male', 'Female', 'hermaphrodite'], example: 'Male' },
           neutered: { type: 'boolean', example: true },
           color: { type: 'string', example: 'Golden' },
-<<<<<<< HEAD
-          user_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
-=======
-          user_id: { type: 'string', format: 'uuid', example: '7c1ab762-96d9-4340-921f-72817af3917e' },
->>>>>>> origin/hippo/crudpet
         },
         required: ['name', 'breed', 'age', 'species', 'weight', 'diet', 'user_id'],
       },
@@ -50,26 +47,21 @@ swaggerRouter.route('/Create').post(
           },
         },
       },
-      '400': { description: 'Bad request' },
-<<<<<<< HEAD
-      '500': { description: 'Internal serveur error' },
-    },
-  },
-  PetController.createPet
-=======
+      '400': { description: 'Bad request données incorrectes' },
     },
   },
   PetController.createPet,
+  validateSchema(petSchema),
   authenticate
->>>>>>> origin/hippo/crudpet
 );
 
   
-  swaggerRouter.route('/GetPet/:id').get(
+  swaggerRouter.route('/:id').get(
     {
       description: 'Get a pet by ID',
       summary: 'Retrieve a pet by its unique identifier',
       tags: ['Pets'],
+      security:true,
       parameters: [
         {
           in: 'path',
@@ -81,44 +73,36 @@ swaggerRouter.route('/Create').post(
       responses: {
         '200': { description: 'Pet found' },
         '404': { description: 'Pet not found' },
-<<<<<<< HEAD
         '400': { description: 'No Pet for this ID' },
-        '500': { description: 'Internal server error'}
-      },
-    },
-    PetController.getPetById
-=======
         '500': { description: 'Internal server error'}
       },
     },
     PetController.getPetById,
     authenticate
->>>>>>> origin/hippo/crudpet
   );
 
-  swaggerRouter.route('/pets').get(
+  swaggerRouter.route('/').get(
     {
       description: 'Get all pets',
       summary: 'Retrieve a list of all pets',
       tags: ['Pets'],
+      security:true,
       responses: {
         '200': { description: 'List of pets retrieved successfully' },
+        '400': { description: 'Bad request' },
         '500': { description: 'Internal server error' },
       },
     },
-<<<<<<< HEAD
-    PetController.getAllPets
-=======
     PetController.getAllPets,
     authenticate
->>>>>>> origin/hippo/crudpet
   );
   
-  swaggerRouter.route('/Update/:id').put(
+  swaggerRouter.route('/:id').patch(
     {
       description: 'Update a pet',
       summary: 'Modify details of an existing pet',
       tags: ['Pets'],
+      security:true,
       parameters: [
         {
           in: 'path',
@@ -145,22 +129,8 @@ swaggerRouter.route('/Create').post(
             gender: { type: 'string', enum: ['Male', 'Female', 'hermaphrodite'], example: 'Male' },
             neutered: { type: 'boolean', example: true },
             color: { type: 'string', example: 'Golden' },
-<<<<<<< HEAD
-            user_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
-=======
-            user_id: { type: 'string', format: 'uuid', example: '7c1ab762-96d9-4340-921f-72817af3917e' },
->>>>>>> origin/hippo/crudpet
           },
-          required: [
-            'name',
-            'breed',
-            'age',
-            'species',
-            'weight',
-            'diet',
-            'gender',
-            'user_id',
-          ],
+
         },
       },
       responses: {
@@ -187,22 +157,19 @@ swaggerRouter.route('/Create').post(
                   gender: { type: 'string', example: 'Male' },
                   neutered: { type: 'boolean', example: true },
                   color: { type: 'string', example: 'Golden' },
-                  user_id: { type: 'string', example: '7c1ab762-96d9-4340-921f-72817af3917e' },
                 },
               },
             },
           },
         },
         '404': { description: 'Pet not found' },
+        '400': { description: 'Bad request' },
         '500': { description: 'Internal server error' },
       },
     },
-<<<<<<< HEAD
-    PetController.updatePet
-=======
     PetController.updatePet,
+    validateSchema(petPatchSchema),
     authenticate
->>>>>>> origin/hippo/crudpet
   );
 
   swaggerRouter.route('/pets/:id').delete(
@@ -210,6 +177,7 @@ swaggerRouter.route('/Create').post(
       description: 'Delete a pet',
       summary: 'Remove a pet from the database',
       tags: ['Pets'],
+      security:true,
       parameters: [
         {
           in: 'path',
@@ -220,18 +188,13 @@ swaggerRouter.route('/Create').post(
       ],
       responses: {
         '200': { description: 'Pet deleted successfully' },
+        '400': { description: 'Bad request' },
         '404': { description: 'Pet not found' },
-<<<<<<< HEAD
         '500': { description: 'Internal serveur error' },
-      },
-    },
-    PetController.deletePet
-=======
       },
     },
     PetController.deletePet,
     authenticate
->>>>>>> origin/hippo/crudpet
   );
   
   

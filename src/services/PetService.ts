@@ -1,6 +1,7 @@
 import type { AvailabilityDay } from '@/types/type';
 import pets from '@/models/pets';
 import { Op, ValidationError } from 'sequelize';
+import type { UUID } from 'crypto';
 
 interface PetsResponse {
   pets: pets[];  
@@ -8,12 +9,13 @@ interface PetsResponse {
 }
 
 class PetService {
-    static async createPet(data: Partial<pets>): Promise<pets> {
+    static async createPet(data: Partial<pets>,user_id? : string): Promise<pets> {
         try {
-          if (!data.user_id) {
-            throw new Error("ID utilisateur requis pour créer un animal");
+          if (!user_id) {
+            throw new Error("L'ID utilisateur est requis");
           }
     
+          data.user_id = user_id;
           if (!data.name || data.name.trim().length < 3) {
             throw new Error("Le nom de l'animal doit avoir au moins 3 caractères");
           }
@@ -111,7 +113,7 @@ class PetService {
           }
     
           const deleted = await pets.destroy({ where: { id } });
-    
+
           return deleted > 0;
         } catch (error) {
           console.error(`Erreur dans la suppression du pet(${id}):`, error);
@@ -124,8 +126,13 @@ class PetService {
           if (!id) {
             throw new Error("ID du pet requis pour la récupération");
           }
+          const pet = await pets.findByPk(id)
+          if (!pet) {
+            return null;
+          }
     
-          return await pets.findByPk(id);
+          return pet;
+
         } catch (error) {
           console.error(`Erreur dans la récupération pour l'animal(${id}):`, error);
           throw error;

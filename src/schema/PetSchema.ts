@@ -28,5 +28,43 @@ export const petSchema = z.object({
   
   neutered: z.boolean().optional(),
   color: z.string().optional(),
-  user_id: z.string().uuid("L'ID utilisateur doit être un UUID valide"),
-});
+}).strict();
+
+export const petPatchSchema = z.object({
+  id: z.string().uuid().optional(),
+  name: z
+    .string()
+    .trim()
+    .min(3, "Le nom de l'animal doit avoir au moins 3 caractères")
+    .max(25, "Le nom de l'animal ne peut pas dépasser 25 caractères")
+    .optional(),
+  breed: z.string().trim().min(1, "La race de l'animal est requise").optional(),
+  age: z
+    .number()
+    .int("L'âge doit être un nombre entier")
+    .min(0, "L'âge ne peut pas être négatif")
+    .max(100, "L'âge semble irréaliste")
+    .optional(),
+  species: z.string().trim().min(1, "L'espèce de l'animal est requise").optional(),
+  allergy: z
+    .string()
+    .trim()
+    .min(2, "L'allergie doit contenir au moins 2 caractères")
+    .max(100, "L'allergie ne peut pas dépasser 100 caractères")
+    .optional(),
+  weight: z
+    .number()
+    .min(0.1, "Le poids doit être supérieur à 0")
+    .max(200, "Le poids semble irréaliste")
+    .optional(),
+  diet: z.string().trim().min(1, "Le régime alimentaire est requis").optional(),
+  description: z
+    .string()
+    .trim()
+    .max(500, "La description ne peut pas dépasser 500 caractères")
+    .optional(),
+  photo_url: z.string().url("L'URL de la photo doit être valide").optional(),
+  gender: z.enum(["Male", "Female", "Hermaphrodite"]).optional(),
+  neutered: z.boolean().optional(),
+  color: z.string().trim().max(50, "La couleur ne peut pas dépasser 50 caractères").optional(),
+}).strict();
