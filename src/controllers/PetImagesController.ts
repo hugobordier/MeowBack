@@ -58,7 +58,21 @@ class PetImagesController{
                 return ApiResponse.internalServerError(res, "Erreur lors de getPetImageById");
             }
         
-    };
+    }
+
+    static async getPetImages(req: Request, res: Response) {
+        try {
+            const { petId } = req.params;
+            if(!petId){
+                return ApiResponse.badRequest(res,"id de l'animal requis")
+            }
+            const petImages = await PetImagesService.getPetImages(petId);
+            return ApiResponse.ok(res,"Toutes les images pour le pet ont été récupérées",Image);
+        } catch (error) {
+            return ApiResponse.internalServerError(res, "Erreur lors de getPetImageById");
+        }
+    }
+
 
     static async deletePetImage (req: Request, res: Response) {
         try{
@@ -98,6 +112,24 @@ class PetImagesController{
         }catch (error) {
             return ApiResponse.internalServerError(res, "Erreur lors de l'upload de l'image");
         }
-    };
+    }
+
+    static async updatePetImage(req: Request, res: Response) {
+        try {
+            const { imageId } = req.params;  
+            const { newUrlImage } = req.body;
+            if (!imageId){
+                return ApiResponse.badRequest(res,"ID de l'image requis");
+            }
+            if (!newUrlImage){
+                return ApiResponse.badRequest(res,"Nouvelle image requise");
+            }
+
+            const updatedPetImage = await PetImagesService.updatePetImage(imageId, newUrlImage);
+            return ApiResponse.ok(res, 'Image mise à jour avec succès.');
+        } catch (error) {
+            return ApiResponse.internalServerError(res, "Erreur lors de la mise à jour de l'image");
+        }
+    }
 }
 export default PetImagesController;

@@ -12,26 +12,39 @@ class PetImagesService {
 
             return petImage;
         } catch (error) {
-                throw new Error('Could not create pet image');
-        }
+            console.error('Erreur dans createPetImage',error);
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            throw ApiError.internal(
+              'Erreur inconnue dans createPetImage'
+            );
+          }
         }
 
         static async getPetImageById(imageId: string): Promise<PetImage>  {
             try {
               if (!imageId) {
-                throw ApiError.badRequest('Image ID is required.');
+                throw ApiError.badRequest('Image ID est requis.');
               }
           
               const petImage = await PetImage.findByPk(imageId);
           
               if (!petImage) {
-                throw ApiError.notFound('Pet image not found.');
+                throw ApiError.notFound('Pet image pas trouvée.');
               }
           
               return petImage;
             } catch (error) {
-              throw error; 
+            
+            console.error('Erreur dans getPetImageById',error);
+            if (error instanceof ApiError) {
+              throw error;
             }
+            throw ApiError.internal(
+              'Erreur inconnue dans getPetImageById'
+            );
+          }
           }
 
 
@@ -39,40 +52,70 @@ class PetImagesService {
         try {
             const petImages = await PetImage.findAll({ where: { pet_id: petId }});
 
+            if (!petImages) {
+                throw ApiError.notFound('images inexistantes pour ce pet.');
+              }
             return petImages;
         } catch (error) {
-                throw new Error('Could not fetch pet images');
-        }
+            console.error('Erreur dans getPetImages',error);
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            throw ApiError.internal(
+              'Erreur inconnue dans getPetImages'
+            );
+          }
     }
 
     static async deletePetImage  (imageId: string): Promise<boolean>{
         try {
 
             if (!imageId) {
-                throw new Error("Cette image n'existe pas");
+                throw ApiError.notFound("Cette image n'existe pas");
             }
 
             const deleted = await PetImage.destroy({ where: { imageId } });
             return deleted > 0;
         } catch (error) {
-            throw new Error('Could not delete pet image');
-        }
+            console.error('Erreur dans deletePetImage',error);
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            throw ApiError.internal(
+              'Erreur inconnue dans deletePetImage'
+            );
+          }
     }
 
     static async updatePetImage(imageId: string, newUrlImage: string): Promise<PetImage> {
         try {
-            const petImage = await PetImage.findByPk(imageId);
-
-            if (!petImage) {
-                throw new Error('Pet image not found');
+            if (!imageId) {
+                throw ApiError.badRequest('Image ID is required.');
             }
-
+    
+            if (!newUrlImage) {
+                throw ApiError.badRequest('New image URL is required.');
+            }
+    
+            const petImage = await PetImage.findByPk(imageId);
+    
+            if (!petImage) {
+                throw ApiError.notFound('Pet image not found.');
+            }
+    
             petImage.url_image = newUrlImage;
             await petImage.save();
+    
             return petImage;
         } catch (error) {
-            throw new Error('Could not update pet image');
-        }
+            console.error('Erreur dans updatePetImage',error);
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            throw ApiError.internal(
+              'Erreur inconnue dans updatePetImage'
+            );
+          }
     }
 }
 export default PetImagesService;
