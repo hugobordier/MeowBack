@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import PetSitterService from '../services/PetsitterService';
 import PetSitter from '@/models/PetSitter';
+import { getCoordinatesFromAddress } from '@utils/geocoding';
 
 class PetSitterController {
   static async getPetSitters(req: Request, res: Response): Promise<Response> {
@@ -164,12 +165,16 @@ class PetSitterController {
         );
       }
 
+      const { lat, lon } = await getCoordinatesFromAddress(req.user.address);
+
       const newPetSitter = await PetSitterService.createPetSitter(
         user_id,
         bio || '',
         parsedHourlyRate,
         parsedExperience,
-        availability || []
+        availability || [],
+        lat,
+        lon
       );
 
       return ApiResponse.created(res, 'Petsitter créé avec succès', {

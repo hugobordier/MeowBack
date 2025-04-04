@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import UserService from '../services/UserService';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import ApiError from '@utils/ApiError';
+import PetService from '@/services/PetService';
+import PetSitterService from '@/services/PetsitterService';
 
 class UserController {
   static async getUserProfile(req: Request, res: Response) {
@@ -99,6 +101,16 @@ class UserController {
       delete updateData.isAdmin;
       delete updateData.createdAt;
       delete updateData.updatedAt;
+
+      if (updateData.age && updateData.age < 18) {
+        return ApiResponse.badRequest(
+          res,
+          "L'utilisateur doit avoir au moins 18 ans"
+        );
+      }
+      if (updateData.address) {
+        PetSitterService;
+      }
 
       const updatedUser = await UserService.updateUser(userId, updateData);
 

@@ -3,6 +3,7 @@ import PetSitter from '../models/PetSitter';
 import { Op, ValidationError } from 'sequelize';
 import UserService from './UserService';
 import User from '@/models/User';
+import ApiError from '@utils/ApiError';
 
 class PetSitterService {
   static async getAllPetSitters(
@@ -98,7 +99,9 @@ class PetSitterService {
     bio: string,
     hourly_rate: number,
     experience: number,
-    availability: AvailabilityDay[]
+    availability: AvailabilityDay[],
+    lat: number | null,
+    lon: number | null
   ): Promise<PetSitter> {
     try {
       if (!user_id) {
@@ -129,6 +132,8 @@ class PetSitterService {
         hourly_rate,
         experience,
         availability,
+        lat,
+        lon,
       });
     } catch (error) {
       console.error('Error in createPetSitter:', error);
@@ -319,6 +324,39 @@ class PetSitterService {
         );
       }
       throw new Error('Erreur inconnue lors de la recherche de petsitters');
+    }
+  }
+
+  static async updatePetSitterGeoLocation(
+    id: string,
+    lat: number,
+    lon: number
+  ) {
+    try {
+      if (!id) {
+        throw ApiError.badRequest(
+          'ID du petsitter non spécifié pour la mise à jour'
+        );
+      }
+
+      const [updated] = await PetSitter.update(
+        { lat, lon },
+        {
+          where: { user_id: id },
+        }
+      );
+
+      return updated > 0;
+    } catch (error) {
+      console.error(`Error in updatePetSitterGeoLocation(${id}):`, error);
+      if (error instanceof Error) {
+        throw ApiError.badRequest(
+          `Erreur lors de la mise à jour de la géolocalisation du petsitter ID ${id}: ${error.message}`
+        );
+      }
+      throw ApiError.internal(
+        `Erreur inconnue lors de la mise à jour de la géolocalisation du petsitter ID ${id}`
+      );
     }
   }
 }

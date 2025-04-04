@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import db from '../config/config';
 import type { AvailabilityDay } from '@/types/type';
 import User from './User';
+
 class PetSitter extends Model {
   declare id: string;
   declare user_id: string;
@@ -9,6 +10,8 @@ class PetSitter extends Model {
   declare experience: number;
   declare hourly_rate: number;
   declare availability: AvailabilityDay[] | null;
+  declare latitude: number | null;
+  declare longitude: number | null;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -96,6 +99,22 @@ PetSitter.init(
             });
           });
         },
+      },
+    },
+    latitude: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+      validate: {
+        min: -90,
+        max: 90,
+      },
+    },
+    longitude: {
+      type: DataTypes.DOUBLE,
+      allowNull: true,
+      validate: {
+        min: -180,
+        max: 180,
       },
     },
   },
