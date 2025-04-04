@@ -44,9 +44,6 @@ class PetController{
         }
 
         const pet = await PetService.getPetById(id)
-        if (pet?.user_id !== req.user?.id){
-          return ApiResponse.badRequest(res,"pas ton pet ")
-        }
 
         if (!pet) {
           return ApiResponse.notFound(res,"Animal non trouvé");

@@ -5,6 +5,7 @@ import UserRoutes from './UserRoute';
 import PetRoutes from './PetRoutes';
 import PetSitterRatingRoute from './PetSitterRatingRoute';
 import PetSitterReviewRoute from './PetSitterReviewRoute';
+import PetImageRoutes from './PetImageRoutes';
 
 export interface IRoute {
   path: string;
@@ -36,6 +37,10 @@ const routes: IRoute[] = [
   {
     path: '/petSitterReview',
     route: PetSitterReviewRoute,
+  },
+  {
+    path: '/PetImage',
+    route: PetImageRoutes,
   },
 ];
 
