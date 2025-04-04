@@ -4,6 +4,7 @@ import { Op, ValidationError } from 'sequelize';
 import UserService from './UserService';
 import User from '@/models/User';
 import ApiError from '@utils/ApiError';
+import { getCoordinatesFromAddress } from '@utils/geocoding';
 
 class PetSitterService {
   static async getAllPetSitters(
@@ -327,11 +328,7 @@ class PetSitterService {
     }
   }
 
-  static async updatePetSitterGeoLocation(
-    id: string,
-    lat: number,
-    lon: number
-  ) {
+  static async updatePetSitterGeoLocation(id: string, address: string) {
     try {
       if (!id) {
         throw ApiError.badRequest(
@@ -339,8 +336,13 @@ class PetSitterService {
         );
       }
 
+      const result = await getCoordinatesFromAddress(address);
+
+      const { lat, lon } = result;
+
+      // Mettre à jour la géolocalisation du petsitter
       const [updated] = await PetSitter.update(
-        { lat, lon },
+        { latitude: lat, longitude: lon },
         {
           where: { user_id: id },
         }

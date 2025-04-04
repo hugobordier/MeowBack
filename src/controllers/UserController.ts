@@ -109,7 +109,7 @@ class UserController {
         );
       }
       if (updateData.address) {
-        PetSitterService;
+        PetSitterService.updatePetSitterGeoLocation(userId, updateData.address);
       }
 
       const updatedUser = await UserService.updateUser(userId, updateData);
