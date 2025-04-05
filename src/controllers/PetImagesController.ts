@@ -8,7 +8,7 @@ import { ApiResponse } from '@utils/ApiResponse';
 class PetImagesController{
     static async createPetImage(req: Request, res: Response) {
         try{
-            const { petId, urlImage } = req.body;
+            const { petId } = req.body;
             if (!petId) {
                 return ApiResponse.badRequest(res, "ID de l'animal requis");
             }
@@ -25,7 +25,7 @@ class PetImagesController{
             if (!req.file) {
                 return ApiResponse.badRequest(res, 'Aucun fichier uploadé.');
             }
-            const newPetImage = await PetImagesService.createPetImage(petId, urlImage);
+            const newPetImage = await PetImagesService.createPetImage(petId, req.file);
 
             return ApiResponse.created(res,"Image ajoutée avec succès",newPetImage);
         }catch (error:any) {
@@ -105,18 +105,28 @@ class PetImagesController{
         }
     }
 
-    static async updatePetImage(req: Request, res: Response) {
+    static async updateImage(req: Request, res: Response) {
         try {
             const { imageId } = req.params;  
-            const { newUrlImage } = req.body;
             if (!imageId){
                 return ApiResponse.badRequest(res,"ID de l'image requis");
             }
-            if (!newUrlImage){
+            if (!req.file){
                 return ApiResponse.badRequest(res,"Nouvelle image requise");
             }
+            const ImageOriginale = PetImagesService.getPetImageById(imageId);
+            const petID=(await ImageOriginale).pet_id
+            const pet = await PetService.getPetById(petID);
 
-            const updatedPetImage = await PetImagesService.updatePetImage(imageId, newUrlImage);
+            if (!pet) {
+                return ApiResponse.notFound(res, "Pet de l'image non trouvé.");
+            }
+            
+            if (pet?.user_id !== req.user?.id){
+                return ApiResponse.badRequest(res,"pas ton pet")
+            }
+
+            const updatedPetImage = await PetImagesService.updateImage(imageId, req.file);
             return ApiResponse.ok(res, 'Image mise à jour avec succès.');
         } catch (error) {
             return ApiResponse.internalServerError(res, "Erreur lors de la mise à jour de l'image");

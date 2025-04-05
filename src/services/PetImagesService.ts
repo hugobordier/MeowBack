@@ -109,7 +109,7 @@ class PetImagesService {
           }
     }
 
-    static async updatePetImage(imageId: string, file: Express.Multer.File): Promise<PetImage> {
+    static async updateImage(imageId: string, file: Express.Multer.File): Promise<PetImage> {
         try {
             if (!imageId) {
                 throw ApiError.badRequest('Image ID is required.');

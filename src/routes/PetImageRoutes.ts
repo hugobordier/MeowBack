@@ -2,40 +2,50 @@ import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import PetImagesController from '@/controllers/PetImagesController';
 import { authenticate } from '@/middleware/authMiddleware';
 import { validateSchema } from '@/middleware/validateSchema';
-import { petImageSchema } from '@/schema/PetImageSchema';
+import { petImageSchema,petImagePatchSchema } from '@/schema/PetImageSchema';
+import { uploadMiddleware } from '@/middleware/uploadMiddleware';
+
 
 const swaggerRouter = new SwaggerRouter();
 
-swaggerRouter.route('/pets/:petId/images').post(
+swaggerRouter.route('/').post(
+  
   {
     description: 'Upload an image for a pet',
     summary: 'Add a new image to a pet',
     tags: ['Pet Images'],
     security: true,
     requestBody: {
+      contentType: 'multipart/form-data',
       description: 'Image data',
       required: true,
       schema: {
         type: 'object',
         properties: {
-          url_image: { type: 'string', example: 'https://example.com/dog.jpg' },
-        },
-        required: ['url_image'],
+          file: {
+            type: 'string',
+            format: 'binary',
+          },
+        required: ['file'],
       },
     },
+  },
     responses: {
-      '201': { description: 'Image uploaded successfully' },
-      '400': { description: 'Invalid data' },
-      '404': { description: 'Pet not found' },
+      '201': { description: 'Image updated successfully' },
+      '400': { description: 'Invalid request' },
+      '404': { description: 'Image not found' },
       '500': { description: 'Internal server error' },
     },
   },
+
+  
   PetImagesController.createPetImage,
-  validateSchema(PetImageSchema),
+  uploadMiddleware,
+  validateSchema(petImageSchema),
   authenticate
 );
 
-swaggerRouter.route('/pets/:petId/images').get(
+swaggerRouter.route('/:id').get(
   {
     description: 'Get all images of a pet',
     summary: 'Retrieve all images for a specific pet',
@@ -60,7 +70,32 @@ swaggerRouter.route('/pets/:petId/images').get(
   authenticate
 );
 
-swaggerRouter.route('/pets/:petId/images/:imageId').delete(
+swaggerRouter.route('/Image/:id').get(
+  {
+    description: 'Get an image',
+    summary: 'Retrieve an image by its id',
+    tags: ['Image'],
+    security: true,
+    parameters: [
+      {
+        in: 'path',
+        name: 'id',
+        required: true,
+        schema: { type: 'string', format: 'uuid' },
+      },
+    ],
+    responses: {
+      '200': { description: 'Image retrieved successfully' },
+      '400': { description: 'Invalid request' },
+      '404': { description: 'No image found' },
+      '500': { description: 'Internal server error' },
+    },
+  },
+  PetImagesController.getPetImageById,
+  authenticate
+);
+
+swaggerRouter.route('/:id').delete(
   {
     description: 'Delete an image of a pet',
     summary: 'Remove a specific image from a pet',
@@ -91,7 +126,7 @@ swaggerRouter.route('/pets/:petId/images/:imageId').delete(
   authenticate
 );
 
-swaggerRouter.route('/pets/:petId/images/:imageId').patch(
+swaggerRouter.route('/:id').patch(
   {
     description: 'Update an image of a pet',
     summary: 'Modify an existing image of a pet',
@@ -116,10 +151,11 @@ swaggerRouter.route('/pets/:petId/images/:imageId').patch(
       required: true,
       schema: {
         type: 'object',
-        properties: {
-          url_image: { type: 'string', example: 'https://example.com/new-image.jpg' },
+        file: {
+          type: 'string',
+          format: 'binary',
         },
-        required: ['url_image'],
+      required: ['file'],
       },
     },
     responses: {
@@ -129,8 +165,9 @@ swaggerRouter.route('/pets/:petId/images/:imageId').patch(
       '500': { description: 'Internal server error' },
     },
   },
-  PetImagesController.updatePetImage,
-  validateSchema(petImageSchema),
+  PetImagesController.updateImage,
+  uploadMiddleware,
+  validateSchema(petImagePatchSchema),
   authenticate
 );
 

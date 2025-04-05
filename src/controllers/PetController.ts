@@ -65,7 +65,7 @@ class PetController{
         if (!updatedPet) {
           return ApiResponse.notFound(res,"Animal non trouvé");
         }
-        return ApiResponse.ok(res,"Animal récupéré",updatedPet);
+        return ApiResponse.ok(res,"Animal mis à jour",updatedPet);
       } catch (error) {
         return ApiResponse.internalServerError(res,"Erreur lors de la mise à jour de l'animal");
       }
