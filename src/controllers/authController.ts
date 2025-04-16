@@ -18,7 +18,7 @@ export default class authController {
         maxAge: 3600 * 1000 * 24 * 7,
         sameSite: 'strict',
       });
-      return res.status(200).json({ accessToken });
+      return res.status(200).json({ accessToken, refreshToken });
     } catch (error: any) {
       console.error(error);
       return ApiResponse.unauthorized(res, error.message);
@@ -55,7 +55,7 @@ export default class authController {
   }
 
   static async refresh(req: Request, res: Response) {
-    const refreshToken = req.cookies.refreshToken;
+    const refreshToken = req.body.refreshToken;
 
     if (!refreshToken) {
       return ApiResponse.forbidden(res, 'No refresh token found');
@@ -64,12 +64,11 @@ export default class authController {
     try {
       const { accessToken, newRefreshToken } =
         await AuthService.refreshAccessToken(refreshToken);
-      res.cookie('refreshToken', newRefreshToken, {
-        httpOnly: true,
-        maxAge: 3600 * 1000 * 24 * 7,
-        sameSite: 'strict',
+
+      return res.status(200).json({
+        accessToken,
+        refreshToken: newRefreshToken,
       });
-      return res.status(200).json({ accessToken });
     } catch (error) {
       return ApiResponse.forbidden(res, 'Invalid refresh token');
     }
