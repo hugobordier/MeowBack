@@ -130,6 +130,20 @@ swaggerRouter.route('/refresh').post(
     summary: 'Refresh authentication token',
     security: false,
     tags: ['Auth'],
+    requestBody: {
+      description: 'User login credentials refresh',
+      required: true,
+      schema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            description: 'refresh token',
+            example: 'refresh token',
+          },
+        },
+      },
+    },
     responses: {
       '200': {
         description: 'New access token successfully issued.',
