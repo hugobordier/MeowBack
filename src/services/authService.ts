@@ -29,7 +29,7 @@ export default class AuthService {
     }
 
     const accessToken = jwt.sign({ id: user.id }, accessTokenSecret, {
-      expiresIn: '1s',
+      expiresIn: '1h',
     });
     const refreshToken = jwt.sign({ id: user.id }, refreshTokenSecret, {
       expiresIn: '7d',
