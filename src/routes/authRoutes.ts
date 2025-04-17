@@ -136,7 +136,7 @@ swaggerRouter.route('/refresh').post(
       schema: {
         type: 'object',
         properties: {
-          email: {
+          refreshToken: {
             type: 'string',
             description: 'refresh token',
             example: 'refresh token',
