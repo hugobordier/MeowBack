@@ -134,17 +134,31 @@ class IDVerificationService {
         console.log('userData.firstName:', userData.firstName);
         console.log('userData.lastName:', userData.lastName);
 
-        const firstNameMatch =
-          dataResult.firstName.toLowerCase() ===
-          userData.lastName.toLowerCase();
-        const lastNameMatch =
-          dataResult.lastName.toLowerCase() ===
-          userData.firstName.toLowerCase();
+        const dataFirst = dataResult.firstName.toLowerCase();
+        const dataLast = dataResult.lastName.toLowerCase();
+        const userFirst = userData.firstName.toLowerCase();
+        const userLast = userData.lastName.toLowerCase();
 
-        console.log('firstNameMatch:', firstNameMatch);
-        console.log('lastNameMatch:', lastNameMatch);
+        const directFirstMatch = dataFirst === userFirst;
+        const directLastMatch = dataLast === userLast;
 
-        verificationResult.isNameMatch = firstNameMatch && lastNameMatch;
+        const inverseFirstMatch = dataFirst === userLast;
+        const inverseLastMatch = dataLast === userFirst;
+
+        const isLooseNameMatch =
+          (directFirstMatch && directLastMatch) || // cas normal
+          (inverseFirstMatch && inverseLastMatch) || // prénom/nom inversés
+          directFirstMatch || // au moins un bon
+          directLastMatch ||
+          inverseFirstMatch ||
+          inverseLastMatch;
+
+        console.log('directFirstMatch:', directFirstMatch);
+        console.log('directLastMatch:', directLastMatch);
+        console.log('inverseFirstMatch:', inverseFirstMatch);
+        console.log('inverseLastMatch:', inverseLastMatch);
+
+        verificationResult.isNameMatch = isLooseNameMatch;
         console.log(
           'verificationResult.isNameMatch:',
           verificationResult.isNameMatch
