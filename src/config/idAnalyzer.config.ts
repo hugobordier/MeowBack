@@ -136,9 +136,10 @@ class IDVerificationService {
 
         const firstNameMatch =
           dataResult.firstName.toLowerCase() ===
-          userData.firstName.toLowerCase();
+          userData.lastName.toLowerCase();
         const lastNameMatch =
-          dataResult.lastName.toLowerCase() === userData.lastName.toLowerCase();
+          dataResult.lastName.toLowerCase() ===
+          userData.firstName.toLowerCase();
 
         console.log('firstNameMatch:', firstNameMatch);
         console.log('lastNameMatch:', lastNameMatch);
