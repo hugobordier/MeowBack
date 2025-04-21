@@ -245,7 +245,7 @@ class UserService {
 
       console.log('jmet le rep ici', response);
 
-      if (!response.authenticationScore || response.authenticationScore < 0.5) {
+      if (!response.authenticationScore || response.authenticationScore < 0.3) {
         throw ApiError.badRequest(
           "Le document n'est pas valide ",
           response.errors

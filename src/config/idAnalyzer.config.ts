@@ -129,10 +129,25 @@ class IDVerificationService {
 
       // Verify name
       if (dataResult.firstName && dataResult.lastName) {
-        verificationResult.isNameMatch =
+        console.log('dataResult.firstName:', dataResult.firstName);
+        console.log('dataResult.lastName:', dataResult.lastName);
+        console.log('userData.firstName:', userData.firstName);
+        console.log('userData.lastName:', userData.lastName);
+
+        const firstNameMatch =
           dataResult.firstName.toLowerCase() ===
-            userData.firstName.toLowerCase() &&
+          userData.firstName.toLowerCase();
+        const lastNameMatch =
           dataResult.lastName.toLowerCase() === userData.lastName.toLowerCase();
+
+        console.log('firstNameMatch:', firstNameMatch);
+        console.log('lastNameMatch:', lastNameMatch);
+
+        verificationResult.isNameMatch = firstNameMatch && lastNameMatch;
+        console.log(
+          'verificationResult.isNameMatch:',
+          verificationResult.isNameMatch
+        );
       }
 
       // Verify age (if date of birth is provided)
