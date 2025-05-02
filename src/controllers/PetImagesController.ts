@@ -8,7 +8,9 @@ import { ApiResponse } from '@utils/ApiResponse';
 class PetImagesController{
     static async createPetImage(req: Request, res: Response) {
         try{
-            const { petId } = req.body;
+            
+            const { petId } = req.params;
+
             if (!petId) {
                 return ApiResponse.badRequest(res, "ID de l'animal requis");
             }

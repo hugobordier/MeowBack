@@ -138,8 +138,7 @@ class PetService {
           throw error;
         }
       }
-    
-
+  
       static async getAllPets({ page, perPage }: { page: number, perPage: number }): Promise<PetsResponse> {
         try {
           const offset = (page - 1) * perPage;
