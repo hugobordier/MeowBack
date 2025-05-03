@@ -93,6 +93,61 @@ class PetController{
         return ApiResponse.internalServerError(res,"Erreur lors de la suppression de l'animal");
       }
     }
+
+    static async uploadImagePetProfile(req: Request, res: Response) {
+      try{
+          
+          const { id } = req.params;
+
+          if (!id) {
+              return ApiResponse.badRequest(res, "ID de l'animal requis");
+          }
+
+          const pet = await PetService.getPetById(id)
+          if (pet?.user_id !== req.user?.id){
+              return ApiResponse.badRequest(res,"pas ton pet ")
+          }
+
+          if (!pet) {
+              return ApiResponse.notFound(res, 'Pet non trouvé.');
+          }
+
+          if (!req.file) {
+              return ApiResponse.badRequest(res, 'Aucun fichier uploadé.');
+          }
+          const photo_url = await PetService.uploadImagePetProfile(id, req.file);
+
+          return ApiResponse.created(res,"Image de profil ajoutée avec succès",photo_url);
+      }catch (error:any) {
+          return ApiResponse.internalServerError(res, "Erreur lors de l'upload de l'image de profil",error.message);
+      }
+  };
+
+    static async deletePetImageProfile (req: Request, res: Response) {
+      try{
+          const { id } = req.params;
+          
+          if (!id) {
+              return ApiResponse.badRequest(res, "ID du pet requis");
+          }
+          const Pet = await PetService.getPetById(id);
+          if (!Pet) {
+              return ApiResponse.notFound(res, 'Pet non trouvé.');
+          }
+
+          if (Pet?.user_id !== req.user?.id){
+              return ApiResponse.badRequest(res,"pas ton pet")
+          }
+
+          const success= await PetService.deletePetImageProfile(id);
+          if (!success) {
+              return ApiResponse.notFound(res,"Suppression échouée");
+            }
+          return ApiResponse.ok(res, 'Image supprimée avec succès.');
+      }catch (error) {
+          return ApiResponse.internalServerError(res, "Erreur lors de la suppression");
+      }
+  }
   }
   
 export default PetController;

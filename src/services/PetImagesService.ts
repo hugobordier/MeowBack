@@ -120,7 +120,7 @@ class PetImagesService {
             if (!petImage) {
                 throw ApiError.notFound('Pet image not found.');
             }
-            await CloudinaryService.deleteImage(id,FolderName.PET_PICTURES);
+            
             const fileExtension = path.extname(file.originalname);
             const newFileName = `${id}${fileExtension}`;
             file.originalname = newFileName;

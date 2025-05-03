@@ -2,6 +2,10 @@ import type { AvailabilityDay } from '@/types/type';
 import pets from '@/models/pets';
 import { Op, ValidationError } from 'sequelize';
 import type { UUID } from 'crypto';
+import CloudinaryService from './CloudinaryService';
+import path from 'path';
+import { FolderName } from '@/config/cloudinary.config';
+import ApiError from '@utils/ApiError';
 
 interface PetsResponse {
   pets: pets[];  
@@ -154,6 +158,63 @@ class PetService {
           throw error;
         }
       }
+
+      static async uploadImagePetProfile(petId: string, file: Express.Multer.File) {
+        try {
+          const pet = await pets.findByPk(petId);
+    
+          if (!pet) {
+            throw ApiError.notFound("Pet non trouvé");
+          }
+    
+          const fileExtension = path.extname(file.originalname);
+          const newFileName = `${petId}${fileExtension}`;
+          file.originalname = newFileName;
+    
+          const uploadResult = await CloudinaryService.uploadImage(file, petId, {
+            folder: FolderName.PROFILE_PICTURES_PET as string,
+          });
+    
+          await pet.update({
+            photo_url: uploadResult.secure_url,
+          });
+          return uploadResult.secure_url;
+        } catch (error) {
+          console.error(
+            "Erreur lors de la mise à jour de l'image de profil:",
+            error
+          );
+          return {
+            success: false,
+            message: "Une erreur est survenue lors de l'upload",
+          };
+        }
+      }
+
+
+
+      static async deletePetImageProfile  (id: string): Promise<boolean>{
+        try {
+            const pet = await pets.findByPk(id);
+            if (!pet) {
+                throw ApiError.notFound("Ce pet n'existe pas");
+            }
+            
+            await pet.update({ photo_url: null });
+            await CloudinaryService.deleteImage(id,FolderName.PROFILE_PICTURES_PET);
+
+            return true;
+        } catch (error) {
+            console.error('Erreur dans deletePetImageProfile',error);
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            throw ApiError.internal(
+              'Erreur inconnue dans deletePetImageProfile'
+            );
+          }
     }
+    }
+    
     
     export default PetService;
