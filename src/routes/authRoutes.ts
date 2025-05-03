@@ -79,6 +79,58 @@ swaggerRouter.route('/register').post(
   AuthController.register,
   validateSchema(userSchema)
 );
+
+swaggerRouter.route('/google').post(
+  {
+    description: 'Authentification avec Google (register ou login automatique)',
+    summary: 'Connexion / inscription via Google',
+    tags: ['Auth'],
+    security: false,
+    requestBody: {
+      description:
+        'Jeton ID Google (`idToken`) retourné par Google après login',
+      required: true,
+      schema: {
+        type: 'object',
+        properties: {
+          idToken: {
+            type: 'string',
+            description: 'ID Token reçu depuis Google',
+            example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjEzMmYzYz...etc',
+          },
+        },
+        required: ['idToken'],
+      },
+    },
+    responses: {
+      '200': {
+        description: 'Authentification réussie',
+        schema: {
+          type: 'object',
+          properties: {
+            token: {
+              type: 'string',
+              description: 'JWT généré pour cet utilisateur',
+            },
+            user: {
+              type: 'object',
+              description: "Infos de l'utilisateur",
+              properties: {
+                id: { type: 'string' },
+                email: { type: 'string' },
+                name: { type: 'string' },
+                avatar: { type: 'string' },
+              },
+            },
+          },
+        },
+      },
+      '401': { description: "Échec de l'authentification Google" },
+    },
+  },
+  AuthController.loginWithGoogle
+);
+
 swaggerRouter.route('/login').post(
   {
     description: 'Authenticate a user and get an access token.',
@@ -99,7 +151,7 @@ swaggerRouter.route('/login').post(
           password: {
             type: 'string',
             description: 'mot de passe',
-            example: 'SecurePassword123',
+            example: 'securePassword123',
           },
         },
         required: ['email', 'password'],

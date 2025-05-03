@@ -21,6 +21,7 @@ class User extends Model {
   declare phoneNumber: string;
   declare address: string;
   declare identityDocument: string;
+  declare googleId?: string;
   declare resetcode?: string;
   declare resetcodeexpire?: Date;
   declare createdAt: Date;
@@ -128,6 +129,11 @@ User.init(
     identityDocument: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    googleId: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
     },
     isAdmin: {
       type: DataTypes.BOOLEAN,

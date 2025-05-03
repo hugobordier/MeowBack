@@ -1,5 +1,6 @@
-import type User from '../models/User';
+import User from '../models/User';
 import AuthService from '../services/authService';
+import GoogleAuthService from '@/services/GoogleAuthService';
 import type { Request, Response } from 'express';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
@@ -9,19 +10,74 @@ export default class authController {
     const { email, password } = req.body;
 
     try {
+      const user = await User.findOne({ where: { email } });
+
+      if (!user) {
+        return ApiResponse.unauthorized(res, 'Utilisateur non trouvé');
+      }
+
+      if (user.password === 'google') {
+        return ApiResponse.unauthorized(
+          res,
+          'Ce compte a été créé via Google. Veuillez définir un mot de passe pour vous connecter.'
+        );
+      }
+
       const { accessToken, refreshToken } = await AuthService.loginUser(
         email,
         password
       );
+
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         maxAge: 3600 * 1000 * 24 * 7,
         sameSite: 'strict',
       });
+
       return res.status(200).json({ accessToken, refreshToken });
     } catch (error: any) {
       console.error(error);
       return ApiResponse.unauthorized(res, error.message);
+    }
+  }
+
+  static async loginWithGoogle(req: Request, res: Response) {
+    try {
+      const { idToken } = req.body;
+
+      if (!idToken) {
+        return ApiResponse.badRequest(
+          res,
+          'Le jeton Google (idToken) est requis'
+        );
+      }
+
+      const result = await GoogleAuthService.authenticateWithGoogle(idToken);
+
+      return ApiResponse.ok(res, 'Authentification Google réussie', {
+        user: {
+          id: result.user._id,
+          email: result.user.email,
+          name: result.user.name,
+          avatar: result.user.profilePicture,
+        },
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+      });
+    } catch (error: any) {
+      console.error('[AuthController] Google auth error:', error);
+
+      if (error.name === 'GoogleVerificationError') {
+        return ApiResponse.unauthorized(
+          res,
+          "Échec de l'authentification Google"
+        );
+      }
+
+      return ApiResponse.internalServerError(
+        res,
+        "Une erreur est survenue lors de l'authentification"
+      );
     }
   }
 
