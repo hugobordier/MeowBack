@@ -2,7 +2,6 @@ import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import PetImagesController from '@/controllers/PetImagesController';
 import { authenticate } from '@/middleware/authMiddleware';
 import { validateSchema } from '@/middleware/validateSchema';
-import { petImageSchema,petImagePatchSchema } from '@/schema/PetImageSchema';
 import { uploadMiddleware } from '@/middleware/uploadMiddleware';
 
 
@@ -60,7 +59,6 @@ swaggerRouter.route('/:petId').post(
     },
   },
   PetImagesController.createPetImage,
-  //validateSchema(petImageSchema),
   uploadMiddleware,
   authenticate
 );
@@ -192,7 +190,6 @@ swaggerRouter.route('/:imageId').patch(
   },
   PetImagesController.updateImage,
   uploadMiddleware,
-  //validateSchema(petImagePatchSchema),
   authenticate
 );
 
