@@ -39,7 +39,9 @@ class CloudinaryService {
     }
   }
 
-  static async deleteImage(publicId: string): Promise<any> {
+  static async deleteImage(id: string, folder: string): Promise<any> {
+    const publicId = `${folder}/${id}`;
+    console.log("publicid",publicId)
     try {
       return await cloudinary.uploader.destroy(publicId);
     } catch (error) {

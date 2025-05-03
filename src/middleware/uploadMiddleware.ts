@@ -1,4 +1,6 @@
 import multer, { type FileFilterCallback } from 'multer';
+import path from 'path';
+
 import type {
   Response,
   Request,
@@ -11,6 +13,14 @@ const singleImageUpload = multer({
     if (!file.mimetype.startsWith('image/')) {
       return cb(new Error('Seuls les fichiers image sont autorisés.'));
     }
+
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      return cb(new Error('Seuls les fichiers JPG, PNG, GIF et WEBP sont autorisés.'));
+    }
+
     cb(null, true);
   },
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 Mo
@@ -25,6 +35,14 @@ const multipleImageUpload = multer({
     if (!file.mimetype.startsWith('image/')) {
       return cb(new Error('Seuls les fichiers image sont autorisés.'));
     }
+
+    const allowedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    const ext = path.extname(file.originalname).toLowerCase();
+    
+    if (!allowedExtensions.includes(ext)) {
+      return cb(new Error('Seuls les fichiers JPG, PNG, GIF et WEBP sont autorisés.'));
+    }
+
     cb(null, true);
   },
   limits: {

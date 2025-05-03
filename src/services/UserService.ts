@@ -222,7 +222,7 @@ class UserService {
 
       const publicId = FolderName.PROFILE_PICTURES + '/' + userId;
 
-      await CloudinaryService.deleteImage(publicId);
+      await CloudinaryService.deleteImage(publicId,FolderName.PROFILE_PICTURES);
 
       await user.update({ profilePicture: null });
 
@@ -303,7 +303,7 @@ class UserService {
 
       const publicId = FolderName.IDENTITY_DOCUMENT + '/' + userId;
 
-      await CloudinaryService.deleteImage(publicId);
+      await CloudinaryService.deleteImage(publicId,FolderName.IDENTITY_DOCUMENT);
 
       await user.update({ identityDocument: null });
 

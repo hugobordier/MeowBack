@@ -3,6 +3,7 @@ import PetController from '../controllers/PetController';
 import { authenticate } from '@/middleware/authMiddleware';
 import { validateSchema } from '@/middleware/validateSchema';
 import { petPatchSchema, petSchema } from '@/schema/PetSchema';
+import { uploadMiddleware } from '@/middleware/uploadMiddleware';
 
 const swaggerRouter = new SwaggerRouter();
 
@@ -194,6 +195,164 @@ swaggerRouter.route('/').post(
       },
     },
     PetController.deletePet,
+    authenticate
+  );
+
+
+  swaggerRouter.route('/PhotoProfil/:id').patch(
+    {
+      description: "Enregistrer une photo de profil pour un animal",
+      summary: "Téléverser une photo de profil pour un animal",
+      tags: ['Pets'],
+      security: true,
+      parameters: [
+        {
+          in: 'path',
+          name: 'id',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+        },
+      ],
+      requestBody: {
+        contentType: 'multipart/form-data',
+        required: true,
+        description: "Fichier de la photo de profil à télécharger",
+        schema: {
+          type: 'object',
+          properties: {
+            file: {
+              type: 'string',
+              format: 'binary',
+            },
+          },
+        },
+      },
+      responses: {
+        '200': {
+          description: "photo de profil enregistrée avec succès",
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: "photo de profil enregistrée avec succès",
+              },
+              documentUrl: {
+                type: 'string',
+                example: 'https://example.com/uploads/photoanimal.jpg',
+              },
+            },
+          },
+        },
+        '400': {
+          description: 'Requête invalide (fichier manquant ou format incorrect)',
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Format de fichier invalide ou taille maximale dépassée',
+              },
+            },
+          },
+        },
+        '401': {
+          description: 'Non autorisé (token manquant ou invalide)',
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: "Token d'authentification manquant ou invalide",
+              },
+            },
+          },
+        },
+        '500': {
+          description: 'Erreur serveur',
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Erreur interne du serveur',
+              },
+            },
+          },
+        },
+      },
+    },
+    PetController.uploadImagePetProfile,
+    uploadMiddleware,
+    authenticate
+  );
+  
+  swaggerRouter.route('/PhotoProfil/:id').delete(
+    {
+      description: "Supprimer photo de profil d'un pet",
+      summary: "Supprimer une photo de profil",
+      tags: ['Pets'],
+      security: true,
+      parameters: [
+        {
+          in: 'path',
+          name: 'id',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+        },
+      ],
+      responses: {
+        '200': {
+          description: "photo de profil supprimée avec succès",
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: "photo de profil supprimée avec succès",
+              },
+            },
+          },
+        },
+        '400': {
+          description: 'Requête invalide',
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Aucune photo de profil à supprimer ou requête incorrecte',
+              },
+            },
+          },
+        },
+        '401': {
+          description: 'Non autorisé (token manquant ou invalide)',
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: "Token d'authentification manquant ou invalide",
+              },
+            },
+          },
+        },
+        '500': {
+          description: 'Erreur serveur',
+          schema: {
+            type: 'object',
+            properties: {
+              message: {
+                type: 'string',
+                example: 'Erreur interne du serveur',
+              },
+            },
+          },
+        },
+      },
+    },
+    PetController.deletePetImageProfile,
     authenticate
   );
   
