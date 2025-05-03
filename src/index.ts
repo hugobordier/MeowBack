@@ -16,7 +16,6 @@ const io = new Server(server, {
   },
 });
 
-
 export { io, server };
 
 const port = 3000;
@@ -28,6 +27,7 @@ app.use('/', defaultRouter.getRouter());
 const allowedOrigins = [
   'http://localhost:3000',
   'exp://jmvvxtg-anonymous-8081.exp.direct',
+  'exp://grr9zza-kikipaul-8081.exp.direct',
   'exp://192.168.1.42:8081',
   'exp://172.20.10.3:8081',
   'exp://172.20.10.13:8081',
