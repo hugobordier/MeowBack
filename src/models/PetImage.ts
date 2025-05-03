@@ -3,7 +3,7 @@ import db from '../config/config';
 import pets from './pets';
 
 class PetImage extends Model {
-  declare id: string;
+  declare id: string;;
   declare pet_id: string;
   declare url_image: string;
   declare createdAt: Date;

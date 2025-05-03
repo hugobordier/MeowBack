@@ -38,19 +38,19 @@ class PetImagesController{
 
     static async getPetImageById (req: Request, res: Response) {
         try{
-            const { imageId } = req.params;
-            if (!imageId) {
+            const { id } = req.params;
+            if (!id) {
                 return ApiResponse.badRequest(res, "ID de l'image requis");
             }
-        
-            const Image = await PetImagesService.getPetImageById(imageId);
+            
+            const Image = await PetImagesService.getPetImageById(id);
             if (!Image) {
                 return ApiResponse.notFound(res, 'Image non trouvée.');
             }
             return ApiResponse.ok(res,"Image récupérée",Image);
-            }catch (error:any) {
-                return ApiResponse.internalServerError(res, "Erreur lors de getPetImageById",error.message);
-            }
+        }catch (error:any) {
+            return ApiResponse.internalServerError(res, "Erreur lors de getPetImageById",error.message);
+        }
         
     }
 
@@ -78,6 +78,7 @@ class PetImagesController{
     static async deletePetImage (req: Request, res: Response) {
         try{
             const { imageId } = req.params;
+            
             if (!imageId) {
                 return ApiResponse.badRequest(res, "ID de l'image requis");
             }
@@ -92,7 +93,6 @@ class PetImagesController{
             if (!pet) {
                 return ApiResponse.notFound(res, 'Pet non trouvé.');
             }
-            
             if (pet?.user_id !== req.user?.id){
                 return ApiResponse.badRequest(res,"pas ton pet")
             }
@@ -103,7 +103,7 @@ class PetImagesController{
               }
             return ApiResponse.ok(res, 'Image supprimée avec succès.');
         }catch (error) {
-            return ApiResponse.internalServerError(res, "Erreur lors de l'upload de l'image");
+            return ApiResponse.internalServerError(res, "Erreur lors de la suppression");
         }
     }
 

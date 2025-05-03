@@ -35,13 +35,13 @@ class PetImagesService {
           }
         }
 
-        static async getPetImageById(imageId: string): Promise<PetImage>  {
+        static async getPetImageById(id: string): Promise<PetImage>  {
             try {
-              if (!imageId) {
+              if (!id) {
                 throw ApiError.badRequest('Image ID est requis.');
               }
           
-              const petImage = await PetImage.findByPk(imageId);
+              const petImage = await PetImage.findByPk(id);
           
               if (!petImage) {
                 throw ApiError.notFound('Pet image pas trouvée.');
@@ -49,14 +49,11 @@ class PetImagesService {
           
               return petImage;
             } catch (error) {
-            
-            console.error('Erreur dans getPetImageById',error);
-            if (error instanceof ApiError) {
-              throw error;
-            }
-            throw ApiError.internal(
-              'Erreur inconnue dans getPetImageById'
-            );
+              console.error('Erreur dans getPetImageById',error);
+              if (error instanceof ApiError) {
+                throw error;
+              } 
+              throw ApiError.internal('Erreur inconnue dans getPetImageById');
           }
           }
 
@@ -86,16 +83,15 @@ class PetImagesService {
           }
     }
 
-    static async deletePetImage  (imageId: string): Promise<boolean>{
+    static async deletePetImage  (id: string): Promise<boolean>{
         try {
 
-            if (!imageId) {
+            if (!id) {
                 throw ApiError.notFound("Cette image n'existe pas");
             }
 
-            await CloudinaryService.deleteImage(imageId);
-            const deleted = await PetImage.destroy({ where: { imageId } });
-            await CloudinaryService.deleteImage(imageId);
+            const deleted = await PetImage.destroy({ where: { id } });
+            await CloudinaryService.deleteImage(id,FolderName.PET_PICTURES);
 
             return deleted > 0;
         } catch (error) {
@@ -109,9 +105,9 @@ class PetImagesService {
           }
     }
 
-    static async updateImage(imageId: string, file: Express.Multer.File): Promise<PetImage> {
+    static async updateImage(id: string, file: Express.Multer.File): Promise<PetImage> {
         try {
-            if (!imageId) {
+            if (!id) {
                 throw ApiError.badRequest('Image ID is required.');
             }
     
@@ -119,17 +115,17 @@ class PetImagesService {
                 throw ApiError.badRequest('La nouvelle image est requise');
             }
     
-            const petImage = await PetImage.findByPk(imageId);
+            const petImage = await PetImage.findByPk(id);
     
             if (!petImage) {
                 throw ApiError.notFound('Pet image not found.');
             }
-    
+            await CloudinaryService.deleteImage(id,FolderName.PET_PICTURES);
             const fileExtension = path.extname(file.originalname);
-            const newFileName = `${imageId}${fileExtension}`;
+            const newFileName = `${id}${fileExtension}`;
             file.originalname = newFileName;
       
-            const uploadResult = await CloudinaryService.uploadImage(file, imageId, {
+            const uploadResult = await CloudinaryService.uploadImage(file, id, {
               folder: FolderName.PET_PICTURES as string,
             });
       
