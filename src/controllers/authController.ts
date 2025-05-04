@@ -4,13 +4,18 @@ import GoogleAuthService from '@/services/GoogleAuthService';
 import type { Request, Response } from 'express';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
+import { Op } from 'sequelize';
 
 export default class authController {
   static async login(req: Request, res: Response) {
     const { email, password } = req.body;
 
     try {
-      const user = await User.findOne({ where: { email } });
+      const user = await User.findOne({
+        where: {
+          [Op.or]: [{ email }, { username: email }],
+        },
+      });
 
       if (!user) {
         return ApiResponse.unauthorized(res, 'Utilisateur non trouvé');
