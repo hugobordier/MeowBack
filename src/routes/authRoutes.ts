@@ -80,55 +80,162 @@ swaggerRouter.route('/register').post(
   validateSchema(userSchema)
 );
 
-swaggerRouter.route('/google').post(
+swaggerRouter.route('/google').get(
   {
-    description: 'Authentification avec Google (register ou login automatique)',
-    summary: 'Connexion / inscription via Google',
+    description: 'Redirection vers la page de connexion Google OAuth',
+    summary: 'Initier le flux de connexion OAuth avec Google',
     tags: ['Auth'],
     security: false,
-    requestBody: {
-      description:
-        'Jeton ID Google (`idToken`) retourné par Google après login',
-      required: true,
-      schema: {
-        type: 'object',
-        properties: {
-          idToken: {
-            type: 'string',
-            description: 'ID Token reçu depuis Google',
-            example: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjEzMmYzYz...etc',
+    responses: {
+      '302': {
+        description: 'Redirection vers Google pour authentification',
+        schema: {
+          Location: {
+            schema: {
+              type: 'string',
+              format: 'uri',
+            },
+            description: 'URL de redirection vers Google OAuth',
           },
         },
-        required: ['idToken'],
       },
-    },
-    responses: {
-      '200': {
-        description: 'Authentification réussie',
+      '400': {
+        description: 'Paramètres de requête invalides',
         schema: {
           type: 'object',
           properties: {
-            token: {
+            error: {
               type: 'string',
-              description: 'JWT généré pour cet utilisateur',
-            },
-            user: {
-              type: 'object',
-              description: "Infos de l'utilisateur",
-              properties: {
-                id: { type: 'string' },
-                email: { type: 'string' },
-                name: { type: 'string' },
-                avatar: { type: 'string' },
-              },
+              description: "Message d'erreur détaillé",
+              example: 'Invalid redirect_uri',
             },
           },
         },
       },
-      '401': { description: "Échec de l'authentification Google" },
+      '500': {
+        description: 'Erreur serveur (configuration manquante)',
+        schema: {
+          type: 'object',
+          properties: {
+            error: {
+              type: 'string',
+              description: "Message d'erreur serveur",
+              example: 'Missing GOOGLE_CLIENT_ID environment variable',
+            },
+          },
+        },
+      },
     },
   },
-  AuthController.loginWithGoogle
+  AuthController.getAuthRedirect
+);
+
+swaggerRouter.route('/callback').get(
+  {
+    description: 'Callback pour le processus OAuth Google',
+    summary:
+      'Traite le retour de Google OAuth et récupère les infos utilisateur',
+    tags: ['Auth'],
+    security: false,
+    parameters: [
+      {
+        name: 'code',
+        in: 'query',
+        description: "Code d'autorisation fourni par Google",
+        required: true,
+      },
+      {
+        name: 'state',
+        in: 'query',
+        description: 'État de la requête OAuth pour vérification',
+        required: true,
+      },
+      {
+        name: 'scope',
+        in: 'query',
+        description: "Scopes autorisés par l'utilisateur",
+        required: false,
+      },
+    ],
+    responses: {
+      '200': {
+        description: 'Informations utilisateur récupérées avec succès',
+        schema: {
+          type: 'object',
+          properties: {
+            sub: {
+              type: 'string',
+              description: "ID unique de l'utilisateur",
+              example: '110169484474386276334',
+            },
+            name: {
+              type: 'string',
+              description: "Nom complet de l'utilisateur",
+              example: 'John Doe',
+            },
+            given_name: {
+              type: 'string',
+              description: "Prénom de l'utilisateur",
+              example: 'John',
+            },
+            family_name: {
+              type: 'string',
+              description: "Nom de famille de l'utilisateur",
+              example: 'Doe',
+            },
+            picture: {
+              type: 'string',
+              description: 'URL de la photo de profil',
+              example: 'https://lh3.googleusercontent.com/a/photo.jpg',
+            },
+            email: {
+              type: 'string',
+              description: "Adresse email de l'utilisateur",
+              example: 'john.doe@gmail.com',
+            },
+            email_verified: {
+              type: 'boolean',
+              description: "Indique si l'email a été vérifié",
+              example: true,
+            },
+            locale: {
+              type: 'string',
+              description: "Langue préférée de l'utilisateur",
+              example: 'fr',
+            },
+          },
+        },
+      },
+      '400': {
+        description: 'Paramètres de requête invalides',
+        schema: {
+          type: 'object',
+          properties: {
+            error: {
+              type: 'string',
+              description: "Message d'erreur détaillé",
+              example: 'Invalid state parameter',
+            },
+          },
+        },
+      },
+      '500': {
+        description:
+          "Erreur serveur lors de l'échange du token ou récupération des infos",
+        schema: {
+          type: 'object',
+          properties: {
+            error: {
+              type: 'string',
+              description: "Message d'erreur serveur",
+              example: 'Failed to authenticate with Google',
+            },
+          },
+        },
+      },
+    },
+  },
+  AuthController.handleGoogleCallback
 );
 
 swaggerRouter.route('/login').post(
