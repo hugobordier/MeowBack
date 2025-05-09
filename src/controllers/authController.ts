@@ -1,10 +1,17 @@
 import User from '../models/User';
 import AuthService from '../services/authService';
-import GoogleAuthService from '@/services/GoogleAuthService';
 import type { Request, Response } from 'express';
 import { ApiResponse, HttpStatusCode } from '../utils/ApiResponse';
 import ApiError from '../utils/ApiError';
 import { Op } from 'sequelize';
+import querystring from 'querystring';
+import dotenv from 'dotenv';
+import axios from 'axios';
+import GoogleAuthService from '@/services/GoogleAuthService';
+
+dotenv.config();
+
+const BASE_URL = process.env.BASE_URL as string;
 
 export default class authController {
   static async login(req: Request, res: Response) {
@@ -21,7 +28,7 @@ export default class authController {
         return ApiResponse.unauthorized(res, 'Utilisateur non trouvé');
       }
 
-      if (user.password === 'google') {
+      if (user.password === 'googlegoogle') {
         return ApiResponse.unauthorized(
           res,
           'Ce compte a été créé via Google. Veuillez définir un mot de passe pour vous connecter.'
@@ -46,43 +53,129 @@ export default class authController {
     }
   }
 
-  static async loginWithGoogle(req: Request, res: Response) {
-    try {
-      const { idToken } = req.body;
+  static async getAuthRedirect(req: Request, res: Response) {
+    const redirectUri = `${BASE_URL}/authRoutes/callback`;
+    const state = 'random_state_ing';
+    const scope = 'openid email profile';
 
-      if (!idToken) {
-        return ApiResponse.badRequest(
-          res,
-          'Le jeton Google (idToken) est requis'
-        );
-      }
-
-      const result = await GoogleAuthService.authenticateWithGoogle(idToken);
-
-      return ApiResponse.ok(res, 'Authentification Google réussie', {
-        user: {
-          id: result.user._id,
-          email: result.user.email,
-          name: result.user.name,
-          avatar: result.user.profilePicture,
-        },
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
+    if (!redirectUri) {
+      return res.status(400).json({
+        error: 'Missing redirect_uri',
       });
-    } catch (error: any) {
-      console.error('[AuthController] Google auth error:', error);
+    }
 
-      if (error.name === 'GoogleVerificationError') {
-        return ApiResponse.unauthorized(
-          res,
-          "Échec de l'authentification Google"
-        );
+    if (!state) {
+      return res.status(400).json({
+        error: 'Missing state',
+      });
+    }
+
+    const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+    const GOOGLE_AUTH_ENDPOINT = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+    if (!GOOGLE_CLIENT_ID) {
+      return res.status(500).json({
+        error: 'Missing GOOGLE_CLIENT_ID environment variable',
+      });
+    }
+
+    const queryParams = querystring.stringify({
+      client_id: GOOGLE_CLIENT_ID,
+      redirect_uri: redirectUri,
+      response_type: 'code',
+      scope: scope,
+      state: state,
+      access_type: 'offline',
+      prompt: 'consent',
+    });
+
+    const authUrl = `${GOOGLE_AUTH_ENDPOINT}?${queryParams}`;
+
+    return res.redirect(authUrl);
+  }
+
+  static async handleGoogleCallback(req: Request, res: Response) {
+    const { code, state } = req.query;
+
+    const codeStr = Array.isArray(code) ? code[0] : (code as string);
+    const stateStr = Array.isArray(state) ? state[0] : (state as string);
+
+    if (stateStr !== 'random_state_ing') {
+      return res.status(400).json({ error: 'Invalid state parameter' });
+    }
+
+    if (!codeStr) {
+      return res.status(400).json({ error: 'Missing authorization code' });
+    }
+
+    try {
+      const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+      const GOOGLE_SECRET = process.env.GOOGLE_SECRET;
+
+      if (!GOOGLE_CLIENT_ID || !GOOGLE_SECRET) {
+        return res.status(500).json({
+          error: 'Missing Google OAuth credentials in environment variables',
+        });
       }
 
-      return ApiResponse.internalServerError(
-        res,
-        "Une erreur est survenue lors de l'authentification"
+      const tokenRequestData = {
+        code: codeStr as string,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_SECRET,
+        redirect_uri: `${BASE_URL}/authRoutes/callback`,
+        grant_type: 'authorization_code',
+      };
+
+      console.log('redirect url :', tokenRequestData.redirect_uri);
+
+      const tokenResponse = await axios.post(
+        'https://oauth2.googleapis.com/token',
+        querystring.stringify(tokenRequestData),
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        }
       );
+
+      const { access_token, id_token } = tokenResponse.data;
+
+      const userInfoResponse = await axios.get(
+        'https://www.googleapis.com/oauth2/v3/userinfo',
+        {
+          headers: {
+            Authorization: `Bearer ${access_token}`,
+          },
+        }
+      );
+
+      const userInfo = userInfoResponse.data;
+
+      const user = await GoogleAuthService.findOrCreateUser(userInfo);
+
+      return res.json({
+        user: userInfo,
+        token: {
+          access_token,
+          id_token,
+        },
+      });
+    } catch (error) {
+      console.error('Error processing Google callback:', error);
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error;
+        if (axiosError.response) {
+          return res.status(500).json({
+            error: 'Error from Google API',
+            details: axiosError.response.data,
+          });
+        }
+      }
+
+      return res.status(500).json({
+        error: 'Failed to authenticate with Google',
+      });
     }
   }
 
