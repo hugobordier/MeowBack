@@ -154,13 +154,14 @@ export default class authController {
 
       const user = await GoogleAuthService.findOrCreateUser(userInfo);
 
-      return res.json({
-        user: userInfo,
-        token: {
-          access_token,
-          id_token,
-        },
-      });
+      // return res.json({
+      //   user: userInfo,
+      //   token: {
+      //     access_token,
+      //     id_token,
+      //   },
+      // });
+      res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home');
     } catch (error) {
       console.error('Error processing Google callback:', error);
 
