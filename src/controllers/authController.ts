@@ -83,11 +83,11 @@ export default class authController {
       client_id: GOOGLE_CLIENT_ID,
       redirect_uri: redirectUri,
       success: 'true',
-      // response_type: 'code',
-      // scope: scope,
-      // state: state,
-      // access_type: 'offline',
-      // prompt: 'consent',
+      response_type: 'code',
+      scope: scope,
+      state: state,
+      access_type: 'offline',
+      prompt: 'consent',
     });
 
     const authUrl = `${GOOGLE_AUTH_ENDPOINT}?${queryParams}`;
