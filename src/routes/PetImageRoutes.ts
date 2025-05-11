@@ -193,4 +193,29 @@ swaggerRouter.route('/:imageId').patch(
   authenticate
 );
 
+swaggerRouter.route('/Execute-Order-66/:petId').delete(
+  {
+    description: 'Delete all Images ',
+    summary: 'Remove all Images for a pet',
+    tags: ['Pet Images'],
+    security: true,
+    parameters: [
+      {
+        in: 'path',
+        name: 'petId',
+        required: true,
+        schema: { type: 'string', format: 'uuid' },
+      },
+    ],
+    responses: {
+      '200': { description: 'Images deleted permanantly' },
+      '400': { description: 'Invalid request' },
+      '404': { description: 'Images not found' },
+      '500': { description: 'Internal server error' },
+    },
+  },
+  PetImagesController.deleteAllImagesForAPet,
+  authenticate
+);
+
 export default swaggerRouter;
