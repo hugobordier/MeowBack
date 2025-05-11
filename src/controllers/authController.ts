@@ -163,7 +163,7 @@ export default class authController {
       //   },
       // });
       res.redirect(
-        `exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home?accessToken=${accessToken}&refreshToken=${refreshToken}`
+        `exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home?accessToken=${accessToken}&refreshToken=${refreshToken}&user_id=${user.id}`
       ); // a changer avec app sheme de l'app
     } catch (error) {
       console.error('Error processing Google callback:', error);
