@@ -125,13 +125,39 @@ class PetImagesController{
             }
             
             if (pet?.user_id !== req.user?.id){
-                return ApiResponse.badRequest(res,"pas ton pet")
+                return ApiResponse.badRequest(res,"pas ton pet");
             }
 
             const updatedPetImage = await PetImagesService.updateImage(imageId, req.file);
             return ApiResponse.ok(res, 'Image mise à jour avec succès.');
         } catch (error) {
             return ApiResponse.internalServerError(res, "Erreur lors de la mise à jour de l'image");
+        }
+    }
+
+    static async deleteAllImagesForAPet(req:Request,res:Response){
+        try{
+            const {petId} = req.params
+            if(!petId){
+                return ApiResponse.badRequest(res, "ID du pet requis");
+            }
+            console.log("petid : ",petId);
+            const pet = await PetService.getPetById(petId);
+
+            if (!pet) {
+                return ApiResponse.notFound(res, 'Pet non trouvé.');
+            }
+            if (pet?.user_id !== req.user?.id){
+                return ApiResponse.badRequest(res,"pas ton pet");
+            }
+
+            const deleted = await PetImagesService.deleteAllImagesForAPet(petId);
+            if (!deleted) {
+                return ApiResponse.notFound(res,"Images non trouvées pour ce pet");
+              }
+            return ApiResponse.ok(res, 'Images supprimées avec succès.');
+        }catch (error) {
+            return ApiResponse.internalServerError(res, "Erreur lors de la suppression");
         }
     }
 }
