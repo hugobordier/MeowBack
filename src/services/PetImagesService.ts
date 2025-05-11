@@ -141,5 +141,41 @@ class PetImagesService {
             )
     }
   }
+
+  static async deleteAllImagesForAPet  (petId: string): Promise<boolean>{
+    try {
+
+        if (!petId) {
+            throw ApiError.notFound("Ce pet n'existe pas");
+        }
+        const petImages = await PetImage.findAll({ where: { pet_id: petId }});
+
+        for (const image of petImages) {
+          try {
+            await CloudinaryService.deleteImage(image.id, FolderName.PET_PICTURES);
+          } catch (error) {
+            console.error("Erreur lors de la suppression dans Cloudinary :", error);
+            
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            
+            throw ApiError.notFound('Erreur de suppression dans Cloudinary');
+          }
+        }
+        
+        
+        const deleted = await PetImage.destroy({ where: { pet_id:petId } });
+        return deleted > 0;
+    } catch (error) {
+        console.error('Erreur dans deleteAllImagesForAPet',error);
+        if (error instanceof ApiError) {
+          throw error;
+        }
+        throw ApiError.internal(
+          'Erreur inconnue dans deleteAllImagesForAPet'
+        );
+      }
+}
 }
 export default PetImagesService;
