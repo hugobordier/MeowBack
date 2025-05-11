@@ -139,7 +139,7 @@ export default class authController {
         }
       );
 
-      const { access_token, id_token } = tokenResponse.data;
+      const { access_token } = tokenResponse.data;
 
       const userInfoResponse = await axios.get(
         'https://www.googleapis.com/oauth2/v3/userinfo',
@@ -152,7 +152,8 @@ export default class authController {
 
       const userInfo = userInfoResponse.data;
 
-      const user = await GoogleAuthService.findOrCreateUser(userInfo);
+      const { user, accessToken, refreshToken } =
+        await GoogleAuthService.findOrCreateUser(userInfo);
 
       // return res.json({
       //   user: userInfo,
@@ -161,7 +162,9 @@ export default class authController {
       //     id_token,
       //   },
       // });
-      res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
+      res.redirect(
+        `exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home?accessToken=${accessToken}&refreshToken=${refreshToken}`
+      ); // a changer avec app sheme de l'app
     } catch (error) {
       console.error('Error processing Google callback:', error);
 
