@@ -161,23 +161,18 @@ export default class authController {
       //     id_token,
       //   },
       // });
-      res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home');
+      res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
     } catch (error) {
       console.error('Error processing Google callback:', error);
 
       if (axios.isAxiosError(error)) {
         const axiosError = error;
         if (axiosError.response) {
-          return res.status(500).json({
-            error: 'Error from Google API',
-            details: axiosError.response.data,
-          });
+          res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
         }
       }
 
-      return res.status(500).json({
-        error: 'Failed to authenticate with Google',
-      });
+      res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
     }
   }
 
