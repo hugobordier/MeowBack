@@ -86,6 +86,18 @@ swaggerRouter.route('/google').get(
     summary: 'Initier le flux de connexion OAuth avec Google',
     tags: ['Auth'],
     security: false,
+    parameters: [
+      {
+        name: 'scheme',
+        in: 'query',
+        required: true,
+        description: 'Schéma de l’application pour construire le redirect_uri',
+        schema: {
+          type: 'string',
+          example: 'meow',
+        },
+      },
+    ],
     responses: {
       '302': {
         description: 'Redirection vers Google pour authentification',

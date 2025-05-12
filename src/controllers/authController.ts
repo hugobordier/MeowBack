@@ -55,15 +55,16 @@ export default class authController {
 
   static async getAuthRedirect(req: Request, res: Response) {
     const redirectUri = `${BASE_URL}/authRoutes/callback`;
-    const state = 'random_state_ing';
     const scope = 'openid email profile';
+    const { scheme } = req.query as { scheme: string };
+    const state = scheme;
 
     if (!redirectUri) {
       return res.status(400).json({
         error: 'Missing redirect_uri',
       });
     }
-
+    console.log('state', state);
     if (!state) {
       return res.status(400).json({
         error: 'Missing state',
@@ -88,9 +89,12 @@ export default class authController {
       state: state,
       access_type: 'offline',
       prompt: 'consent',
+      scheme: scheme,
     });
 
     const authUrl = `${GOOGLE_AUTH_ENDPOINT}?${queryParams}`;
+
+    console.log(authUrl);
 
     return res.redirect(authUrl);
   }
@@ -101,7 +105,7 @@ export default class authController {
     const codeStr = Array.isArray(code) ? code[0] : (code as string);
     const stateStr = Array.isArray(state) ? state[0] : (state as string);
 
-    if (stateStr !== 'random_state_ing') {
+    if (!stateStr) {
       return res.status(400).json({ error: 'Invalid state parameter' });
     }
 
@@ -155,27 +159,25 @@ export default class authController {
       const { user, accessToken, refreshToken } =
         await GoogleAuthService.findOrCreateUser(userInfo);
 
-      // return res.json({
-      //   user: userInfo,
-      //   token: {
-      //     access_token,
-      //     id_token,
-      //   },
-      // });
+      // res.redirect(
+      //   `exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home?accessToken=${accessToken}&refreshToken=${refreshToken}&user_id=${user.id}`
+      // ); // a changer avec app sheme de l'app
       res.redirect(
-        `exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home?accessToken=${accessToken}&refreshToken=${refreshToken}&user_id=${user.id}`
-      ); // a changer avec app sheme de l'app
+        `${state}?accessToken=${accessToken}&refreshToken=${refreshToken}&user_id=${user.id}`
+      );
     } catch (error) {
       console.error('Error processing Google callback:', error);
 
       if (axios.isAxiosError(error)) {
         const axiosError = error;
         if (axiosError.response) {
-          res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
+          // res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
+          res.redirect(`${state}`);
         }
       }
 
-      res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
+      // res.redirect('exp://7gjsi3u-kikipaul-8081.exp.direct/--/(auth)/home'); // a changer avec app sheme de l'app
+      res.redirect(`${state}`);
     }
   }
 
