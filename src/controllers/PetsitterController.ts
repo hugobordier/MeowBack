@@ -134,7 +134,14 @@ class PetSitterController {
 
   static async createPetSitter(req: Request, res: Response): Promise<Response> {
     try {
-      const { bio, hourly_rate, experience, availability } = req.body;
+      const {
+        bio,
+        hourly_rate,
+        experience,
+        availability,
+        animal_types,
+        services,
+      } = req.body;
 
       if (!req.user || !req.user.id) {
         return ApiResponse.unauthorized(
@@ -165,6 +172,15 @@ class PetSitterController {
         );
       }
 
+      // On valide que c'est bien un tableau de string si présent
+      if (animal_types && !Array.isArray(animal_types)) {
+        return ApiResponse.badRequest(res, 'animal_types doit être un tableau');
+      }
+
+      if (services && !Array.isArray(services)) {
+        return ApiResponse.badRequest(res, 'services doit être un tableau');
+      }
+
       const { lat, lon } = await getCoordinatesFromAddress(req.user.address);
 
       const newPetSitter = await PetSitterService.createPetSitter(
@@ -174,7 +190,9 @@ class PetSitterController {
         parsedExperience,
         availability || [],
         lat,
-        lon
+        lon,
+        animal_types || [],
+        services || []
       );
 
       return ApiResponse.created(res, 'Petsitter créé avec succès', {
@@ -192,7 +210,6 @@ class PetSitterController {
           return ApiResponse.badRequest(res, error.message);
         }
 
-        // Pour les erreurs de validation
         if (error.message.includes('Validation')) {
           return ApiResponse.badRequest(res, error.message);
         }
@@ -220,7 +237,6 @@ class PetSitterController {
         return ApiResponse.badRequest(res, 'ID du petsitter requis');
       }
 
-      // Préparation des données à mettre à jour
       const petSitterData: Partial<PetSitter> = {};
 
       if (updateData.bio !== undefined) {
@@ -251,6 +267,23 @@ class PetSitterController {
 
       if (updateData.availability !== undefined) {
         petSitterData.availability = updateData.availability;
+      }
+
+      if (updateData.animal_types !== undefined) {
+        if (!Array.isArray(updateData.animal_types)) {
+          return ApiResponse.badRequest(
+            res,
+            'animal_types doit être un tableau'
+          );
+        }
+        petSitterData.animal_types = updateData.animal_types;
+      }
+
+      if (updateData.services !== undefined) {
+        if (!Array.isArray(updateData.services)) {
+          return ApiResponse.badRequest(res, 'services doit être un tableau');
+        }
+        petSitterData.services = updateData.services;
       }
 
       const [updated, updatedPetSitter] =

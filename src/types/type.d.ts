@@ -1,8 +1,3 @@
-export type TimeInterval = {
-  start_time: string;
-  end_time: string;
-};
-
 export type AvailabilityDay = {
   day:
     | 'Monday'
@@ -12,5 +7,5 @@ export type AvailabilityDay = {
     | 'Friday'
     | 'Saturday'
     | 'Sunday';
-  intervals: TimeInterval[];
+  intervals: ('Matin' | 'Après-midi' | 'Soir' | 'Nuit')[];
 };

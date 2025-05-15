@@ -2,6 +2,12 @@ import PetsitterController from '../controllers/PetsitterController';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import { authenticate } from '../middleware/authMiddleware';
 import petSitterAuth from '@/middleware/petSitterAuth';
+import { validateSchema } from '@/middleware/validateSchema';
+import {
+  animalTypesEnum,
+  availableServices,
+  petSitterSchema,
+} from '@/schema/PetSitterSchema';
 
 const swaggerRouter = new SwaggerRouter();
 
@@ -329,19 +335,65 @@ swaggerRouter.route('/user/:id').get(
 
 swaggerRouter.route('/').post(
   {
-    description: 'Create a new Petsitter',
-    summary: 'Add a new Petsitter',
+    description: 'Créer un nouveau pet sitter',
+    summary: 'Ajouter un pet sitter',
     tags: ['Petsitter'],
     security: true,
     requestBody: {
-      description: 'Petsitter data to be added',
+      description: 'Données du pet sitter à ajouter',
       required: true,
       schema: {
         type: 'object',
         properties: {
-          bio: { type: 'string', example: 'Experienced pet sitter' },
-          hourly_rate: { type: 'number', example: 15 },
-          experience: { type: 'number', example: 5 },
+          bio: {
+            type: 'string',
+            example: 'Updated bio',
+          },
+          hourly_rate: {
+            type: 'number',
+            example: 20,
+          },
+          experience: {
+            type: 'number',
+            example: 7,
+          },
+          animal_types: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: [
+                'Chat',
+                'Chien',
+                'Oiseau',
+                'Rongeur',
+                'Reptile',
+                'Poisson',
+                'Furet',
+                'Cheval',
+                'Autre',
+              ],
+            },
+            example: ['Rongeur'],
+          },
+          services: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: [
+                'Promenade',
+                'Alimentation',
+                'Jeux',
+                'Soins',
+                'Toilettage',
+                'Dressage',
+                'Garderie',
+                'Médication',
+                'Nettoyage',
+                'Transport',
+              ],
+            },
+            example: ['Toilettage'],
+          },
           availability: {
             type: 'array',
             items: {
@@ -358,33 +410,23 @@ swaggerRouter.route('/').post(
                     'Saturday',
                     'Sunday',
                   ],
+                  example: 'Monday',
                 },
                 intervals: {
                   type: 'array',
                   items: {
-                    type: 'object',
-                    properties: {
-                      start_time: { type: 'string', example: '09:00:00' },
-                      end_time: { type: 'string', example: '12:00:00' },
-                    },
+                    type: 'string',
+                    enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
                   },
+                  example: ['Après-midi'],
                 },
               },
+              required: ['day', 'intervals'],
             },
             example: [
               {
                 day: 'Monday',
-                intervals: [
-                  { start_time: '09:00:00', end_time: '12:00:00' },
-                  { start_time: '14:00:00', end_time: '18:00:00' },
-                ],
-              },
-              {
-                day: 'Tuesday',
-                intervals: [
-                  { start_time: '09:00:00', end_time: '12:00:00' },
-                  { start_time: '14:00:00', end_time: '18:00:00' },
-                ],
+                intervals: ['Matin', 'Soir'],
               },
             ],
           },
@@ -394,72 +436,169 @@ swaggerRouter.route('/').post(
     },
     responses: {
       '201': {
-        description: 'Petsitter created successfully',
+        description: 'Pet sitter créé avec succès',
         schema: {
           type: 'object',
           properties: {
-            success: {
-              type: 'boolean',
-              example: true,
-            },
-            message: {
-              type: 'string',
-              example: 'Petsitter créé avec succès',
-            },
-            petsitter: {
-              type: 'object',
-              properties: {
-                id: { type: 'string', example: '60d5f84d071f9c44b14f9d8f' },
-                user_id: {
-                  type: 'string',
-                  example: '7c1ab762-96d9-4340-921f-72817af3917e',
-                },
-                hourly_rate: { type: 'number', example: 15 },
+            id: { type: 'string', format: 'uuid', example: 'abc123' },
+            bio: { type: 'string', example: 'J’adore les animaux' },
+            experience: { type: 'number', example: 5 },
+            hourly_rate: { type: 'number', example: 20 },
+            animal_types: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: [
+                  'Chat',
+                  'Chien',
+                  'Oiseau',
+                  'Rongeur',
+                  'Reptile',
+                  'Poisson',
+                  'Furet',
+                  'Cheval',
+                  'Autre',
+                ],
               },
+              example: ['Chien', 'Furet'],
+            },
+            services: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: [
+                  'Promenade',
+                  'Alimentation',
+                  'Jeux',
+                  'Soins',
+                  'Toilettage',
+                  'Dressage',
+                  'Garderie',
+                  'Médication',
+                  'Nettoyage',
+                  'Transport',
+                ],
+              },
+              example: ['Promenade', 'Soins'],
+            },
+            availability: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  day: {
+                    type: 'string',
+                    enum: [
+                      'Monday',
+                      'Tuesday',
+                      'Wednesday',
+                      'Thursday',
+                      'Friday',
+                      'Saturday',
+                      'Sunday',
+                    ],
+                    example: 'Monday',
+                  },
+                  intervals: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
+                    },
+                    example: ['Matin', 'Soir'],
+                  },
+                },
+                required: ['day', 'intervals'],
+              },
+              example: [
+                {
+                  day: 'Monday',
+                  intervals: ['Matin', 'Soir'],
+                },
+              ],
             },
           },
         },
       },
-      '400': { description: 'Bad request' },
-      '401': { description: 'Unauthorized' },
-      '409': {
-        description: 'Conflict - Petsitter already exists for this user',
-      },
-      '500': { description: 'Internal server error' },
+      '400': { description: 'Requête invalide' },
     },
   },
   PetsitterController.createPetSitter,
+  validateSchema(petSitterSchema),
   authenticate,
   petSitterAuth
 );
 
 swaggerRouter.route('/:id').patch(
   {
-    description: 'Update Petsitter data',
-    summary: 'Update existing Petsitter',
+    description: 'Update existing Petsitter data',
+    summary: 'Update Petsitter by ID',
     tags: ['Petsitter'],
     security: true,
     parameters: [
       {
         name: 'id',
         in: 'path',
-        required: false,
-        description: 'ID of the Petsitter to update',
-        schema: {
-          type: 'string',
-          example: '7c1ab762-96d9-4340-921f-72817af3917e',
-        },
+        required: true,
+        description: 'Petsitter ID to update',
+        schema: { type: 'string' },
       },
     ],
     requestBody: {
-      description: 'Updated Petsitter data',
+      description: 'Fields to update',
       required: true,
       schema: {
         type: 'object',
         properties: {
-          bio: { type: 'string', example: 'Updated bio information' },
-          hourly_rate: { type: 'number', example: 20 },
-          experience: { type: 'number', example: 6 },
+          bio: {
+            type: 'string',
+            example: 'Updated bio',
+          },
+          hourly_rate: {
+            type: 'number',
+            example: 20,
+          },
+          experience: {
+            type: 'number',
+            example: 7,
+          },
+          animal_types: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: [
+                'Chat',
+                'Chien',
+                'Oiseau',
+                'Rongeur',
+                'Reptile',
+                'Poisson',
+                'Furet',
+                'Cheval',
+                'Autre',
+              ],
+            },
+            example: ['Rongeur'],
+          },
+          services: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: [
+                'Promenade',
+                'Alimentation',
+                'Jeux',
+                'Soins',
+                'Toilettage',
+                'Dressage',
+                'Garderie',
+                'Médication',
+                'Nettoyage',
+                'Transport',
+              ],
+            },
+            example: ['Toilettage'],
+          },
           availability: {
             type: 'array',
             items: {
@@ -476,19 +615,25 @@ swaggerRouter.route('/:id').patch(
                     'Saturday',
                     'Sunday',
                   ],
+                  example: 'Monday',
                 },
                 intervals: {
                   type: 'array',
                   items: {
-                    type: 'object',
-                    properties: {
-                      start_time: { type: 'string', example: '09:00:00' },
-                      end_time: { type: 'string', example: '12:00:00' },
-                    },
+                    type: 'string',
+                    enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
                   },
+                  example: ['Après-midi'],
                 },
               },
+              required: ['day', 'intervals'],
             },
+            example: [
+              {
+                day: 'Monday',
+                intervals: ['Matin', 'Soir'],
+              },
+            ],
           },
         },
       },
@@ -499,10 +644,7 @@ swaggerRouter.route('/:id').patch(
         schema: {
           type: 'object',
           properties: {
-            success: {
-              type: 'boolean',
-              example: true,
-            },
+            success: { type: 'boolean', example: true },
             message: {
               type: 'string',
               example: 'Petsitter mis à jour avec succès',
@@ -510,29 +652,83 @@ swaggerRouter.route('/:id').patch(
             petsitter: {
               type: 'object',
               properties: {
-                id: { type: 'string' },
-                user_id: { type: 'string' },
-                bio: { type: 'string' },
-                experience: { type: 'number' },
-                hourly_rate: { type: 'number' },
+                id: { type: 'string', example: 'abc123' },
+                user_id: { type: 'string', example: 'user123' },
+                bio: { type: 'string', example: 'Updated bio' },
+                hourly_rate: { type: 'number', example: 20 },
+                experience: { type: 'number', example: 7 },
+                animal_types: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: [
+                      'Chat',
+                      'Chien',
+                      'Oiseau',
+                      'Rongeur',
+                      'Reptile',
+                      'Poisson',
+                      'Furet',
+                      'Cheval',
+                      'Autre',
+                    ],
+                  },
+                  example: ['Chien', 'Chat'],
+                },
+                services: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: [
+                      'Promenade',
+                      'Alimentation',
+                      'Jeux',
+                      'Soins',
+                      'Toilettage',
+                      'Dressage',
+                      'Garderie',
+                      'Médication',
+                      'Nettoyage',
+                      'Transport',
+                    ],
+                  },
+                  example: ['Promenade', 'Toilettage'],
+                },
                 availability: {
                   type: 'array',
                   items: {
                     type: 'object',
                     properties: {
-                      day: { type: 'string' },
+                      day: {
+                        type: 'string',
+                        enum: [
+                          'Monday',
+                          'Tuesday',
+                          'Wednesday',
+                          'Thursday',
+                          'Friday',
+                          'Saturday',
+                          'Sunday',
+                        ],
+                        example: 'Friday',
+                      },
                       intervals: {
                         type: 'array',
                         items: {
-                          type: 'object',
-                          properties: {
-                            start_time: { type: 'string' },
-                            end_time: { type: 'string' },
-                          },
+                          type: 'string',
+                          enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
                         },
+                        example: ['Matin', 'Soir'],
                       },
                     },
+                    required: ['day', 'intervals'],
                   },
+                  example: [
+                    {
+                      day: 'Friday',
+                      intervals: ['Matin', 'Nuit'],
+                    },
+                  ],
                 },
               },
             },
@@ -540,11 +736,13 @@ swaggerRouter.route('/:id').patch(
         },
       },
       '400': { description: 'Bad request' },
+      '401': { description: 'Unauthorized' },
       '404': { description: 'Petsitter not found' },
       '500': { description: 'Internal server error' },
     },
   },
   PetsitterController.updatePetSitter,
+  validateSchema(petSitterSchema),
   authenticate,
   petSitterAuth
 );
