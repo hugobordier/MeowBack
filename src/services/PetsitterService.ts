@@ -102,57 +102,47 @@ class PetSitterService {
     experience: number,
     availability: AvailabilityDay[],
     lat: number | null,
-    lon: number | null
+    lon: number | null,
+    animal_types: string[] = [],
+    services: string[] = []
   ): Promise<PetSitter> {
+    if (!user_id) {
+      throw new Error('ID utilisateur requis pour créer un petsitter');
+    }
+
+    const existingPetSitter = await PetSitter.findOne({ where: { user_id } });
+    if (existingPetSitter) {
+      throw new Error(
+        `Un petsitter existe déjà pour l'utilisateur avec l'ID ${user_id}`
+      );
+    }
+
+    if (hourly_rate < 0) {
+      throw new Error('Le tarif horaire doit être un nombre positif');
+    }
+
+    if (experience < 0) {
+      throw new Error("Le niveau d'expérience doit être un nombre positif");
+    }
+
     try {
-      if (!user_id) {
-        throw new Error('ID utilisateur requis pour créer un petsitter');
-      }
-
-      const existingPetSitter = await PetSitter.findOne({
-        where: { user_id },
-      });
-
-      if (existingPetSitter) {
-        throw new Error(
-          `Un petsitter existe déjà pour l'utilisateur avec l'ID ${user_id}`
-        );
-      }
-
-      if (hourly_rate < 0) {
-        throw new Error('Le tarif horaire doit être un nombre positif');
-      }
-
-      if (experience < 0) {
-        throw new Error("Le niveau d'expérience doit être un nombre positif");
-      }
-
       return await PetSitter.create({
         user_id,
         bio,
         hourly_rate,
         experience,
         availability,
-        lat,
-        lon,
+        latitude: lat,
+        longitude: lon,
+        animal_types,
+        services,
       });
     } catch (error) {
-      console.error('Error in createPetSitter:', error);
-
       if (error instanceof ValidationError) {
-        const validationErrors = error.errors
-          .map((err) => err.message)
-          .join(', ');
-        throw new Error(
-          `Validation échouée lors de la création du petsitter: ${validationErrors}`
-        );
+        const validationErrors = error.errors.map((e) => e.message).join(', ');
+        throw new Error(`Validation échouée : ${validationErrors}`);
       }
-
-      if (error instanceof Error) {
-        throw error;
-      }
-
-      throw new Error('Erreur inconnue lors de la création du petsitter');
+      throw error;
     }
   }
 

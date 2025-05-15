@@ -12,6 +12,29 @@ class PetSitter extends Model {
   declare availability: AvailabilityDay[] | null;
   declare latitude: number | null;
   declare longitude: number | null;
+  declare animal_types: (
+    | 'Chat'
+    | 'Chien'
+    | 'Oiseau'
+    | 'Rongeur'
+    | 'Reptile'
+    | 'Poisson'
+    | 'Furet'
+    | 'Cheval'
+    | 'Autre'
+  )[];
+  declare services: (
+    | 'Promenade'
+    | 'Alimentation'
+    | 'Jeux'
+    | 'Soins'
+    | 'Toilettage'
+    | 'Dressage'
+    | 'Garderie'
+    | 'Médication'
+    | 'Nettoyage'
+    | 'Transport'
+  )[];
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -71,6 +94,7 @@ PetSitter.init(
             'Saturday',
             'Sunday',
           ];
+          const validSlots = ['Matin', 'Après-midi', 'Soir', 'Nuit'];
 
           value.forEach((entry) => {
             if (!entry.day || !validDays.includes(entry.day)) {
@@ -81,20 +105,11 @@ PetSitter.init(
               throw new Error('Intervals must be an array.');
             }
 
-            entry.intervals.forEach((interval) => {
-              if (
-                !interval.start_time ||
-                !interval.end_time ||
-                typeof interval.start_time !== 'string' ||
-                typeof interval.end_time !== 'string'
-              ) {
+            entry.intervals.forEach((slot) => {
+              if (typeof slot !== 'string' || !validSlots.includes(slot)) {
                 throw new Error(
-                  'Invalid time format. start_time and end_time must be strings in TIME format (HH:mm:ss).'
+                  `Invalid time slot "${slot}". Must be one of: ${validSlots.join(', ')}`
                 );
-              }
-
-              if (interval.start_time >= interval.end_time) {
-                throw new Error('start_time must be before end_time.');
               }
             });
           });
@@ -116,6 +131,41 @@ PetSitter.init(
         min: -180,
         max: 180,
       },
+    },
+    animal_types: {
+      type: DataTypes.ARRAY(
+        DataTypes.ENUM(
+          'Chat',
+          'Chien',
+          'Oiseau',
+          'Rongeur',
+          'Reptile',
+          'Poisson',
+          'Furet',
+          'Cheval',
+          'Autre'
+        )
+      ),
+      allowNull: true,
+      defaultValue: [],
+    },
+    services: {
+      type: DataTypes.ARRAY(
+        DataTypes.ENUM(
+          'Promenade',
+          'Alimentation',
+          'Jeux',
+          'Soins',
+          'Toilettage',
+          'Dressage',
+          'Garderie',
+          'Médication',
+          'Nettoyage',
+          'Transport'
+        )
+      ),
+      allowNull: true,
+      defaultValue: [],
     },
   },
   {
