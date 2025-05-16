@@ -9,9 +9,22 @@ class PetSitter extends Model {
   declare bio: string;
   declare experience: number;
   declare hourly_rate: number;
-  declare availability: AvailabilityDay[] | null;
+
+  declare available_days: (
+    | 'Monday'
+    | 'Tuesday'
+    | 'Wednesday'
+    | 'Thursday'
+    | 'Friday'
+    | 'Saturday'
+    | 'Sunday'
+  )[];
+
+  declare available_slots: ('Matin' | 'Après-midi' | 'Soir' | 'Nuit')[];
+
   declare latitude: number | null;
   declare longitude: number | null;
+
   declare animal_types: (
     | 'Chat'
     | 'Chien'
@@ -23,6 +36,7 @@ class PetSitter extends Model {
     | 'Cheval'
     | 'Autre'
   )[];
+
   declare services: (
     | 'Promenade'
     | 'Alimentation'
@@ -35,6 +49,7 @@ class PetSitter extends Model {
     | 'Nettoyage'
     | 'Transport'
   )[];
+
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -74,47 +89,27 @@ PetSitter.init(
         min: 0,
       },
     },
-    availability: {
-      type: DataTypes.JSONB,
+    available_days: {
+      type: DataTypes.ARRAY(
+        DataTypes.ENUM(
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday'
+        )
+      ),
       allowNull: true,
-      validate: {
-        isValidAvailability(value: AvailabilityDay[] | null) {
-          if (value === null) return;
-
-          if (!Array.isArray(value)) {
-            throw new Error('Availability must be an array.');
-          }
-
-          const validDays: AvailabilityDay['day'][] = [
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-            'Sunday',
-          ];
-          const validSlots = ['Matin', 'Après-midi', 'Soir', 'Nuit'];
-
-          value.forEach((entry) => {
-            if (!entry.day || !validDays.includes(entry.day)) {
-              throw new Error(`Invalid day: ${entry.day}`);
-            }
-
-            if (!Array.isArray(entry.intervals)) {
-              throw new Error('Intervals must be an array.');
-            }
-
-            entry.intervals.forEach((slot) => {
-              if (typeof slot !== 'string' || !validSlots.includes(slot)) {
-                throw new Error(
-                  `Invalid time slot "${slot}". Must be one of: ${validSlots.join(', ')}`
-                );
-              }
-            });
-          });
-        },
-      },
+      defaultValue: [],
+    },
+    available_slots: {
+      type: DataTypes.ARRAY(
+        DataTypes.ENUM('Matin', 'Après-midi', 'Soir', 'Nuit')
+      ),
+      allowNull: true,
+      defaultValue: [],
     },
     latitude: {
       type: DataTypes.DOUBLE,

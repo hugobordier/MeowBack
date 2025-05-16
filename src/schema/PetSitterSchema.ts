@@ -42,16 +42,6 @@ export const availableServices = [
   'Transport',
 ] as const;
 
-// Schema pour availability
-const availabilitySchema = z
-  .array(
-    z.object({
-      day: z.enum(daysOfWeek),
-      intervals: z.array(z.enum(availableTimeSlots)),
-    })
-  )
-  .optional();
-
 export const petSitterSchema = z
   .object({
     bio: z.string().optional(),
@@ -64,9 +54,24 @@ export const petSitterSchema = z
       .number()
       .min(0, 'Le tarif horaire doit être un nombre positif'),
 
-    availability: availabilitySchema,
+    available_days: z.array(z.enum(daysOfWeek)).optional(),
+    available_slots: z.array(z.enum(availableTimeSlots)).optional(),
 
     animal_types: z.array(z.enum(animalTypesEnum)).optional(),
     services: z.array(z.enum(availableServices)).optional(),
+
+    latitude: z
+      .number()
+      .min(-90, 'Latitude doit être >= -90')
+      .max(90, 'Latitude doit être <= 90')
+      .nullable()
+      .optional(),
+
+    longitude: z
+      .number()
+      .min(-180, 'Longitude doit être >= -180')
+      .max(180, 'Longitude doit être <= 180')
+      .nullable()
+      .optional(),
   })
   .strict();
