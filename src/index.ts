@@ -73,3 +73,17 @@ async function startServer() {
 }
 
 startServer();
+
+io.on('connection', (socket) => {
+  console.log('new user connected:'); //Qd new user se connecte 
+  console.log(socket.id); //unique identifier for the socket session
+
+  socket.on('chat message', (msg) =>{ //Qd user envoie msg
+    console.log('Message:', msg);
+    io.emit('chat message', msg);//envoyer a tout le monde: io.emit(eventName, args)
+  });
+
+  socket.on('disconnect', () => {
+        console.log('User disconnected');
+  });
+})
