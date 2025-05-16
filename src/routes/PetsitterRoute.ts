@@ -79,22 +79,118 @@ swaggerRouter.route('/').get(
         },
       },
       {
-        name: 'dayAvailable',
+        name: 'availability_days',
         in: 'query',
         required: false,
-        description: 'Filter by day of availability',
+        description: 'Filtrer par un ou plusieurs jours de disponibilité',
         schema: {
-          type: 'string',
-          enum: [
-            'Monday',
-            'Tuesday',
-            'Wednesday',
-            'Thursday',
-            'Friday',
-            'Saturday',
-            'Sunday',
-          ],
-          example: 'Saturday',
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: [
+              'Monday',
+              'Tuesday',
+              'Wednesday',
+              'Thursday',
+              'Friday',
+              'Saturday',
+              'Sunday',
+            ],
+          },
+          example: ['Saturday', 'Sunday'],
+        },
+      },
+      {
+        name: 'availability_intervals',
+        in: 'query',
+        required: false,
+        description: 'Filtrer par un ou plusieurs créneaux de disponibilité',
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
+          },
+          example: ['Matin', 'Soir'],
+        },
+      },
+      {
+        name: 'animal_types',
+        in: 'query',
+        required: false,
+        description: 'Filtrer par types d’animaux gardés (peut être multiple)',
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: [
+              'Chat',
+              'Chien',
+              'Oiseau',
+              'Rongeur',
+              'Reptile',
+              'Poisson',
+              'Furet',
+              'Cheval',
+              'Autre',
+            ],
+          },
+          example: ['Chien', 'Chat'],
+        },
+      },
+      {
+        name: 'services',
+        in: 'query',
+        required: false,
+        description: 'Filtrer par services proposés (peut être multiple)',
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+            enum: [
+              'Promenade',
+              'Alimentation',
+              'Jeux',
+              'Soins',
+              'Toilettage',
+              'Dressage',
+              'Garderie',
+              'Médication',
+              'Nettoyage',
+              'Transport',
+            ],
+          },
+          example: ['Promenade', 'Toilettage'],
+        },
+      },
+      {
+        name: 'latitude',
+        in: 'query',
+        required: false,
+        description: 'Latitude pour filtrage par proximité',
+        schema: {
+          type: 'number',
+          example: 48.8566,
+        },
+      },
+      {
+        name: 'longitude',
+        in: 'query',
+        required: false,
+        description: 'Longitude pour filtrage par proximité',
+        schema: {
+          type: 'number',
+          example: 2.3522,
+        },
+      },
+      {
+        name: 'radius',
+        in: 'query',
+        required: false,
+        description: 'Rayon de recherche en kilomètres autour des coordonnées',
+        schema: {
+          type: 'number',
+          example: 10,
         },
       },
     ],
@@ -129,6 +225,18 @@ swaggerRouter.route('/').get(
                   bio: { type: 'string', example: 'Experienced pet sitter' },
                   experience: { type: 'number', example: 5 },
                   hourly_rate: { type: 'number', example: 15 },
+                  latitude: { type: 'number', example: 48.8566 },
+                  longitude: { type: 'number', example: 2.3522 },
+                  animal_types: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    example: ['Chien', 'Chat'],
+                  },
+                  services: {
+                    type: 'array',
+                    items: { type: 'string' },
+                    example: ['Promenade', 'Garderie'],
+                  },
                   availability: {
                     type: 'array',
                     items: {
@@ -357,6 +465,42 @@ swaggerRouter.route('/').post(
             type: 'number',
             example: 7,
           },
+          available_days: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+              ],
+            },
+            example: ['Monday', 'Wednesday'],
+          },
+          available_slots: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
+            },
+            example: ['Matin', 'Soir'],
+          },
+          latitude: {
+            type: 'number',
+            format: 'float',
+            nullable: true,
+            example: 48.8566,
+          },
+          longitude: {
+            type: 'number',
+            format: 'float',
+            nullable: true,
+            example: 2.3522,
+          },
           animal_types: {
             type: 'array',
             items: {
@@ -394,42 +538,6 @@ swaggerRouter.route('/').post(
             },
             example: ['Toilettage'],
           },
-          availability: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                day: {
-                  type: 'string',
-                  enum: [
-                    'Monday',
-                    'Tuesday',
-                    'Wednesday',
-                    'Thursday',
-                    'Friday',
-                    'Saturday',
-                    'Sunday',
-                  ],
-                  example: 'Monday',
-                },
-                intervals: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
-                  },
-                  example: ['Après-midi'],
-                },
-              },
-              required: ['day', 'intervals'],
-            },
-            example: [
-              {
-                day: 'Monday',
-                intervals: ['Matin', 'Soir'],
-              },
-            ],
-          },
         },
         required: ['hourly_rate'],
       },
@@ -444,6 +552,42 @@ swaggerRouter.route('/').post(
             bio: { type: 'string', example: 'J’adore les animaux' },
             experience: { type: 'number', example: 5 },
             hourly_rate: { type: 'number', example: 20 },
+            available_days: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: [
+                  'Monday',
+                  'Tuesday',
+                  'Wednesday',
+                  'Thursday',
+                  'Friday',
+                  'Saturday',
+                  'Sunday',
+                ],
+              },
+              example: ['Monday', 'Wednesday'],
+            },
+            available_slots: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
+              },
+              example: ['Matin', 'Soir'],
+            },
+            latitude: {
+              type: 'number',
+              format: 'float',
+              nullable: true,
+              example: 48.8566,
+            },
+            longitude: {
+              type: 'number',
+              format: 'float',
+              nullable: true,
+              example: 2.3522,
+            },
             animal_types: {
               type: 'array',
               items: {
@@ -481,42 +625,6 @@ swaggerRouter.route('/').post(
               },
               example: ['Promenade', 'Soins'],
             },
-            availability: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  day: {
-                    type: 'string',
-                    enum: [
-                      'Monday',
-                      'Tuesday',
-                      'Wednesday',
-                      'Thursday',
-                      'Friday',
-                      'Saturday',
-                      'Sunday',
-                    ],
-                    example: 'Monday',
-                  },
-                  intervals: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
-                      enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
-                    },
-                    example: ['Matin', 'Soir'],
-                  },
-                },
-                required: ['day', 'intervals'],
-              },
-              example: [
-                {
-                  day: 'Monday',
-                  intervals: ['Matin', 'Soir'],
-                },
-              ],
-            },
           },
         },
       },
@@ -539,7 +647,6 @@ swaggerRouter.route('/:id').patch(
       {
         name: 'id',
         in: 'path',
-        required: true,
         description: 'Petsitter ID to update',
         schema: { type: 'string' },
       },
@@ -553,14 +660,18 @@ swaggerRouter.route('/:id').patch(
           bio: {
             type: 'string',
             example: 'Updated bio',
+            nullable: true,
           },
           hourly_rate: {
             type: 'number',
             example: 20,
+            minimum: 0,
           },
           experience: {
-            type: 'number',
+            type: 'integer',
             example: 7,
+            minimum: 0,
+            nullable: true,
           },
           animal_types: {
             type: 'array',
@@ -579,6 +690,7 @@ swaggerRouter.route('/:id').patch(
               ],
             },
             example: ['Rongeur'],
+            nullable: true,
           },
           services: {
             type: 'array',
@@ -598,44 +710,50 @@ swaggerRouter.route('/:id').patch(
               ],
             },
             example: ['Toilettage'],
+            nullable: true,
           },
-          availability: {
+          available_days: {
             type: 'array',
             items: {
-              type: 'object',
-              properties: {
-                day: {
-                  type: 'string',
-                  enum: [
-                    'Monday',
-                    'Tuesday',
-                    'Wednesday',
-                    'Thursday',
-                    'Friday',
-                    'Saturday',
-                    'Sunday',
-                  ],
-                  example: 'Monday',
-                },
-                intervals: {
-                  type: 'array',
-                  items: {
-                    type: 'string',
-                    enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
-                  },
-                  example: ['Après-midi'],
-                },
-              },
-              required: ['day', 'intervals'],
+              type: 'string',
+              enum: [
+                'Monday',
+                'Tuesday',
+                'Wednesday',
+                'Thursday',
+                'Friday',
+                'Saturday',
+                'Sunday',
+              ],
             },
-            example: [
-              {
-                day: 'Monday',
-                intervals: ['Matin', 'Soir'],
-              },
-            ],
+            example: ['Monday', 'Wednesday'],
+            nullable: true,
+          },
+          available_slots: {
+            type: 'array',
+            items: {
+              type: 'string',
+              enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
+            },
+            example: ['Matin', 'Soir'],
+            nullable: true,
+          },
+          latitude: {
+            type: 'number',
+            minimum: -90,
+            maximum: 90,
+            nullable: true,
+            example: 48.8566,
+          },
+          longitude: {
+            type: 'number',
+            minimum: -180,
+            maximum: 180,
+            nullable: true,
+            example: 2.3522,
           },
         },
+        additionalProperties: false,
       },
     },
     responses: {
@@ -694,41 +812,49 @@ swaggerRouter.route('/:id').patch(
                   },
                   example: ['Promenade', 'Toilettage'],
                 },
-                availability: {
+                available_days: {
                   type: 'array',
                   items: {
-                    type: 'object',
-                    properties: {
-                      day: {
-                        type: 'string',
-                        enum: [
-                          'Monday',
-                          'Tuesday',
-                          'Wednesday',
-                          'Thursday',
-                          'Friday',
-                          'Saturday',
-                          'Sunday',
-                        ],
-                        example: 'Friday',
-                      },
-                      intervals: {
-                        type: 'array',
-                        items: {
-                          type: 'string',
-                          enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
-                        },
-                        example: ['Matin', 'Soir'],
-                      },
-                    },
-                    required: ['day', 'intervals'],
+                    type: 'string',
+                    enum: [
+                      'Monday',
+                      'Tuesday',
+                      'Wednesday',
+                      'Thursday',
+                      'Friday',
+                      'Saturday',
+                      'Sunday',
+                    ],
                   },
-                  example: [
-                    {
-                      day: 'Friday',
-                      intervals: ['Matin', 'Nuit'],
-                    },
-                  ],
+                  example: ['Monday', 'Wednesday'],
+                },
+                available_slots: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: ['Matin', 'Après-midi', 'Soir', 'Nuit'],
+                  },
+                  example: ['Matin', 'Soir'],
+                },
+                latitude: {
+                  type: 'number',
+                  nullable: true,
+                  example: 48.8566,
+                },
+                longitude: {
+                  type: 'number',
+                  nullable: true,
+                  example: 2.3522,
+                },
+                createdAt: {
+                  type: 'string',
+                  format: 'date-time',
+                  example: '2025-05-15T10:00:00Z',
+                },
+                updatedAt: {
+                  type: 'string',
+                  format: 'date-time',
+                  example: '2025-05-15T10:00:00Z',
                 },
               },
             },
@@ -742,9 +868,9 @@ swaggerRouter.route('/:id').patch(
     },
   },
   PetsitterController.updatePetSitter,
-  validateSchema(petSitterSchema),
   authenticate,
-  petSitterAuth
+  petSitterAuth,
+  validateSchema(petSitterSchema)
 );
 
 swaggerRouter.route('/:id').delete(

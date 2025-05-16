@@ -7,25 +7,105 @@ import { getCoordinatesFromAddress } from '@utils/geocoding';
 class PetSitterController {
   static async getPetSitters(req: Request, res: Response): Promise<Response> {
     try {
-      const { minRate, maxRate, minExperience, dayAvailable, search } =
-        req.query;
+      // Extract all query parameters
+      const {
+        page: pageParam,
+        limit: limitParam,
+        search,
+        minRate,
+        maxRate,
+        minExperience,
+        animal_types,
+        services,
+        latitude,
+        longitude,
+        radius,
+        availability_days,
+        availability_intervals,
+      } = req.query;
 
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 10;
+      const page = parseInt(pageParam as string) || 1;
+      const limit = parseInt(limitParam as string) || 10;
+
+      const filters: any = {
+        search: search as string,
+        minHourlyRate: minRate ? parseFloat(minRate as string) : undefined,
+        maxHourlyRate: maxRate ? parseFloat(maxRate as string) : undefined,
+        minExperience: minExperience
+          ? parseInt(minExperience as string)
+          : undefined,
+      };
+
+      if (availability_days) {
+        filters.availability_days = Array.isArray(availability_days)
+          ? availability_days
+          : [availability_days];
+      }
+
+      if (availability_intervals) {
+        filters.availability_intervals = Array.isArray(availability_intervals)
+          ? availability_intervals
+          : [availability_intervals];
+      }
+      if (animal_types) {
+        let animalTypesFilter;
+
+        try {
+          animalTypesFilter =
+            typeof animal_types === 'string'
+              ? JSON.parse(animal_types)
+              : animal_types;
+
+          filters.animalTypes = Array.isArray(animalTypesFilter)
+            ? animalTypesFilter
+            : [animalTypesFilter];
+        } catch (error) {
+          console.error('Error parsing animal_types filter:', error);
+          return ApiResponse.badRequest(
+            res,
+            "Format de types d'animaux invalide"
+          );
+        }
+      }
+
+      if (services) {
+        let servicesFilter;
+
+        try {
+          servicesFilter =
+            typeof services === 'string' ? JSON.parse(services) : services;
+
+          filters.services = Array.isArray(servicesFilter)
+            ? servicesFilter
+            : [servicesFilter];
+        } catch (error) {
+          console.error('Error parsing services filter:', error);
+          return ApiResponse.badRequest(res, 'Format de services invalide');
+        }
+      }
+
+      if (latitude && longitude) {
+        filters.latitude = parseFloat(latitude as string);
+        filters.longitude = parseFloat(longitude as string);
+
+        if (radius) {
+          filters.radius = parseFloat(radius as string);
+        } else {
+          filters.radius = 10; // 10km default radius
+        }
+      }
+
+      // Check if any filters are applied
+      const hasFilters = Object.values(filters).some(
+        (value) => value !== undefined
+      );
 
       let petsitters, totalItems;
-
-      if (minRate || maxRate || minExperience || dayAvailable || search) {
+      console.log('wtf les amis');
+      if (hasFilters) {
+        console.log('filter : ', filters);
         ({ petsitters, totalItems } = await PetSitterService.searchPetSitters(
-          {
-            minHourlyRate: minRate ? parseFloat(minRate as string) : undefined,
-            maxHourlyRate: maxRate ? parseFloat(maxRate as string) : undefined,
-            minExperience: minExperience
-              ? parseInt(minExperience as string)
-              : undefined,
-            dayAvailability: dayAvailable as string,
-            search: search as string,
-          },
+          filters,
           page,
           limit
         ));
@@ -36,10 +116,8 @@ class PetSitterController {
         ));
       }
 
-      // Create pagination metadata
       const pagination = ApiResponse.createPagination(totalItems, page, limit);
 
-      // Use ApiResponse to send successful response
       return ApiResponse.ok(
         res,
         'Données récupérées avec succès',
@@ -49,7 +127,6 @@ class PetSitterController {
     } catch (error) {
       console.error('Error in getPetSitters controller:', error);
 
-      // Use ApiResponse for error handling
       return ApiResponse.internalServerError(
         res,
         error instanceof Error ? error.message : 'Erreur interne du serveur',
@@ -138,7 +215,8 @@ class PetSitterController {
         bio,
         hourly_rate,
         experience,
-        availability,
+        available_days,
+        available_slots,
         animal_types,
         services,
       } = req.body;
@@ -172,7 +250,53 @@ class PetSitterController {
         );
       }
 
-      // On valide que c'est bien un tableau de string si présent
+      // Validation des arrays
+      if (available_days && !Array.isArray(available_days)) {
+        return ApiResponse.badRequest(
+          res,
+          'available_days doit être un tableau'
+        );
+      }
+      if (available_days) {
+        const validDays = [
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+          'Sunday',
+        ];
+        const invalidDays = available_days.filter(
+          (d: string) => !validDays.includes(d)
+        );
+        if (invalidDays.length > 0) {
+          return ApiResponse.badRequest(
+            res,
+            `Jours invalides dans available_days: ${invalidDays.join(', ')}`
+          );
+        }
+      }
+
+      if (available_slots && !Array.isArray(available_slots)) {
+        return ApiResponse.badRequest(
+          res,
+          'available_slots doit être un tableau'
+        );
+      }
+      if (available_slots) {
+        const validSlots = ['Matin', 'Après-midi', 'Soir', 'Nuit'];
+        const invalidSlots = available_slots.filter(
+          (s: string) => !validSlots.includes(s)
+        );
+        if (invalidSlots.length > 0) {
+          return ApiResponse.badRequest(
+            res,
+            `Créneaux invalides dans available_slots: ${invalidSlots.join(', ')}`
+          );
+        }
+      }
+
       if (animal_types && !Array.isArray(animal_types)) {
         return ApiResponse.badRequest(res, 'animal_types doit être un tableau');
       }
@@ -181,16 +305,38 @@ class PetSitterController {
         return ApiResponse.badRequest(res, 'services doit être un tableau');
       }
 
-      const { lat, lon } = await getCoordinatesFromAddress(req.user.address);
+      // Récupération des coordonnées, ici on utilise l'adresse user si lat/lon non fournis dans req.body
+      let latitude = null;
+      let longitude = null;
+
+      if (req.body.latitude !== undefined && req.body.longitude !== undefined) {
+        latitude = parseFloat(req.body.latitude);
+        longitude = parseFloat(req.body.longitude);
+        if (
+          isNaN(latitude) ||
+          latitude < -90 ||
+          latitude > 90 ||
+          isNaN(longitude) ||
+          longitude < -180 ||
+          longitude > 180
+        ) {
+          return ApiResponse.badRequest(res, 'Latitude ou longitude invalides');
+        }
+      } else if (req.user.address) {
+        const coords = await getCoordinatesFromAddress(req.user.address);
+        latitude = coords.lat;
+        longitude = coords.lon;
+      }
 
       const newPetSitter = await PetSitterService.createPetSitter(
         user_id,
         bio || '',
         parsedHourlyRate,
         parsedExperience,
-        availability || [],
-        lat,
-        lon,
+        available_days || [],
+        available_slots || [],
+        latitude,
+        longitude,
         animal_types || [],
         services || []
       );
@@ -265,8 +411,34 @@ class PetSitterController {
         petSitterData.experience = parsedExp;
       }
 
-      if (updateData.availability !== undefined) {
-        petSitterData.availability = updateData.availability;
+      if (updateData.availability_days !== undefined) {
+        if (!Array.isArray(updateData.availability_days)) {
+          return ApiResponse.badRequest(
+            res,
+            'availability_days doit être un tableau'
+          );
+        }
+        petSitterData.available_days = updateData.availability_days;
+      }
+
+      if (updateData.availability_intervals !== undefined) {
+        if (!Array.isArray(updateData.availability_intervals)) {
+          return ApiResponse.badRequest(
+            res,
+            'availability_intervals doit être un tableau'
+          );
+        }
+        const validSlots = ['Matin', 'Après-midi', 'Soir', 'Nuit'];
+        const invalidSlots = updateData.availability_intervals.filter(
+          (slot: string) => !validSlots.includes(slot)
+        );
+        if (invalidSlots.length > 0) {
+          return ApiResponse.badRequest(
+            res,
+            `availability_intervals contient des valeurs invalides : ${invalidSlots.join(', ')}`
+          );
+        }
+        petSitterData.available_slots = updateData.availability_intervals;
       }
 
       if (updateData.animal_types !== undefined) {

@@ -1,6 +1,6 @@
 import type { AvailabilityDay } from '@/types/type';
 import PetSitter from '../models/PetSitter';
-import { Op, ValidationError } from 'sequelize';
+import { Op, Sequelize, ValidationError } from 'sequelize';
 import UserService from './UserService';
 import User from '@/models/User';
 import ApiError from '@utils/ApiError';
@@ -100,7 +100,8 @@ class PetSitterService {
     bio: string,
     hourly_rate: number,
     experience: number,
-    availability: AvailabilityDay[],
+    available_days: string[],
+    available_slots: string[],
     lat: number | null,
     lon: number | null,
     animal_types: string[] = [],
@@ -131,7 +132,8 @@ class PetSitterService {
         bio,
         hourly_rate,
         experience,
-        availability,
+        available_days,
+        available_slots,
         latitude: lat,
         longitude: lon,
         animal_types,
@@ -232,11 +234,17 @@ class PetSitterService {
       minHourlyRate?: number;
       maxHourlyRate?: number;
       minExperience?: number;
-      dayAvailability?: string;
       search?: string;
+      animalTypes?: string[];
+      services?: string[];
+      latitude?: number;
+      longitude?: number;
+      radius?: number;
+      availableDays?: string[];
+      availableSlots?: string[];
     },
-    page: any,
-    limit: any
+    page: number,
+    limit: number
   ): Promise<{
     petsitters: {
       petsitter: PetSitter;
@@ -247,6 +255,23 @@ class PetSitterService {
     const offset = (page - 1) * limit;
     try {
       const whereClause: any = {};
+      let includeArray: any[] = [
+        {
+          model: User,
+          as: 'user',
+          required: criteria.search ? true : false,
+          where: criteria.search
+            ? {
+                [Op.or]: [
+                  { username: { [Op.like]: `%${criteria.search}%` } },
+                  { email: { [Op.like]: `%${criteria.search}%` } },
+                  { lastName: { [Op.like]: `%${criteria.search}%` } },
+                  { firstName: { [Op.like]: `%${criteria.search}%` } },
+                ],
+              }
+            : undefined,
+        },
+      ];
 
       if (
         criteria.minHourlyRate !== undefined ||
@@ -269,40 +294,125 @@ class PetSitterService {
         };
       }
 
+      if (criteria.animalTypes && criteria.animalTypes.length > 0) {
+        if (criteria.animalTypes.length === 1) {
+          whereClause.animal_types = {
+            [Op.contains]: [criteria.animalTypes[0]],
+          };
+        } else {
+          whereClause[Op.and] = whereClause[Op.and] || [];
+          whereClause[Op.and].push(
+            Sequelize.literal(
+              `animal_types && ARRAY[${criteria.animalTypes
+                .map((type) => `'${type}'`)
+                .join(',')}]::text[]`
+            )
+          );
+        }
+      }
+
+      if (criteria.services && criteria.services.length > 0) {
+        if (criteria.services.length === 1) {
+          whereClause.services = {
+            [Op.contains]: [criteria.services[0]],
+          };
+        } else {
+          whereClause[Op.and] = whereClause[Op.and] || [];
+          whereClause[Op.and].push(
+            Sequelize.literal(
+              `services && ARRAY[${criteria.services
+                .map((service) => `'${service}'`)
+                .join(',')}]::text[]`
+            )
+          );
+        }
+      }
+
+      if (criteria.availableDays && criteria.availableDays.length > 0) {
+        if (criteria.availableDays.length === 1) {
+          whereClause.available_days = {
+            [Op.contains]: [criteria.availableDays[0]],
+          };
+        } else {
+          whereClause[Op.and] = whereClause[Op.and] || [];
+          whereClause[Op.and].push(
+            Sequelize.literal(
+              `available_days && ARRAY[${criteria.availableDays
+                .map((day) => `'${day}'`)
+                .join(',')}]::text[]`
+            )
+          );
+        }
+      }
+
+      if (criteria.availableSlots && criteria.availableSlots.length > 0) {
+        if (criteria.availableSlots.length === 1) {
+          whereClause.available_slots = {
+            [Op.contains]: [criteria.availableSlots[0]],
+          };
+        } else {
+          // Use ANY for multiple values
+          whereClause[Op.and] = whereClause[Op.and] || [];
+          whereClause[Op.and].push(
+            Sequelize.literal(
+              `available_slots && ARRAY[${criteria.availableSlots
+                .map((slot) => `'${slot}'`)
+                .join(',')}]::text[]`
+            )
+          );
+        }
+      }
+
+      // Filtering by location (using Sequelize literal for distance calculation)
+      if (
+        criteria.latitude !== undefined &&
+        criteria.longitude !== undefined &&
+        criteria.radius !== undefined
+      ) {
+        const haversine = `
+      (
+        6371 * acos(
+          cos(radians(${criteria.latitude})) 
+          * cos(radians(latitude)) 
+          * cos(radians(longitude) - radians(${criteria.longitude})) 
+          + sin(radians(${criteria.latitude})) 
+          * sin(radians(latitude))
+        )
+      )
+    `;
+
+        const locationCondition = Sequelize.literal(
+          `${haversine} <= ${criteria.radius}`
+        );
+
+        whereClause[Op.and] = whereClause[Op.and] || [];
+        whereClause[Op.and].push(locationCondition);
+
+        whereClause.latitude = { [Op.ne]: null };
+        whereClause.longitude = { [Op.ne]: null };
+      }
+
       const queryOptions: any = {
         where: whereClause,
+        include: includeArray,
         limit,
         offset,
+        distinct: true, // Important when including multiple associations
+        subQuery: false, // Can help with complex queries performance
       };
-      if (criteria.search) {
-        queryOptions.include = [
-          {
-            model: User,
-            as: 'user',
-            required: true,
-            where: {
-              [Op.or]: [
-                { username: { [Op.like]: `%${criteria.search}%` } },
-                { email: { [Op.like]: `%${criteria.search}%` } },
-                { lastName: { [Op.like]: `%${criteria.search}%` } },
-                { firstName: { [Op.like]: `%${criteria.search}%` } },
-              ],
-            },
-          },
-        ];
-      }
 
       const { count, rows } = await PetSitter.findAndCountAll(queryOptions);
 
       const petsitterWithUser = await Promise.all(
-        rows.map(async (r) => {
-          const user = await UserService.getUserById(r.user_id);
+        rows.map(async (petsitter) => {
+          const user = await UserService.getUserById(petsitter.user_id);
           return {
-            petsitter: r,
+            petsitter,
             user,
           };
         })
       );
+
       return {
         petsitters: petsitterWithUser,
         totalItems: count,
@@ -317,7 +427,6 @@ class PetSitterService {
       throw new Error('Erreur inconnue lors de la recherche de petsitters');
     }
   }
-
   static async updatePetSitterGeoLocation(id: string, address: string) {
     try {
       if (!id) {
