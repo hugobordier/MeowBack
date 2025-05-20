@@ -1,7 +1,7 @@
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import PetImagesController from '@/controllers/PetImagesController';
 import { authenticate } from '@/middleware/authMiddleware';
-import { validateSchema } from '@/middleware/validateSchema';
+
 import { uploadMiddleware } from '@/middleware/uploadMiddleware';
 
 
