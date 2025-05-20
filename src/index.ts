@@ -7,6 +7,7 @@ import defaultRouter from './routes';
 import { Server, Socket } from 'socket.io';
 import http from 'http';
 import { initWebSocket } from './websocket/websocketServer';
+import webhook from 'webhook';
 
 const app = express();
 const server = http.createServer(app);
@@ -40,7 +41,7 @@ app.use(
     credentials: true,
   })
 );
-
+app.use('/webhook', webhook);
 app.use(
   '/swagger',
   swaggerUi.serve,

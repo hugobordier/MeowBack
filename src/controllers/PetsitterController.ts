@@ -101,7 +101,6 @@ class PetSitterController {
       );
 
       let petsitters, totalItems;
-      console.log('wtf les amis');
       if (hasFilters) {
         console.log('filter : ', filters);
         ({ petsitters, totalItems } = await PetSitterService.searchPetSitters(
