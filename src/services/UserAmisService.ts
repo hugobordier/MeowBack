@@ -1,10 +1,5 @@
-import PetImage from '../models/PetImage'; 
 import ApiError from '@utils/ApiError';
-import CloudinaryService from './CloudinaryService';
-import path from 'path';
-import { FolderName } from '@/config/cloudinary.config';
 import UserAmis from '@/models/UserAmis';
-import User from '@/models/User';
 
 
 class UserAmisService {
@@ -36,7 +31,7 @@ class UserAmisService {
           }
         }
 
-        static async getUserAmi(id: string): Promise<UserAmis>  {
+        static async getUserAmiById(id: string): Promise<UserAmis>  {
             try {
               if (!id) {
                 throw ApiError.badRequest('UserAmi ID est requis.');
@@ -59,7 +54,7 @@ class UserAmisService {
           }
 
 
-    static async getAllUserAmis({ userId,page, perPage }: { page: number, perPage: number ,userId: string}): Promise<{ userAmis: UserAmis[]; total: number }> {
+    static async getAllUserAmisForAUser({ userId,page, perPage }: { page: number, perPage: number ,userId: string}): Promise<{ userAmis: UserAmis[]; total: number }> {
         try {
             const offset = (page - 1) * perPage;
             const userAmis = await UserAmis.findAll({limit:perPage,offset:offset, where: { user_id: userId }});
