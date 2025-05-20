@@ -8,19 +8,23 @@ import User from '@/models/User';
 
 
 class UserAmisService {
-    static async createRequestAmi(user_id: string): Promise<UserAmis> {
+    static async createRequestAmi(userID: string,friendID:string): Promise<UserAmis> {
         try {
-            if (!user_id) {
+            if (!userID) {
                 throw ApiError.badRequest("ID de l'user requis");
             }
-          const newreqami = await UserAmis.create({
-            user_id: user_id,
-            friend_id: null,
-            status:null,
-            });
-      
+            const existing =!UserAmis.findOne({where: {user_id:friendID,friend_id:userID}})
+            if(!existing){
+              const newreqami = await UserAmis.create({
+              user_id: userID,
+              friend_id: friendID,
+              statusdemande:null,
+              });
 
-            return newreqami;
+              return newreqami;
+            }
+            throw ApiError.badRequest("La demande d'ami existe déjà");
+
         } catch (error) {
             console.error('Erreur dans createRequestAmi',error);
             if (error instanceof ApiError) {
@@ -60,7 +64,7 @@ class UserAmisService {
             const offset = (page - 1) * perPage;
             const userAmis = await UserAmis.findAll({limit:perPage,offset:offset, where: { user_id: userId }});
             if (userAmis.length === 0) {
-              throw ApiError.notFound("Demande d'amis inexistantes pour ce user");
+              throw ApiError.notFound("Demande d'ami inexistantes pour ce user");
             }
             const totalAmis = await UserAmis.count({ where: { user_id: userId } });
   
@@ -99,23 +103,18 @@ class UserAmisService {
             );
           }
     }
-    static async ResponseToFriendRequest(id:string,friend_id: string,): Promise<[boolean, UserAmis | null]>{
+    static async ResponseToFriendRequest(currentuserid:string,status_demande:boolean): Promise<[boolean, UserAmis | null]>{
         try {
-            if (!id) {
-                throw ApiError.badRequest('ID de la demande UserAmi requis');
+            if (!currentuserid) {
+                throw ApiError.badRequest('ID de utilisateur requis');
             }
-            if (!friend_id) {
-                throw ApiError.badRequest("ID de l'ami requis");
-            }
-    
-            const userami = await UserAmis.findByPk(id);
-    
-            if (!userami) {
-                throw ApiError.notFound("Demande d'amis non trouvée");
+            const userami = await UserAmis.findOne({where:{friend_id:currentuserid}});
+            if(!userami){
+              throw ApiError.badRequest("Vous n'avez aucune demande d'ami pour l'instant")
             }
 
-            const [updated] = await UserAmis.update({friend_id}, {where: {id}});
-            const updatedrequestami = updated > 0 ? await UserAmis.findByPk(id) : null;
+            const [updated] = await UserAmis.update({statusdemande:status_demande}, {where: {friend_id:currentuserid}});
+            const updatedrequestami = updated > 0 ? await UserAmis.findOne({where:{friend_id:currentuserid}}) : null;
 
             return [updated>0 , updatedrequestami];
             

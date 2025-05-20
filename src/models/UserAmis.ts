@@ -6,7 +6,7 @@ class UserAmis extends Model {
   declare id: string;
   declare user_id: string;
   declare friend_id: string;
-  declare status:boolean;
+  declare statusdemande:boolean;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -36,7 +36,7 @@ UserAmis.init(
       },
       onDelete: 'CASCADE',
     },
-    status: {
+    statusdemande: {
       type: DataTypes.BOOLEAN,
       allowNull:true,
     },
