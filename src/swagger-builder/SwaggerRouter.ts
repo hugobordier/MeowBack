@@ -58,6 +58,10 @@ export class SwaggerRouter {
           url: 'https://meowback-production.up.railway.app',
           description: 'Production server',
         },
+        {
+          url: 'http://46.255.164.67:3000',
+          description: 'Amin server',
+        },
       ],
       paths: {},
       components: {
@@ -238,7 +242,6 @@ export class SwaggerRouter {
   getSwaggerSpec() {
     return this.swaggerSpec;
   }
-  
 }
 
 export default SwaggerRouter;
