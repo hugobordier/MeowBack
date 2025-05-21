@@ -1,8 +1,8 @@
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
-import PetController from '../controllers/PetController';
 import { authenticate } from '@/middleware/authMiddleware';
-import { uploadMiddleware } from '@/middleware/uploadMiddleware';
 import UserAmisController from '@/controllers/UserAmisController';
+import { validateSchema } from '@/middleware/validateSchema';
+import { UserAmiscreateSchema, UserAmispatchSchema, UserAmisResponseSchema } from '@/schema/UserAmisSchema';
 
 const swaggerRouter = new SwaggerRouter();
 
@@ -18,7 +18,7 @@ swaggerRouter.route('/').post(
       schema: {
         type: 'object',
         properties: {
-          friend_id: { type: 'string',format:"uuid",example:"15987b72-70c7-454e-ab06-21751706384b"},
+          friend_id: { type: 'string',format:"uuid",example:"51b28e48-2133-4822-b515-294f840d3e81"},
         },
         required: ['friend_id'],
       },
@@ -32,7 +32,7 @@ swaggerRouter.route('/').post(
             id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
             user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
             friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
-            statusdemande: { type: 'boolean',example:true },
+            statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
@@ -43,8 +43,8 @@ swaggerRouter.route('/').post(
     },
   },
   UserAmisController.createRequestAmi,
+  validateSchema(UserAmiscreateSchema),
   authenticate
-
 );
 
   
@@ -89,19 +89,27 @@ swaggerRouter.route('/').post(
     authenticate
   );
   
-    swaggerRouter.route('/').patch(
+    swaggerRouter.route('/:iddemandeur').patch(
     {
       description: 'Respond to a friend request',
       summary: 'Respond to an existing friend request',
       tags: ['Amis'],
       security:true,
+       parameters: [
+        {
+          in: 'path',
+          name: 'iddemandeur',
+          required: true,
+          schema: { type: 'string', format: 'uuid' },
+        },
+      ],
       requestBody: {
         description: 'friend request data to be updated by response',
         required: true,
         schema: {
           type: 'object',
             properties: {
-            demandestatus: { type: 'boolean',example:true },
+            statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'accepted'},
           },
         },
       },
@@ -119,7 +127,7 @@ swaggerRouter.route('/').post(
                   id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
                   user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
                   friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
-                  demandestatus: { type: 'boolean',example:true },
+                  statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },
@@ -133,6 +141,7 @@ swaggerRouter.route('/').post(
       },
     },
     UserAmisController.ResponseToFriendRequest,
+    validateSchema(UserAmisResponseSchema),
     authenticate
   );
 
@@ -159,7 +168,7 @@ swaggerRouter.route('/').post(
             properties: {
             user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
             friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
-            statusdemande: { type: 'boolean',example:true },
+            statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
           },
         },
       },
@@ -177,7 +186,7 @@ swaggerRouter.route('/').post(
                   id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
                   user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
                   friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
-                  statusdemande: { type: 'boolean',example:true },
+                  statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },
@@ -191,6 +200,7 @@ swaggerRouter.route('/').post(
       },
     },
     UserAmisController.updateDemandeAmiWithAllParameters,
+    validateSchema(UserAmispatchSchema),
     authenticate
   );
 

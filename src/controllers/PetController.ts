@@ -1,8 +1,6 @@
 import type { Request, Response } from 'express';
-import { petSchema } from "@/schema/PetSchema";
 import PetService from '@/services/PetService';
 import { ApiResponse } from '@utils/ApiResponse';
-import { ZodError } from 'zod'; 
 
 class PetController{
 
