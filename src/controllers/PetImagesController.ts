@@ -1,6 +1,4 @@
 import type { Request, Response } from 'express';
-import path from 'path';
-import fs from 'fs';
 import PetService from '@/services/PetService';
 import PetImagesService from '../services/PetImagesService';
 import { ApiResponse } from '@utils/ApiResponse';

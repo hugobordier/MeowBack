@@ -96,9 +96,15 @@ class UserAmisController{
             if (!req.user?.id){
                 return ApiResponse.badRequest(res,"id utilisateur requis");
             }
-            const {demandestatus}= req.body;
-
-            const reponsedemande = await UserAmisService.ResponseToFriendRequest(req.user?.id, demandestatus);
+            const {iddemandeur} = req.params;
+            const {statusdemande}= req.body;
+            if (!iddemandeur){
+                return ApiResponse.badRequest(res,"id du demandeur requis");
+            }
+            const reponsedemande = await UserAmisService.ResponseToFriendRequest(req.user?.id, statusdemande,iddemandeur);
+            if (reponsedemande[0] === false && reponsedemande[1] === null) {
+                return ApiResponse.ok(res, "Pas de demande d'ami en attente",reponsedemande);
+            }
             return ApiResponse.ok(res, "Demande d'ami résolue",reponsedemande);
         } catch (error) {
             return ApiResponse.internalServerError(res, "Erreur lors de la réponse à la demande d'ami");
