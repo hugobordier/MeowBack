@@ -129,7 +129,7 @@ class PetImagesController{
             }
 
             const updatedPetImage = await PetImagesService.updateImage(imageId, req.file);
-            return ApiResponse.ok(res, 'Image mise à jour avec succès.');
+            return ApiResponse.ok(res, 'Image mise à jour avec succès.',updatedPetImage);
         } catch (error) {
             return ApiResponse.internalServerError(res, "Erreur lors de la mise à jour de l'image");
         }

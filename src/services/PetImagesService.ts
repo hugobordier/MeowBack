@@ -1,6 +1,5 @@
 import PetImage from '../models/PetImage'; 
 import ApiError from '@utils/ApiError';
-import pets from '@/models/pets';
 import CloudinaryService from './CloudinaryService';
 import path from 'path';
 import { FolderName } from '@/config/cloudinary.config';
