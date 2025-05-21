@@ -1,23 +1,20 @@
 import type { Request, Response } from 'express';
-import PetService from '@/services/PetService';
-import PetImagesService from '../services/PetImagesService';
 import { ApiResponse } from '@utils/ApiResponse';
 import UserAmisService from '@/services/UserAmisService';
-import { boolean } from 'zod';
 
 class UserAmisController{
     static async createRequestAmi(req: Request, res: Response) {
         try{
             
-            const { friendID } = req.params;
+            const { friend_id } = req.body;
             
             if (!req.user?.id) {
                 return ApiResponse.badRequest(res, "Well t'as pas ta carte d'identitée");
             }
-            if (!friendID) {
+            if (!friend_id) {
                 return ApiResponse.badRequest(res, "Id de l'ami à envoyer la demande requis");
             }
-            const newdemande = await UserAmisService.createRequestAmi(req.user?.id,friendID);
+            const newdemande = await UserAmisService.createRequestAmi(req.user?.id,friend_id);
 
             return ApiResponse.created(res,"Demande d'ami ajoutée avec succès",newdemande);
         }catch (error:any) {
@@ -40,7 +37,7 @@ class UserAmisController{
             if (demande?.user_id !== req.user?.id){
                 return ApiResponse.badRequest(res,"pas ta demande")
             }
-            return ApiResponse.ok(res,"demande d'ami récupérée",Image);
+            return ApiResponse.ok(res,"demande d'ami récupérée",demande);
         }catch (error:any) {
             return ApiResponse.internalServerError(res, "Erreur lors de getUserAmiById",error.message);
         }
@@ -99,7 +96,7 @@ class UserAmisController{
             if (!req.user?.id){
                 return ApiResponse.badRequest(res,"id utilisateur requis");
             }
-            const demandestatus= req.body;
+            const {demandestatus}= req.body;
 
             const reponsedemande = await UserAmisService.ResponseToFriendRequest(req.user?.id, demandestatus);
             return ApiResponse.ok(res, "Demande d'ami résolue",reponsedemande);

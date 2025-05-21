@@ -8,7 +8,7 @@ class UserAmisService {
             if (!userID) {
                 throw ApiError.badRequest("ID de l'user requis");
             }
-            const existing =!UserAmis.findOne({where: {user_id:friendID,friend_id:userID}})
+            const existing = await UserAmis.findOne({where: {user_id:friendID,friend_id:userID}})
             if(!existing){
               const newreqami = await UserAmis.create({
               user_id: userID,
