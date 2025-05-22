@@ -10,6 +10,9 @@ class UserAmisService {
                 throw ApiError.badRequest("ID de l'user requis");
             }
             const existing = await UserAmis.findOne({where: {user_id:friendID,friend_id:userID}})
+            if(userID==friendID){
+              throw ApiError.badRequest("On ne peut pas se demander soit même en ami");
+            }
             if(!existing){
               const newreqami = await UserAmis.create({
               user_id: userID,

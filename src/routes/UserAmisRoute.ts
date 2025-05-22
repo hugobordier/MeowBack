@@ -89,7 +89,7 @@ swaggerRouter.route('/').post(
     authenticate
   );
   
-    swaggerRouter.route('/:iddemandeur').patch(
+    swaggerRouter.route('/ReponseDemande/:iddemandeur').patch(
     {
       description: 'Respond to a friend request',
       summary: 'Respond to an existing friend request',
