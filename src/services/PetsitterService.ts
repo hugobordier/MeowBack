@@ -240,8 +240,8 @@ class PetSitterService {
       latitude?: number;
       longitude?: number;
       radius?: number;
-      availableDays?: string[];
-      availableSlots?: string[];
+      availability_days?: string[];
+      availability_intervals?: string[];
     },
     page: number,
     limit: number
@@ -311,40 +311,33 @@ class PetSitterService {
           )
         );
       }
-
-      if (criteria.availableDays && criteria.availableDays.length > 0) {
-        if (criteria.availableDays.length === 1) {
-          whereClause.available_days = {
-            [Op.contains]: [criteria.availableDays[0]],
-          };
-        } else {
-          whereClause[Op.and] = whereClause[Op.and] || [];
-          whereClause[Op.and].push(
-            Sequelize.literal(
-              `available_days && ARRAY[${criteria.availableDays
-                .map((day) => `'${day}'`)
-                .join(',')}]::text[]`
-            )
-          );
-        }
+      //@ts-ignore
+      console.log('criteria:', criteria.availability_days);
+      if (criteria.availability_days && criteria.availability_days.length > 0) {
+        console.log('test1');
+        whereClause[Op.and] = whereClause[Op.and] || [];
+        whereClause[Op.and].push(
+          Sequelize.literal(
+            `available_days && ARRAY[${criteria.availability_days
+              .map((day) => `'${day}'`)
+              .join(',')}]::text[]`
+          )
+        );
       }
 
-      if (criteria.availableSlots && criteria.availableSlots.length > 0) {
-        if (criteria.availableSlots.length === 1) {
-          whereClause.available_slots = {
-            [Op.contains]: [criteria.availableSlots[0]],
-          };
-        } else {
-          // Use ANY for multiple values
-          whereClause[Op.and] = whereClause[Op.and] || [];
-          whereClause[Op.and].push(
-            Sequelize.literal(
-              `available_slots && ARRAY[${criteria.availableSlots
-                .map((slot) => `'${slot}'`)
-                .join(',')}]::text[]`
-            )
-          );
-        }
+      if (
+        criteria.availability_intervals &&
+        criteria.availability_intervals.length > 0
+      ) {
+        console.log('test2');
+        whereClause[Op.and] = whereClause[Op.and] || [];
+        whereClause[Op.and].push(
+          Sequelize.literal(
+            `available_slots && ARRAY[${criteria.availability_intervals
+              .map((slot) => `'${slot}'`)
+              .join(',')}]::text[]`
+          )
+        );
       }
 
       // Filtering by location (using Sequelize literal for distance calculation)
