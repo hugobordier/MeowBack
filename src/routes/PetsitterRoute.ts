@@ -633,8 +633,8 @@ swaggerRouter.route('/').post(
   },
   PetsitterController.createPetSitter,
   validateSchema(petSitterSchema),
-  authenticate,
-  petSitterAuth
+  authenticate
+  //petSitterAuth
 );
 
 swaggerRouter.route('/:id').patch(

@@ -295,37 +295,21 @@ class PetSitterService {
       }
 
       if (criteria.animalTypes && criteria.animalTypes.length > 0) {
-        if (criteria.animalTypes.length === 1) {
-          whereClause.animal_types = {
-            [Op.contains]: [criteria.animalTypes[0]],
-          };
-        } else {
-          whereClause[Op.and] = whereClause[Op.and] || [];
-          whereClause[Op.and].push(
-            Sequelize.literal(
-              `animal_types && ARRAY[${criteria.animalTypes
-                .map((type) => `'${type}'`)
-                .join(',')}]::text[]`
-            )
-          );
-        }
+        whereClause[Op.and] = whereClause[Op.and] || [];
+        whereClause[Op.and].push(
+          Sequelize.literal(
+            `animal_types && ARRAY[${criteria.animalTypes.map((t) => `'${t}'`).join(',')}]::text[]`
+          )
+        );
       }
 
       if (criteria.services && criteria.services.length > 0) {
-        if (criteria.services.length === 1) {
-          whereClause.services = {
-            [Op.contains]: [criteria.services[0]],
-          };
-        } else {
-          whereClause[Op.and] = whereClause[Op.and] || [];
-          whereClause[Op.and].push(
-            Sequelize.literal(
-              `services && ARRAY[${criteria.services
-                .map((service) => `'${service}'`)
-                .join(',')}]::text[]`
-            )
-          );
-        }
+        whereClause[Op.and] = whereClause[Op.and] || [];
+        whereClause[Op.and].push(
+          Sequelize.literal(
+            `services && ARRAY[${criteria.services.map((s) => `'${s}'`).join(',')}]::text[]`
+          )
+        );
       }
 
       if (criteria.availableDays && criteria.availableDays.length > 0) {

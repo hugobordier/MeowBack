@@ -51,14 +51,19 @@ class PetSitterController {
         let animalTypesFilter;
 
         try {
-          animalTypesFilter =
-            typeof animal_types === 'string'
-              ? JSON.parse(animal_types)
-              : animal_types;
+          if (Array.isArray(animal_types)) {
+            animalTypesFilter = animal_types;
+          } else if (typeof animal_types === 'string') {
+            if (animal_types.startsWith('[')) {
+              animalTypesFilter = JSON.parse(animal_types);
+            } else {
+              animalTypesFilter = [animal_types];
+            }
+          } else {
+            animalTypesFilter = [animal_types];
+          }
 
-          filters.animalTypes = Array.isArray(animalTypesFilter)
-            ? animalTypesFilter
-            : [animalTypesFilter];
+          filters.animalTypes = animalTypesFilter;
         } catch (error) {
           console.error('Error parsing animal_types filter:', error);
           return ApiResponse.badRequest(
@@ -72,12 +77,19 @@ class PetSitterController {
         let servicesFilter;
 
         try {
-          servicesFilter =
-            typeof services === 'string' ? JSON.parse(services) : services;
+          if (Array.isArray(services)) {
+            servicesFilter = services;
+          } else if (typeof services === 'string') {
+            if (services.startsWith('[')) {
+              servicesFilter = JSON.parse(services);
+            } else {
+              servicesFilter = [services];
+            }
+          } else {
+            servicesFilter = [services];
+          }
 
-          filters.services = Array.isArray(servicesFilter)
-            ? servicesFilter
-            : [servicesFilter];
+          filters.services = servicesFilter;
         } catch (error) {
           console.error('Error parsing services filter:', error);
           return ApiResponse.badRequest(res, 'Format de services invalide');
