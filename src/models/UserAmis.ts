@@ -6,7 +6,7 @@ class UserAmis extends Model {
   declare id: string;
   declare user_id: string;
   declare friend_id: string;
-  declare statusdemande:boolean;
+  declare statusdemande: 'accepted' | 'refused' | 'pending';
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -37,8 +37,9 @@ UserAmis.init(
       onDelete: 'CASCADE',
     },
     statusdemande: {
-      type: DataTypes.BOOLEAN,
-      allowNull:true,
+      type: DataTypes.ENUM('accepted', 'refused', 'pending'),
+      allowNull: false,
+      defaultValue: 'pending',
     },
   },
   {

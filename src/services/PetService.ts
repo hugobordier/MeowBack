@@ -1,7 +1,5 @@
-import type { AvailabilityDay } from '@/types/type';
 import pets from '@/models/pets';
 import { Op, ValidationError } from 'sequelize';
-import type { UUID } from 'crypto';
 import CloudinaryService from './CloudinaryService';
 import path from 'path';
 import { FolderName } from '@/config/cloudinary.config';

@@ -1,5 +1,6 @@
 import ApiError from '@utils/ApiError';
 import UserAmis from '@/models/UserAmis';
+import { statusDemande } from '@/types/enumStatusAmis';
 
 
 class UserAmisService {
@@ -9,11 +10,14 @@ class UserAmisService {
                 throw ApiError.badRequest("ID de l'user requis");
             }
             const existing = await UserAmis.findOne({where: {user_id:friendID,friend_id:userID}})
+            if(userID==friendID){
+              throw ApiError.badRequest("On ne peut pas se demander soit même en ami");
+            }
             if(!existing){
               const newreqami = await UserAmis.create({
               user_id: userID,
               friend_id: friendID,
-              statusdemande:null,
+              statusdemande:"pending",
               });
 
               return newreqami;
@@ -98,27 +102,30 @@ class UserAmisService {
             );
           }
     }
-    static async ResponseToFriendRequest(currentuserid:string,status_demande:boolean): Promise<[boolean, UserAmis | null]>{
+    static async ResponseToFriendRequest(currentuserid:string,status_demande: statusDemande ,iddemandeur:string): Promise<[boolean, UserAmis | null]>{
         try {
             if (!currentuserid) {
                 throw ApiError.badRequest('ID de utilisateur requis');
             }
-            const userami = await UserAmis.findOne({where:{friend_id:currentuserid}});
+            if (!iddemandeur) {
+                throw ApiError.badRequest("ID du demandeur d'ami requis");
+            }
+            const userami = await UserAmis.findOne({where:{user_id:iddemandeur,friend_id:currentuserid,statusdemande:statusDemande.Pending}});
             if(!userami){
-              throw ApiError.badRequest("Vous n'avez aucune demande d'ami pour l'instant")
+              return [false,null]
             }
 
-            const [updated] = await UserAmis.update({statusdemande:status_demande}, {where: {friend_id:currentuserid}});
-            const updatedrequestami = updated > 0 ? await UserAmis.findOne({where:{friend_id:currentuserid}}) : null;
+            const [updated] = await UserAmis.update({statusdemande:status_demande}, {where: {friend_id:currentuserid,user_id:iddemandeur}});
+            const updatedrequestami = updated > 0 ? await UserAmis.findOne({where:{friend_id:currentuserid,user_id:iddemandeur}}) : null;
 
             return [updated>0 , updatedrequestami];
             
           } catch (error) {
-            console.error("Erreur dans updateDemandeAmiResOfFriend : ",error);
+            console.error("Erreur dans ResponseToFriendRequest : ",error);
             if (error instanceof ApiError) {
               throw error;
             }throw ApiError.internal(
-              'Erreur inconnue dans updateDemandeAmiResOfFriend'
+              'Erreur inconnue dans ResponseToFriendRequest'
             )
     }
   }
