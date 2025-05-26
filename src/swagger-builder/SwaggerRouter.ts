@@ -62,6 +62,10 @@ export class SwaggerRouter {
           url: 'http://46.255.164.67:3000',
           description: 'Amin server',
         },
+        {
+          url: 'http://v71168.webmo.fr/MeowBack',
+          description: 'Amin server avec le nom de domaine',
+        },
       ],
       paths: {},
       components: {
