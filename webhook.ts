@@ -6,7 +6,7 @@ const router = express.Router();
 router.post('/', (req: Request, res: Response) => {
   console.log('🚨 Webhook reçu !');
   exec(
-    'git pull origin main && bun install && pm2 restart mon-api',
+    'git pull origin main && bun install && pm2 restart MeowBack',
     (err, stdout, stderr) => {
       if (err) {
         console.error(`❌ Erreur : ${stderr}`);

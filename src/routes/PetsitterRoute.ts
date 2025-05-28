@@ -2,10 +2,11 @@ import PetsitterController from '../controllers/PetsitterController';
 import SwaggerRouter from '../swagger-builder/SwaggerRouter';
 import { authenticate } from '../middleware/authMiddleware';
 import petSitterAuth from '@/middleware/petSitterAuth';
-import { validateSchema } from '@/middleware/validateSchema';
+import { validateQuery, validateSchema } from '@/middleware/validateSchema';
 import {
   animalTypesEnum,
   availableServices,
+  getPetSittersQuerySchema,
   petSitterSchema,
 } from '@/schema/PetSitterSchema';
 
@@ -281,6 +282,7 @@ swaggerRouter.route('/').get(
     },
   },
   PetsitterController.getPetSitters,
+  validateQuery(getPetSittersQuerySchema),
   authenticate
 );
 
@@ -633,8 +635,8 @@ swaggerRouter.route('/').post(
   },
   PetsitterController.createPetSitter,
   validateSchema(petSitterSchema),
-  authenticate
-  //petSitterAuth
+  authenticate,
+  petSitterAuth
 );
 
 swaggerRouter.route('/:id').patch(

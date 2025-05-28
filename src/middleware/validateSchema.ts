@@ -21,3 +21,20 @@ export const validateSchema =
       next(error);
     }
   };
+
+export const validateQuery =
+  (schema: ZodSchema) => (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const parsedQuery = schema.parse(req.query);
+      Object.assign(req.query, parsedQuery); // ✅ mutation douce de l'objet
+      next();
+    } catch (error) {
+      if (error instanceof ZodError) {
+        const stringError = error.errors.map((e) => e.message).join(', ');
+        return ApiResponse.badRequest(res, stringError, {
+          error: error.errors,
+        });
+      }
+      next(error);
+    }
+  };
