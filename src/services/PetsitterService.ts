@@ -296,48 +296,41 @@ class PetSitterService {
 
       if (criteria.animalTypes && criteria.animalTypes.length > 0) {
         whereClause[Op.and] = whereClause[Op.and] || [];
-        whereClause[Op.and].push(
-          Sequelize.literal(
-            `animal_types && ARRAY[${criteria.animalTypes.map((t) => `'${t}'`).join(',')}]::text[]`
-          )
-        );
+        whereClause[Op.and].push({
+          animal_types: {
+            [Op.overlap]: criteria.animalTypes,
+          },
+        });
       }
 
       if (criteria.services && criteria.services.length > 0) {
         whereClause[Op.and] = whereClause[Op.and] || [];
-        whereClause[Op.and].push(
-          Sequelize.literal(
-            `services && ARRAY[${criteria.services.map((s) => `'${s}'`).join(',')}]::text[]`
-          )
-        );
+        whereClause[Op.and].push({
+          services: {
+            [Op.overlap]: criteria.services,
+          },
+        });
       }
-      //@ts-ignore
-      console.log('criteria:', criteria.availability_days);
+
       if (criteria.availability_days && criteria.availability_days.length > 0) {
-        console.log('test1');
         whereClause[Op.and] = whereClause[Op.and] || [];
-        whereClause[Op.and].push(
-          Sequelize.literal(
-            `available_days && ARRAY[${criteria.availability_days
-              .map((day) => `'${day}'`)
-              .join(',')}]::text[]`
-          )
-        );
+        whereClause[Op.and].push({
+          available_days: {
+            [Op.overlap]: criteria.availability_days,
+          },
+        });
       }
 
       if (
         criteria.availability_intervals &&
         criteria.availability_intervals.length > 0
       ) {
-        console.log('test2');
         whereClause[Op.and] = whereClause[Op.and] || [];
-        whereClause[Op.and].push(
-          Sequelize.literal(
-            `available_slots && ARRAY[${criteria.availability_intervals
-              .map((slot) => `'${slot}'`)
-              .join(',')}]::text[]`
-          )
-        );
+        whereClause[Op.and].push({
+          available_slots: {
+            [Op.overlap]: criteria.availability_intervals,
+          },
+        });
       }
 
       // Filtering by location (using Sequelize literal for distance calculation)

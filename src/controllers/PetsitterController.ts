@@ -4,6 +4,43 @@ import PetSitterService from '../services/PetsitterService';
 import PetSitter from '@/models/PetSitter';
 import { getCoordinatesFromAddress } from '@utils/geocoding';
 
+const VALID_ANIMAL_TYPES = [
+  'Chat',
+  'Chien',
+  'Oiseau',
+  'Rongeur',
+  'Reptile',
+  'Poisson',
+  'Furet',
+  'Cheval',
+  'Autre',
+];
+
+const VALID_SERVICES = [
+  'Promenade',
+  'Alimentation',
+  'Jeux',
+  'Soins',
+  'Toilettage',
+  'Dressage',
+  'Garderie',
+  'Médication',
+  'Nettoyage',
+  'Transport',
+];
+
+const VALID_AVAILABILITY_DAYS = [
+  'Monday',
+  'Tuesday',
+  'Wednesday',
+  'Thursday',
+  'Friday',
+  'Saturday',
+  'Sunday',
+];
+
+const VALID_AVAILABILITY_SLOTS = ['Matin', 'Après-midi', 'Soir', 'Nuit'];
+
 class PetSitterController {
   static async getPetSitters(req: Request, res: Response): Promise<Response> {
     try {
@@ -36,64 +73,58 @@ class PetSitterController {
           : undefined,
       };
 
+      function parseArrayParam(param: any): string[] {
+        if (Array.isArray(param)) return param;
+        if (typeof param === 'string') {
+          try {
+            return param.startsWith('[') ? JSON.parse(param) : [param];
+          } catch {
+            return [param];
+          }
+        }
+        return [param];
+      }
+
+      function validateValues(values: string[], validList: string[]): boolean {
+        return values.every((val) => validList.includes(val));
+      }
+
       if (availability_days) {
-        filters.availability_days = Array.isArray(availability_days)
-          ? availability_days
-          : [availability_days];
+        const days = parseArrayParam(availability_days);
+        if (!validateValues(days, VALID_AVAILABILITY_DAYS)) {
+          return ApiResponse.badRequest(
+            res,
+            'Jour(s) de disponibilité invalide(s)'
+          );
+        }
+        filters.availability_days = days;
       }
 
       if (availability_intervals) {
-        filters.availability_intervals = Array.isArray(availability_intervals)
-          ? availability_intervals
-          : [availability_intervals];
-      }
-      if (animal_types) {
-        let animalTypesFilter;
-
-        try {
-          if (Array.isArray(animal_types)) {
-            animalTypesFilter = animal_types;
-          } else if (typeof animal_types === 'string') {
-            if (animal_types.startsWith('[')) {
-              animalTypesFilter = JSON.parse(animal_types);
-            } else {
-              animalTypesFilter = [animal_types];
-            }
-          } else {
-            animalTypesFilter = [animal_types];
-          }
-
-          filters.animalTypes = animalTypesFilter;
-        } catch (error) {
-          console.error('Error parsing animal_types filter:', error);
+        const slots = parseArrayParam(availability_intervals);
+        if (!validateValues(slots, VALID_AVAILABILITY_SLOTS)) {
           return ApiResponse.badRequest(
             res,
-            "Format de types d'animaux invalide"
+            'Créneau(x) horaire(s) invalide(s)'
           );
         }
+        filters.availability_intervals = slots;
+      }
+
+      if (animal_types) {
+        const animalTypes = parseArrayParam(animal_types);
+        if (!validateValues(animalTypes, VALID_ANIMAL_TYPES)) {
+          return ApiResponse.badRequest(res, 'Type(s) d’animaux invalide(s)');
+        }
+        filters.animalTypes = animalTypes;
       }
 
       if (services) {
-        let servicesFilter;
-
-        try {
-          if (Array.isArray(services)) {
-            servicesFilter = services;
-          } else if (typeof services === 'string') {
-            if (services.startsWith('[')) {
-              servicesFilter = JSON.parse(services);
-            } else {
-              servicesFilter = [services];
-            }
-          } else {
-            servicesFilter = [services];
-          }
-
-          filters.services = servicesFilter;
-        } catch (error) {
-          console.error('Error parsing services filter:', error);
-          return ApiResponse.badRequest(res, 'Format de services invalide');
+        const serviceTypes = parseArrayParam(services);
+        if (!validateValues(serviceTypes, VALID_SERVICES)) {
+          return ApiResponse.badRequest(res, 'Service(s) invalide(s)');
         }
+        filters.services = serviceTypes;
       }
 
       if (latitude && longitude) {
