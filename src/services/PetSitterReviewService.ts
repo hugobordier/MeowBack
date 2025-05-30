@@ -119,7 +119,8 @@ class PetSitterReviewService {
       }
 
       const offset = (page - 1) * limit;
-
+      console.log(offset, page, limit);
+      console.log(typeof offset, typeof page, typeof limit);
       const { rows: reviewsData, count: total } =
         await PetSitterReview.findAndCountAll({
           where: { pet_sitter_id },
@@ -177,6 +178,7 @@ class PetSitterReviewService {
       );
 
       if (error instanceof ApiError) {
+        console.log('la');
         throw error;
       }
 

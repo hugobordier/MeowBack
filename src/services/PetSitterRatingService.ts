@@ -3,6 +3,7 @@ import { ValidationError } from 'sequelize';
 import User from '@/models/User';
 import ApiError from '@utils/ApiError';
 import PetSitterService from './PetsitterService';
+import PetSitter from '@/models/PetSitter';
 
 class PetSitterRatingService {
   static async createRating(
@@ -37,11 +38,34 @@ class PetSitterRatingService {
         throw ApiError.badRequest('La note doit être un nombre entre 0 et 5');
       }
 
-      return await PetSitterRating.create({
+      const res = await PetSitterRating.create({
         user_id,
         pet_sitter_id,
         rating,
       });
+
+      const allRatings = await PetSitterRating.findAll({
+        where: { pet_sitter_id },
+      });
+
+      console.log(allRatings);
+
+      const ps = await PetSitter.findByPk(pet_sitter_id);
+      const user = await User.findByPk(ps?.user_id);
+
+      console.log(user?.dataValues);
+
+      const total = allRatings.reduce((acc, r) => acc + Number(r.rating), 0);
+
+      console.log('total : ', total);
+      const average = parseFloat((total / allRatings.length).toFixed(2));
+
+      console.log(average);
+      console.log(typeof average);
+
+      user ? await user.update({ rating: average }) : null;
+
+      return res;
     } catch (error) {
       console.error('Error in createRating:', error);
 
