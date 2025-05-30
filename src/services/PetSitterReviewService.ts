@@ -4,6 +4,8 @@ import User from '@/models/User';
 import PetSitter from '@/models/PetSitter';
 import ApiError from '@utils/ApiError';
 import PetSitterService from './PetsitterService';
+import type { PetSitterReviewResponse } from '@/types/type';
+import PetSitterRating from '@/models/PetSitterRating';
 
 class PetSitterReviewService {
   static async createReview(
@@ -107,31 +109,77 @@ class PetSitterReviewService {
   }
 
   static async getReviewsForPetSitter(
-    pet_sitter_id: string
-  ): Promise<PetSitterReview[]> {
+    pet_sitter_id: string,
+    page: number,
+    limit: number
+  ): Promise<{ reviews: PetSitterReviewResponse[]; total: number }> {
     try {
       if (!pet_sitter_id) {
         throw ApiError.badRequest('ID du pet sitter non spécifié');
       }
 
-      return await PetSitterReview.findAll({
-        where: { pet_sitter_id },
-        include: [
-          {
-            model: User,
-            as: 'user',
-            attributes: ['id', 'username'],
-          },
-        ],
+      const offset = (page - 1) * limit;
+
+      const { rows: reviewsData, count: total } =
+        await PetSitterReview.findAndCountAll({
+          where: { pet_sitter_id },
+          include: [
+            {
+              model: User,
+              as: 'user',
+              attributes: [
+                'id',
+                'username',
+                'firstName',
+                'lastName',
+                'profilePicture',
+              ],
+            },
+          ],
+          limit,
+          offset,
+          order: [['createdAt', 'DESC']],
+        });
+
+      const userIds = reviewsData.map((review: any) => review.user_id);
+      const ratings = await PetSitterRating.findAll({
+        where: {
+          pet_sitter_id,
+          user_id: userIds,
+        },
       });
+
+      const ratingsMap = new Map(
+        ratings.map((rating: any) => [rating.user_id, rating.rating])
+      );
+
+      const reviews: PetSitterReviewResponse[] = reviewsData.map(
+        (review: any) => ({
+          id: review.id,
+          pet_sitter_id: review.pet_sitter_id,
+          user_id: review.user_id,
+          user_first_name: review.user?.firstName || '',
+          user_last_name: review.user?.lastName || '',
+          user_username: review.user?.username || '',
+          user_picture: review.user?.profilePicture || '',
+          pet_sitter_rating: ratingsMap.get(review.user_id) || 0,
+          message: review.message,
+          createdAt: review.createdAt,
+          updatedAt: review.updatedAt,
+        })
+      );
+
+      return { reviews, total };
     } catch (error) {
       console.error(
         `Error in getReviewsForPetSitter(${pet_sitter_id}):`,
         error
       );
+
       if (error instanceof ApiError) {
         throw error;
       }
+
       throw ApiError.internal(
         `Erreur inconnue lors de la récupération des avis pour le pet sitter ID ${pet_sitter_id}`
       );

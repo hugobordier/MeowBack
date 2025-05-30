@@ -101,14 +101,20 @@ class PetSitterReviewController {
     res: Response
   ): Promise<Response> {
     const { pet_sitter_id } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
 
     try {
       if (!pet_sitter_id) {
         return ApiResponse.badRequest(res, 'ID du pet sitter requis');
       }
 
-      const reviews =
-        await PetSitterReviewService.getReviewsForPetSitter(pet_sitter_id);
+      const { reviews, total } =
+        await PetSitterReviewService.getReviewsForPetSitter(
+          pet_sitter_id,
+          page,
+          limit
+        );
 
       if (!reviews || reviews.length === 0) {
         return ApiResponse.notFound(
@@ -117,8 +123,11 @@ class PetSitterReviewController {
         );
       }
 
+      const pagination = ApiResponse.createPagination(total, page, limit);
+
       return ApiResponse.ok(res, 'Avis récupérés avec succès', {
         reviews,
+        ...pagination,
       });
     } catch (error: any) {
       console.error(

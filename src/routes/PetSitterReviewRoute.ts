@@ -106,12 +106,32 @@ swaggerRouter.route('/:review_id').put(
   authenticate
 );
 
-swaggerRouter.route('/pet-sitter/:pet_sitter_id').get(
+swaggerRouter.route('/petsitter/:pet_sitter_id').get(
   {
-    description: 'Get all reviews for a pet sitter',
-    summary: 'Fetch pet sitter reviews',
+    description: 'Get all reviews for a pet sitter with pagination',
+    summary: 'Fetch paginated pet sitter reviews',
     tags: ['PetSitterReviews'],
     security: true,
+    parameters: [
+      {
+        name: 'pet_sitter_id',
+        in: 'path',
+        required: true,
+        description: 'ID of the pet sitter',
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: 'Number of reviews per page',
+      },
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Page number to fetch',
+      },
+    ],
     responses: {
       '200': {
         description: 'Reviews retrieved successfully',
@@ -119,6 +139,9 @@ swaggerRouter.route('/pet-sitter/:pet_sitter_id').get(
           type: 'object',
           properties: {
             success: { type: 'boolean', example: true },
+            total: { type: 'integer', example: 35 },
+            page: { type: 'integer', example: 1 },
+            limit: { type: 'integer', example: 10 },
             reviews: {
               type: 'array',
               items: {
