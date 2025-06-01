@@ -24,46 +24,58 @@ class PetSitterRatingService {
         throw ApiError.badRequest(`Aucun petsitter pour l'id ${pet_sitter_id}`);
       }
 
-      const existingRating = await PetSitterRating.findOne({
-        where: { user_id, pet_sitter_id },
-      });
-
-      if (existingRating) {
-        throw ApiError.conflict(
-          `Une évaluation existe déjà pour l'utilisateur avec l'ID ${user_id} et le pet sitter avec l'ID ${pet_sitter_id}`
-        );
-      }
-
       if (rating < 0 || rating > 5) {
         throw ApiError.badRequest('La note doit être un nombre entre 0 et 5');
       }
 
-      const res = await PetSitterRating.create({
-        user_id,
-        pet_sitter_id,
-        rating,
+      const existingRating = await PetSitterRating.findOne({
+        where: { user_id, pet_sitter_id },
       });
 
+      let res: PetSitterRating;
+
+      if (existingRating) {
+        // Mettre à jour l'évaluation existante
+        await existingRating.update({ rating });
+        res = existingRating;
+        console.log(
+          `Évaluation mise à jour pour l'utilisateur ${user_id} et le pet sitter ${pet_sitter_id}`
+        );
+      } else {
+        // Créer une nouvelle évaluation
+        res = await PetSitterRating.create({
+          user_id,
+          pet_sitter_id,
+          rating,
+        });
+        console.log(
+          `Nouvelle évaluation créée pour l'utilisateur ${user_id} et le pet sitter ${pet_sitter_id}`
+        );
+      }
+
+      // Recalculer la moyenne après création/mise à jour
       const allRatings = await PetSitterRating.findAll({
         where: { pet_sitter_id },
       });
 
-      console.log(allRatings);
+      console.log(
+        'Toutes les évaluations:',
+        allRatings.map((r) => r.rating)
+      );
 
       const ps = await PetSitter.findByPk(pet_sitter_id);
       const user = await User.findByPk(ps?.user_id);
 
-      console.log(user?.dataValues);
+      if (user) {
+        const total = allRatings.reduce((acc, r) => acc + Number(r.rating), 0);
+        console.log('Total des notes:', total);
 
-      const total = allRatings.reduce((acc, r) => acc + Number(r.rating), 0);
+        const average = parseFloat((total / allRatings.length).toFixed(2));
+        console.log('Nouvelle moyenne:', average);
 
-      console.log('total : ', total);
-      const average = parseFloat((total / allRatings.length).toFixed(2));
-
-      console.log(average);
-      console.log(typeof average);
-
-      user ? await user.update({ rating: average }) : null;
+        await user.update({ rating: average });
+        console.log(`Rating du pet sitter mis à jour: ${average}`);
+      }
 
       return res;
     } catch (error) {
