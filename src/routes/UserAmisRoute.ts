@@ -18,7 +18,7 @@ swaggerRouter.route('/').post(
       schema: {
         type: 'object',
         properties: {
-          friend_id: { type: 'string',format:"uuid",example:"51b28e48-2133-4822-b515-294f840d3e81"},
+          friend_id: { type: 'string',format:"uuid",example:"328c2127-6ce6-419c-ba70-4a42646aa8dd"},
           message:{type:'string',example:"Salut pignouf"},
         },
         required: ['friend_id'],
@@ -32,7 +32,7 @@ swaggerRouter.route('/').post(
           properties: {
             id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
             user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-            friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
+            friend_id: { type: 'string', format: 'uuid', example: '328c2127-6ce6-419c-ba70-4a42646aa8dd' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             message: { type: 'string', example: 'Salut' },
             createdAt: { type: 'string', format: 'date-time' },
@@ -50,7 +50,7 @@ swaggerRouter.route('/').post(
 );
 
   
-  swaggerRouter.route('/:id').get(
+  swaggerRouter.route('/ById/:id').get(
     {
       description: 'Get friend request by ID',
       summary: 'Retrieve a friend request by its unique identifier',
@@ -75,6 +75,22 @@ swaggerRouter.route('/').post(
     authenticate
   );
 
+    swaggerRouter.route('/user/').get(
+    {
+      description: 'Get all friend requests for the current user',
+      summary: 'Retrieve a list of all friend requests for the current user',
+      tags: ['Amis'],
+      security:true,
+      responses: {
+        '200': { description: 'List of friend requests for the current user retrieved successfully' },
+        '400': { description: 'Bad request' },
+        '500': { description: 'Internal server error' },
+      },
+    },
+    UserAmisController.getAllUserAmisForAUser,
+    authenticate
+  );
+  
   swaggerRouter.route('/').get(
     {
       description: 'Get all friend requests',
@@ -87,9 +103,11 @@ swaggerRouter.route('/').post(
         '500': { description: 'Internal server error' },
       },
     },
-    UserAmisController.getAllUserAmisForAUser,
+    UserAmisController.getAlldemandeamis,
     authenticate
   );
+
+  
   
     swaggerRouter.route('/ReponseDemande/:iddemandeur').patch(
     {
@@ -127,7 +145,7 @@ swaggerRouter.route('/').post(
                 type: 'object',
                 properties: {
                   id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-                  user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
+                  user_id: { type: 'string', format: 'uuid', example: '328c2127-6ce6-419c-ba70-4a42646aa8dd' },
                   friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
@@ -170,7 +188,7 @@ swaggerRouter.route('/').post(
           type: 'object',
             properties: {
             user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-            friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
+            friend_id: { type: 'string', format: 'uuid', example: '328c2127-6ce6-419c-ba70-4a42646aa8dd' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             message: { type: 'string', example: 'Salut' },
           },
@@ -189,7 +207,7 @@ swaggerRouter.route('/').post(
                 properties: {
                   id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
                   user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-                  friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
+                  friend_id: { type: 'string', format: 'uuid', example: '328c2127-6ce6-419c-ba70-4a42646aa8dd' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
                   createdAt: { type: 'string', format: 'date-time' },

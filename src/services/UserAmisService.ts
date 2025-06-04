@@ -1,6 +1,7 @@
 import ApiError from '@utils/ApiError';
 import UserAmis from '@/models/UserAmis';
 import { statusDemande } from '@/types/enumStatusAmis';
+import User from '@/models/User';
 
 
 class UserAmisService {
@@ -60,6 +61,32 @@ class UserAmisService {
           }
 
 
+    static async getAllUserAmis({ page, perPage }: { page: number, perPage: number}): Promise<{ userAmis: UserAmis[]; total: number }> {
+        try {
+            const offset = (page - 1) * perPage;
+            const userAmis = await UserAmis.findAll({limit:perPage,offset:offset});
+            if (userAmis.length === 0) {
+              throw ApiError.notFound("Il n'y actuellement aucune demande d'ami dans la db");
+            }
+            const totalAmis = await UserAmis.count();
+  
+            return{
+              userAmis,
+              total : totalAmis
+            };
+
+        } catch (error) {
+            console.error('Erreur dans getAllUserAmis',error);
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            throw ApiError.internal(
+              'Erreur inconnue dans getAllUserAmis'
+            );
+          }
+    }
+
+
     static async getAllUserAmisForAUser({ userId,page, perPage }: { page: number, perPage: number ,userId: string}): Promise<{ userAmis: UserAmis[]; total: number }> {
         try {
             const offset = (page - 1) * perPage;
@@ -75,12 +102,12 @@ class UserAmisService {
             };
 
         } catch (error) {
-            console.error('Erreur dans getAllUserAmis',error);
+            console.error('Erreur dans getAllUserAmisForAUser',error);
             if (error instanceof ApiError) {
               throw error;
             }
             throw ApiError.internal(
-              'Erreur inconnue dans getAllUserAmis'
+              'Erreur inconnue dans getAllUserAmisForAUser'
             );
           }
     }

@@ -1,6 +1,8 @@
 import type { Request, Response } from 'express';
 import { ApiResponse } from '@utils/ApiResponse';
 import UserAmisService from '@/services/UserAmisService';
+import { InstanceError } from 'sequelize';
+import ApiError from '@utils/ApiError';
 
 class UserAmisController{
     static async createRequestAmi(req: Request, res: Response) {
@@ -57,7 +59,27 @@ class UserAmisController{
 
             return ApiResponse.ok(res,"Toutes les demandes d'amis pour l'utilisateur courant ont été récupérées",userAmis,pagination);
         } catch (error) {
+            if(error instanceof ApiError){
+                return ApiResponse.notFound(res,"Pas de demande d'ami trouvée")
+            }
             return ApiResponse.internalServerError(res, "Erreur lors de getAllUserAmisForAUser");
+        }
+    }
+
+        static async getAlldemandeamis(req: Request, res: Response) {
+        try {
+            if(!req.user?.id){
+                return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
+            }
+            const page = parseInt(req.query.page as string) || 1;
+            const perPage = parseInt(req.query.perPage as string) || 10;
+
+            const {userAmis,total} = await UserAmisService.getAllUserAmis({page,perPage});
+            const pagination= ApiResponse.createPagination( total, page, perPage);
+
+            return ApiResponse.ok(res,"Toutes les demandes d'amis ont été récupérées",userAmis,pagination);
+        } catch (error) {
+            return ApiResponse.internalServerError(res, "Erreur lors de getAlldemandeamis");
         }
     }
 
