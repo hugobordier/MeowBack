@@ -7,6 +7,7 @@ class UserAmis extends Model {
   declare user_id: string;
   declare friend_id: string;
   declare statusdemande: 'accepted' | 'refused' | 'pending';
+  declare message:string;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -40,6 +41,10 @@ UserAmis.init(
       type: DataTypes.ENUM('accepted', 'refused', 'pending'),
       allowNull: false,
       defaultValue: 'pending',
+    },
+      message: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
