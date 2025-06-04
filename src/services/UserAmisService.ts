@@ -4,20 +4,22 @@ import { statusDemande } from '@/types/enumStatusAmis';
 
 
 class UserAmisService {
-    static async createRequestAmi(userID: string,friendID:string): Promise<UserAmis> {
+    static async createRequestAmi(userID: string,friendID:string,messagevalue:string): Promise<UserAmis> {
         try {
             if (!userID) {
                 throw ApiError.badRequest("ID de l'user requis");
             }
             const existing = await UserAmis.findOne({where: {user_id:friendID,friend_id:userID}})
+            const existing2 = await UserAmis.findOne({where: {user_id:userID,friend_id:friendID}})
             if(userID==friendID){
               throw ApiError.badRequest("On ne peut pas se demander soit même en ami");
             }
-            if(!existing){
+            if(!existing && !existing2){
               const newreqami = await UserAmis.create({
               user_id: userID,
               friend_id: friendID,
               statusdemande:"pending",
+              message:messagevalue,
               });
 
               return newreqami;

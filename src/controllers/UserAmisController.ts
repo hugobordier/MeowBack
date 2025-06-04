@@ -6,7 +6,7 @@ class UserAmisController{
     static async createRequestAmi(req: Request, res: Response) {
         try{
             
-            const { friend_id } = req.body;
+            const { friend_id,message } = req.body;
             
             if (!req.user?.id) {
                 return ApiResponse.badRequest(res, "Well t'as pas ta carte d'identitée");
@@ -14,7 +14,7 @@ class UserAmisController{
             if (!friend_id) {
                 return ApiResponse.badRequest(res, "Id de l'ami à envoyer la demande requis");
             }
-            const newdemande = await UserAmisService.createRequestAmi(req.user?.id,friend_id);
+            const newdemande = await UserAmisService.createRequestAmi(req.user?.id,friend_id,message);
 
             return ApiResponse.created(res,"Demande d'ami ajoutée avec succès",newdemande);
         }catch (error:any) {
