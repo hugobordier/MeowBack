@@ -57,7 +57,7 @@ swaggerRouter.route('/').post(
 );
 
   
-  swaggerRouter.route('/:id').get(
+  swaggerRouter.route('/ByID/:id').get(
     {
       description: 'Get a pet by ID',
       summary: 'Retrieve a pet by its unique identifier',
@@ -79,6 +79,22 @@ swaggerRouter.route('/').post(
       },
     },
     PetController.getPetById,
+    authenticate
+  );
+  
+  swaggerRouter.route('/user').get(
+    {
+      description: 'Get all pets for the current user',
+      summary: 'Retrieve a list of all pets for the current user',
+      tags: ['Pets'],
+      security:true,
+      responses: {
+        '200': { description: 'List of pets retrieved successfully' },
+        '400': { description: 'Bad request' },
+        '500': { description: 'Internal server error' },
+      },
+    },
+    PetController.getAllPetsForAUser,
     authenticate
   );
 

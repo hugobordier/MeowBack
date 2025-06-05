@@ -157,6 +157,31 @@ class PetService {
         }
       }
 
+          static async getAllPetsForAUser({ userId,page, perPage }: { page: number, perPage: number ,userId: string}): Promise<{ pets: pets[]; total: number }> {
+        try {
+            const offset = (page - 1) * perPage;
+            const pettrouvés = await pets.findAll({limit:perPage,offset:offset, where: { user_id: userId }});
+            if (pettrouvés.length === 0) {
+              throw ApiError.notFound("Pas de pets renseigné");
+            }
+            const totalpets = await pets.count({ where: { user_id: userId } });
+  
+            return{
+              pets : pettrouvés,
+              total : totalpets
+            };
+
+        } catch (error) {
+            console.error('Erreur dans getAllPetsForAUser',error);
+            if (error instanceof ApiError) {
+              throw error;
+            }
+            throw ApiError.internal(
+              'Erreur inconnue dans getAllPetsForAUser'
+            );
+          }
+    }
+
       static async uploadImagePetProfile(petId: string, file: Express.Multer.File) {
         try {
           const pet = await pets.findByPk(petId);
