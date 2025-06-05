@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import PetService from '@/services/PetService';
 import { ApiResponse } from '@utils/ApiResponse';
+import ApiError from '@utils/ApiError';
 
 class PetController{
 
@@ -30,6 +31,26 @@ class PetController{
       } catch (error) {
         return ApiResponse.internalServerError(res,"Erreur lors de la récupération des animaux");
       }
+    }
+
+        static async getAllPetsForAUser(req: Request, res: Response) {
+        try {
+            if(!req.user?.id){
+                return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
+            }
+            const page = parseInt(req.query.page as string) || 1;
+            const perPage = parseInt(req.query.perPage as string) || 10;
+
+            const {pets,total} = await PetService.getAllPetsForAUser({userId: req.user!.id,page,perPage});
+            const pagination= ApiResponse.createPagination( total, page, perPage);
+
+            return ApiResponse.ok(res,"Tous les pets de l'utilisateur courant ont été récupérées",pets,pagination);
+        } catch (error) {
+            if(error instanceof ApiError){
+                return ApiResponse.notFound(res,"Pas de pets trouvés pour l'utilisateur")
+            }
+            return ApiResponse.internalServerError(res, "Erreur lors de getAllPetsForAUser");
+        }
     }
     
   
