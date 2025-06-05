@@ -12,10 +12,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+      origin: '*',
+      methods: ['GET', 'POST'],
   },
 });
-
+initWebSocket(io);
 export { io, server };
 
 const port = 3000;
@@ -60,8 +61,6 @@ async function startServer() {
     await db.sync();
     console.log('Database synced successfully.');
 
-    initWebSocket(server);
-
     server.listen(port, '0.0.0.0', () => {
       console.log(`✅Server running on port ${port}`);
     });
@@ -73,17 +72,3 @@ async function startServer() {
 }
 
 startServer();
-
-io.on('connection', (socket) => {
-  console.log('new user connected:'); //Qd new user se connecte 
-  console.log(socket.id); //unique identifier for the socket session
-
-  socket.on('chat message', (msg) =>{ //Qd user envoie msg
-    console.log('Message:', msg);
-    io.emit('chat message', msg);//envoyer a tout le monde: io.emit(eventName, args)
-  });
-
-  socket.on('disconnect', () => {
-        console.log('User disconnected');
-  });
-})
