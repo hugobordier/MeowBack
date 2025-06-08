@@ -48,6 +48,7 @@ class UserController {
         rating: user.rating,
         phoneNumber: user.phoneNumber,
         createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       return ApiResponse.ok(res, 'Utilisateur trouvé', publicUser);
