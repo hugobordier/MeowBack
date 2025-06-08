@@ -13,10 +13,11 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: '*',
+      origin: '*',
+      methods: ['GET', 'POST'],
   },
 });
-
+initWebSocket(io);
 export { io, server };
 
 const port = 3000;
@@ -60,8 +61,6 @@ async function startServer() {
     );
     await db.sync();
     console.log('Database synced successfully.');
-
-    initWebSocket(server);
 
     server.listen(port, '0.0.0.0', () => {
       console.log(`✅Server running on port ${port}`);
