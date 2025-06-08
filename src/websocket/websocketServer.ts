@@ -8,6 +8,7 @@ import UserService from '@/services/UserService';
 dotenv.config();
 
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET!;
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 
 
 const users: { [userId: string]: string } = {};
@@ -26,12 +27,52 @@ export const initWebSocket = (io: Server): void => {
   
     try{
       if (!token) {
-        console.log(`❌ Aucun token fourni`);
+        console.log('❌ Aucun token fourni');
         socket.emit("invalid-token", "Aucun token fourni.");
         socket.disconnect();
         return;
       }
-      const decoded = jwt.verify(token, accessTokenSecret) as JwtPayload;
+      let decoded: JwtPayload;
+
+    try {
+      decoded = jwt.verify(token, accessTokenSecret) as JwtPayload;
+    } catch (err: any) {
+      if (err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+        const refreshToken = socket.handshake.query.refreshToken;
+        if (!refreshToken || typeof refreshToken !== "string") {
+        console.error("❌ Aucun refresh token fourni");
+        socket.emit("invalid-token", "Aucun refresh token.");
+        socket.disconnect();
+        return;
+      }
+      try {
+        const refreshPayload = jwt.verify(refreshToken, refreshTokenSecret) as JwtPayload;
+          const userId = refreshPayload.id;
+
+      
+          const newAccessToken = jwt.sign({ id: userId }, accessTokenSecret, {
+            expiresIn: "1h",
+          });
+
+      // Envoie au client
+      socket.emit("new-access-token", newAccessToken);
+      decoded = jwt.verify(newAccessToken, accessTokenSecret) as JwtPayload;
+
+      console.log("♻️ AccessToken régénéré via refreshToken");
+
+        } catch (refreshError) {
+          console.error("❌ Refresh token invalide :", refreshError);
+          socket.emit("invalid-token", "Session expirée.");
+          socket.disconnect();
+          return;
+        }
+      } else {
+        console.error("❌ Erreur JWT inconnue :", err);
+        socket.emit("invalid-token", "Token invalide.");
+        socket.disconnect();
+        return;
+      } 
+    }
       const userId = decoded.id;
       const user = await UserService.getUserById(userId); 
 
@@ -69,7 +110,7 @@ export const initWebSocket = (io: Server): void => {
     
     socket.on('message', (msg) => { //Qd user envoie msg
       const username = socket.data.user?.username || 'inconnu';
-      console.log("Message reçu :", msg);
+      console.log("Message reçu :", msg.message);
       console.log("Destinataire :", msg.to);
       console.log(`De : ${username}`);
       io.emit('message', msg); // Envoie le message à tout le monde: io.emit(eventName, args   )
@@ -98,4 +139,3 @@ export const initWebSocket = (io: Server): void => {
 };//verifier accesstoken
 //envoyeraccesstoken
 //deduire en fonction de ca le userid
-//
