@@ -1,12 +1,14 @@
 import { DataTypes, Model } from 'sequelize';
 import db from '../config/config';
 import User from './User';
+import PetSitter from './PetSitter';
 
 class UserAmis extends Model {
   declare id: string;
   declare user_id: string;
-  declare friend_id: string;
+  declare petsitter_id: string;
   declare statusdemande: 'accepted' | 'refused' | 'pending';
+  declare message:string;
   declare createdAt: Date;
   declare updatedAt: Date;
 }
@@ -27,11 +29,11 @@ UserAmis.init(
       },
       onDelete: 'CASCADE',
     },
-    friend_id: {
+    petsitter_id: {
       type: DataTypes.UUID,
       allowNull: true,
       references: {
-        model: 'User', 
+        model: 'PetSitter', 
         key: 'id',
       },
       onDelete: 'CASCADE',
@@ -40,6 +42,10 @@ UserAmis.init(
       type: DataTypes.ENUM('accepted', 'refused', 'pending'),
       allowNull: false,
       defaultValue: 'pending',
+    },
+      message: {
+      type: DataTypes.STRING,
+      allowNull: true,
     },
   },
   {
@@ -53,7 +59,7 @@ UserAmis.init(
 User.hasMany(UserAmis, { foreignKey: 'user_id', as: 'amisAjoutes' });
 UserAmis.belongsTo(User, { foreignKey: 'user_id', as: 'auteur' });
 
-User.hasMany(UserAmis, { foreignKey: 'friend_id', as: 'demandesRecues' });
-UserAmis.belongsTo(User, { foreignKey: 'friend_id', as: 'amiCible' });
+PetSitter.hasMany(UserAmis, { foreignKey: 'petsitter_id', as: 'demandesRecues' });
+UserAmis.belongsTo(PetSitter, { foreignKey: 'petsitter_id', as: 'amiCible' });
 
 export default UserAmis;

@@ -8,31 +8,33 @@ const swaggerRouter = new SwaggerRouter();
 
 swaggerRouter.route('/').post(
   {
-    description: 'Create a new friend request',
-    summary: 'Add a friend request',
-    tags: ['Amis'],
+    description: 'Create a new petsitting request',
+    summary: 'Add a petsitting request',
+    tags: ['Demande de Petsitting'],
     security: true,
     requestBody: {
-      description: 'Friend data to be added',
+      description: 'petsitting data to be added',
       required: true,
       schema: {
         type: 'object',
         properties: {
-          friend_id: { type: 'string',format:"uuid",example:"51b28e48-2133-4822-b515-294f840d3e81"},
+          petsitter_id: { type: 'string',format:"uuid",example:"4f330bea-b96c-47d3-82ac-b6de6a577a6a"},
+          message:{type:'string',example:"Salut pignouf"},
         },
-        required: ['friend_id'],
+        required: ['petsitter_id'],
       },
     },
     responses: {
       '201': {
-        description: 'Friend request created successfully',
+        description: 'petsitting request created successfully',
         schema: {
           type: 'object',
           properties: {
             id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
             user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-            friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
+            petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
+            message: { type: 'string', example: 'Salut' },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
@@ -48,11 +50,11 @@ swaggerRouter.route('/').post(
 );
 
   
-  swaggerRouter.route('/:id').get(
+  swaggerRouter.route('/ById/:id').get(
     {
-      description: 'Get friend request by ID',
-      summary: 'Retrieve a friend request by its unique identifier',
-      tags: ['Amis'],
+      description: 'Get petsitting request by ID',
+      summary: 'Retrieve a petsitting request by its unique identifier',
+      tags: ['Demande de Petsitting'],
       security:true,
       parameters: [
         {
@@ -63,9 +65,9 @@ swaggerRouter.route('/').post(
         },
       ],
       responses: {
-        '200': { description: 'friend request found' },
-        '404': { description: 'friend request not found' },
-        '400': { description: 'No friend request for this ID' },
+        '200': { description: 'petsitting request found' },
+        '404': { description: 'petsitting request not found' },
+        '400': { description: 'No petsitting request for this ID' },
         '500': { description: 'Internal server error'}
       },
     },
@@ -73,14 +75,14 @@ swaggerRouter.route('/').post(
     authenticate
   );
 
-  swaggerRouter.route('/').get(
+    swaggerRouter.route('/user/').get(
     {
-      description: 'Get all friend requests',
-      summary: 'Retrieve a list of all friend requests',
-      tags: ['Amis'],
+      description: 'Get all petsitting requests for the current user',
+      summary: 'Retrieve a list of all petsitting requests for the current user',
+      tags: ['Demande de Petsitting'],
       security:true,
       responses: {
-        '200': { description: 'List of friend requests retrieved successfully' },
+        '200': { description: 'List of petsitting requests for the current user retrieved successfully' },
         '400': { description: 'Bad request' },
         '500': { description: 'Internal server error' },
       },
@@ -88,12 +90,45 @@ swaggerRouter.route('/').post(
     UserAmisController.getAllUserAmisForAUser,
     authenticate
   );
+      swaggerRouter.route('/petsitter/').get(
+    {
+      description: 'Get all petsitter requests for a petsitter',
+      summary: 'Retrieve a list of all petsitting requests recieved if you have a petsitter acount',
+      tags: ['Demande de Petsitting'],
+      security:true,
+      responses: {
+        '200': { description: 'List of petsitting requests for the petsitter retrieved successfully' },
+        '400': { description: 'Bad request' },
+        '500': { description: 'Internal server error' },
+      },
+    },
+    UserAmisController.getAllUserAmisForAPetsitter,
+    authenticate
+  );
+  
+  swaggerRouter.route('/').get(
+    {
+      description: 'Get all petsitting requests',
+      summary: 'Retrieve a list of all petsitting requests',
+      tags: ['Demande de Petsitting'],
+      security:true,
+      responses: {
+        '200': { description: 'List of petsitting requests retrieved successfully' },
+        '400': { description: 'Bad request' },
+        '500': { description: 'Internal server error' },
+      },
+    },
+    UserAmisController.getAlldemandeamis,
+    authenticate
+  );
+
+  
   
     swaggerRouter.route('/ReponseDemande/:iddemandeur').patch(
     {
-      description: 'Respond to a friend request',
-      summary: 'Respond to an existing friend request',
-      tags: ['Amis'],
+      description: 'Respond to a petsitting request',
+      summary: 'Respond to an existing petsitting request',
+      tags: ['Demande de Petsitting'],
       security:true,
        parameters: [
         {
@@ -104,7 +139,7 @@ swaggerRouter.route('/').post(
         },
       ],
       requestBody: {
-        description: 'friend request data to be updated by response',
+        description: 'petsitting request data to be updated by response',
         required: true,
         schema: {
           type: 'object',
@@ -115,19 +150,20 @@ swaggerRouter.route('/').post(
       },
       responses: {
         '200': {
-          description: 'Response to friend request successfull',
+          description: 'Response to petsitting request successfull',
           schema: {
             type: 'object',
             properties: {
               success: { type: 'boolean', example: true },
-              message: { type: 'string', example: 'friend request mise à jour avec succès' },
+              message: { type: 'string', example: 'petsitting request mise à jour avec succès' },
               UserAmis: {
                 type: 'object',
                 properties: {
                   id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
                   user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-                  friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
+                  petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
+                  message: { type: 'string', example: 'Salut' },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },
@@ -135,7 +171,7 @@ swaggerRouter.route('/').post(
             },
           },
         },
-        '404': { description: 'friend request not found' },
+        '404': { description: 'petsitting request not found' },
         '400': { description: 'Bad request' },
         '500': { description: 'Internal server error' },
       },
@@ -148,9 +184,9 @@ swaggerRouter.route('/').post(
 
   swaggerRouter.route('/:id').patch(
     {
-      description: 'Update a friend request',
-      summary: 'Modify details of an existing friend request',
-      tags: ['Amis'],
+      description: 'Update a petsitting request',
+      summary: 'Modify details of an existing petsitting request',
+      tags: ['Demande de Petsitting'],
       security:true,
       parameters: [
         {
@@ -161,32 +197,34 @@ swaggerRouter.route('/').post(
         },
       ],
       requestBody: {
-        description: 'friend request data to be updated',
+        description: 'petsitting request data to be updated',
         required: true,
         schema: {
           type: 'object',
             properties: {
             user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-            friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
+            petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
+            message: { type: 'string', example: 'Salut' },
           },
         },
       },
       responses: {
         '200': {
-          description: 'friend request updated successfully',
+          description: 'petsitting request updated successfully',
           schema: {
             type: 'object',
             properties: {
               success: { type: 'boolean', example: true },
-              message: { type: 'string', example: 'friend request mise à jour avec succès' },
+              message: { type: 'string', example: 'petsitting request mise à jour avec succès' },
               UserAmis: {
                 type: 'object',
                 properties: {
                   id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
                   user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' },
-                  friend_id: { type: 'string', format: 'uuid', example: '15987b72-70c7-454e-ab06-21751706384b' },
+                  petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
+                  message: { type: 'string', example: 'Salut' },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },
@@ -194,7 +232,7 @@ swaggerRouter.route('/').post(
             },
           },
         },
-        '404': { description: 'friend request not found' },
+        '404': { description: 'petsitting request not found' },
         '400': { description: 'Bad request' },
         '500': { description: 'Internal server error' },
       },
@@ -206,9 +244,9 @@ swaggerRouter.route('/').post(
 
   swaggerRouter.route('/:id').delete(
     {
-      description: 'Delete a friend request',
-      summary: 'Remove a friend request from the database',
-      tags: ['Amis'],
+      description: 'Delete a petsitting request',
+      summary: 'Remove a petsitting request from the database',
+      tags: ['Demande de Petsitting'],
       security:true,
       parameters: [
         {
@@ -219,9 +257,9 @@ swaggerRouter.route('/').post(
         },
       ],
       responses: {
-        '200': { description: 'friend request deleted successfully' },
+        '200': { description: 'petsitting request deleted successfully' },
         '400': { description: 'Bad request' },
-        '404': { description: 'friend request not found' },
+        '404': { description: 'petsitting request not found' },
         '500': { description: 'Internal serveur error' },
       },
     },
