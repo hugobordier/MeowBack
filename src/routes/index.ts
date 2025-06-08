@@ -7,6 +7,7 @@ import PetSitterRatingRoute from './PetSitterRatingRoute';
 import PetSitterReviewRoute from './PetSitterReviewRoute';
 import PetImageRoutes from './PetImageRoutes';
 import UserAmisRoute from './UserAmisRoute';
+import NotificationTokenRoutes from './NotificationTokenRoutes';
 
 export interface IRoute {
   path: string;
@@ -46,6 +47,10 @@ const routes: IRoute[] = [
   {
     path: '/Amis',
     route: UserAmisRoute,
+  },
+  {
+    path: '/NotificationToken',
+    route: NotificationTokenRoutes,
   },
 ];
 
