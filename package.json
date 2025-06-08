@@ -46,6 +46,7 @@
     "pg-hstore": "^2.3.4",
     "prettier": "^3.3.3",
     "querystring": "^0.2.1",
+    "react-bootstrap-icons": "^1.11.6",
     "resend": "^4.1.2",
     "sequelize": "^6.37.5",
     "sequelize-cli": "^6.6.2",
