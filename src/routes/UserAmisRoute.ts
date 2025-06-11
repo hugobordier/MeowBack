@@ -20,6 +20,14 @@ swaggerRouter.route('/').post(
         properties: {
           petsitter_id: { type: 'string',format:"uuid",example:"4f330bea-b96c-47d3-82ac-b6de6a577a6a"},
           message:{type:'string',example:"Salut pignouf"},
+          petidtable: {
+            type: 'array',
+            items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+            example: [
+              "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+              "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+            ]
+          },
         },
         required: ['petsitter_id'],
       },
@@ -35,6 +43,14 @@ swaggerRouter.route('/').post(
             petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             message: { type: 'string', example: 'Salut' },
+            petidtable: {
+              type: 'array',
+              items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+              example: [
+                "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+              ]
+            },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
@@ -230,6 +246,14 @@ swaggerRouter.route('/').post(
                   petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
+                  petidtable: {
+                    type: 'array',
+                    items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+                    example: [
+                      "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                      "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+                    ]
+                  },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },
@@ -272,6 +296,14 @@ swaggerRouter.route('/').post(
             petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             message: { type: 'string', example: 'Salut' },
+            petidtable: {
+              type: 'array',
+              items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+              example: [
+                "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+              ]
+            },
           },
         },
       },
@@ -291,6 +323,14 @@ swaggerRouter.route('/').post(
                   petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
+                  petidtable: {
+                    type: 'array',
+                    items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+                    example: [
+                      "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                      "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+                    ]
+                  },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },

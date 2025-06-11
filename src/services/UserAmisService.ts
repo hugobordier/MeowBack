@@ -7,7 +7,7 @@ import PetSitterService from './PetsitterService';
 
 
 class UserAmisService {
-    static async createRequestAmi(userID: string,petsitterID:string,messagevalue:string): Promise<UserAmis> {
+    static async createRequestAmi(userID: string,petsitterID:string,messagevalue:string,petidtable:string[]): Promise<UserAmis> {
         try {
             if (!userID) {
                 throw ApiError.badRequest("ID de l'user requis");
@@ -23,6 +23,7 @@ class UserAmisService {
               petsitter_id: petsitterID,
               statusdemande:"pending",
               message:messagevalue,
+              petidtable:petidtable,
               });
 
               return newreqami;

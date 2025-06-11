@@ -2,6 +2,7 @@ import { DataTypes, Model } from 'sequelize';
 import db from '../config/config';
 import User from './User';
 import PetSitter from './PetSitter';
+import Pet from './pets';
 
 class UserAmis extends Model {
   declare id: string;
@@ -11,6 +12,7 @@ class UserAmis extends Model {
   declare message:string;
   declare createdAt: Date;
   declare updatedAt: Date;
+  declare petidtable:string[];
 }
 
 UserAmis.init(
@@ -47,6 +49,10 @@ UserAmis.init(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    petidtable: {
+      type: DataTypes.ARRAY(DataTypes.UUID),
+      allowNull: true,
+    }
   },
   {
     sequelize: db,
