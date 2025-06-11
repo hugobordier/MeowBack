@@ -21,7 +21,7 @@ class PetController{
       try {
 
         const page = parseInt(req.query.page as string) || 1;
-        const perPage = parseInt(req.query.perPage as string) || 10;
+        const perPage = parseInt(req.query.limit as string) || 10;
 
         const {pets,total} = await PetService.getAllPets({page,perPage});
         const pagination= ApiResponse.createPagination( total, page, perPage);
@@ -39,7 +39,7 @@ class PetController{
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
             }
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
 
             const {pets,total} = await PetService.getAllPetsForAUser({userId: req.user!.id,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);

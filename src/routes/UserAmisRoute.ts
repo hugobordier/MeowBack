@@ -81,6 +81,28 @@ swaggerRouter.route('/').post(
       summary: 'Retrieve a list of all petsitting requests for the current user',
       tags: ['Demande de Petsitting'],
       security:true,
+      parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
+      },
+      ],
       responses: {
         '200': { description: 'List of petsitting requests for the current user retrieved successfully' },
         '400': { description: 'Bad request' },
@@ -96,6 +118,28 @@ swaggerRouter.route('/').post(
       summary: 'Retrieve a list of all petsitting requests recieved if you have a petsitter acount',
       tags: ['Demande de Petsitting'],
       security:true,
+      parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
+      },
+      ],
       responses: {
         '200': { description: 'List of petsitting requests for the petsitter retrieved successfully' },
         '400': { description: 'Bad request' },
@@ -112,6 +156,28 @@ swaggerRouter.route('/').post(
       summary: 'Retrieve a list of all petsitting requests',
       tags: ['Demande de Petsitting'],
       security:true,
+      parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
+      },
+      ],
       responses: {
         '200': { description: 'List of petsitting requests retrieved successfully' },
         '400': { description: 'Bad request' },

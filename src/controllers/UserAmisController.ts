@@ -51,7 +51,7 @@ class UserAmisController{
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
             }
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
 
             const {userAmis,total} = await UserAmisService.getAllUserAmisForAUser({userId: req.user!.id,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
@@ -71,7 +71,7 @@ class UserAmisController{
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
             }
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
             
             const {userAmis,total} = await UserAmisService.getAllUserAmisForAPetsitter({currentuserid: req.user!.id,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
@@ -91,7 +91,7 @@ class UserAmisController{
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
             }
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
 
             const {userAmis,total} = await UserAmisService.getAllUserAmis({page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
