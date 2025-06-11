@@ -57,7 +57,7 @@ class PetImagesController{
             const { petId } = req.params;
 
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
 
             const {petImages,total} = await PetImagesService.getPetImages({petId,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
