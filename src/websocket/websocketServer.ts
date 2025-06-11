@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import UserService from '@/services/UserService';
 
 dotenv.config();
-
+console.log("🔥 Serveur WEBSOCKET démarré (c'est le bon fichier) !");
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET!;
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string;
 
@@ -110,10 +110,17 @@ export const initWebSocket = (io: Server): void => {
     
     socket.on('message', (msg) => { //Qd user envoie msg
       const username = socket.data.user?.username || 'inconnu';
+      const recipientSocketId = users[msg.to];
       console.log("Message reçu :", msg.message);
       console.log("Destinataire :", msg.to);
       console.log(`De : ${username}`);
-      io.emit('message', msg); // Envoie le message à tout le monde: io.emit(eventName, args   )
+      io.to(recipientSocketId).emit('message',{
+        from: username,
+        to: msg.to,
+        message: msg.message
+      }); 
+      console.log(`👽 Message privé envoyé à ${recipientSocketId} :`, msg);
+      // Envoie le message à tout le monde: io.emit(eventName, args   )
     });
     handlePrivateMessages(socket, io); //pour le chat privé
     socket.on('disconnect', () => {
