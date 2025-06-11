@@ -9,33 +9,39 @@ class UserAmisService {
   static async createRequestAmi(
     userID: string,
     petsitterID: string,
-    messagevalue: string
+    messagevalue: string,
+    petidtable: string[]
   ): Promise<UserAmis> {
     try {
       if (!userID) {
         throw ApiError.badRequest("ID de l'user requis");
       }
+
+      if (userID === petsitterID) {
+        throw ApiError.badRequest(
+          "On ne peut pas se faire une demande de petsitting à soi-même"
+        );
+      }
+
       const existing = await UserAmis.findOne({
         where: { user_id: petsitterID, petsitter_id: userID },
       });
       const existing2 = await UserAmis.findOne({
         where: { user_id: userID, petsitter_id: petsitterID },
       });
-      if (userID == petsitterID) {
-        throw ApiError.badRequest(
-          'On ne peut pas se faire une demande de petsitting à soi-même'
-        );
-      }
+
       if (!existing && !existing2) {
         const newreqami = await UserAmis.create({
           user_id: userID,
           petsitter_id: petsitterID,
           statusdemande: 'pending',
           message: messagevalue,
+          petidtable: petidtable,
         });
 
         return newreqami;
       }
+
       throw ApiError.badRequest('La demande de petsitting existe déjà');
     } catch (error) {
       console.error('Erreur dans createRequestAmi', error);
@@ -116,7 +122,7 @@ class UserAmisService {
         limit: perPage,
         offset: offset,
         where: { user_id: userId },
-        order: [['createdAt', 'DESC']], // Tri du plus récent au plus ancien
+        order: [['createdAt', 'DESC']],
       });
       if (userAmis.length === 0) {
         throw ApiError.notFound(
@@ -155,20 +161,23 @@ class UserAmisService {
           "L'utilisateur courant n'a pas de compte petsitter"
         );
       }
+
       const offset = (page - 1) * perPage;
       const userAmis = await UserAmis.findAll({
         limit: perPage,
         offset: offset,
-        where: { petsitter_id: petsitter?.id },
-        order: [['createdAt', 'DESC']], // Tri du plus récent au plus ancien
+        where: { petsitter_id: petsitter.id },
+        order: [['createdAt', 'DESC']],
       });
+
       if (userAmis.length === 0) {
         throw ApiError.notFound(
           'Demande de petsitting inexistantes pour ce user'
         );
       }
+
       const totalAmis = await UserAmis.count({
-        where: { petsitter_id: petsitter?.id },
+        where: { petsitter_id: petsitter.id },
       });
 
       return {
@@ -202,6 +211,7 @@ class UserAmisService {
       throw ApiError.internal('Erreur inconnue dans deleteDemandeAmi');
     }
   }
+
   static async ResponseToFriendRequest(
     currentuserid: string,
     status_demande: statusDemande,
@@ -214,6 +224,7 @@ class UserAmisService {
       if (!iddemandeur) {
         throw ApiError.badRequest("ID du demandeur d'ami requis");
       }
+
       const petsitter =
         await PetSitterService.getPetSitterByUserId(currentuserid);
       if (!petsitter) {
@@ -221,10 +232,11 @@ class UserAmisService {
           "L'utilisateur courant n'a pas de compte petsitter"
         );
       }
+
       const userami = await UserAmis.findOne({
         where: {
           user_id: iddemandeur,
-          petsitter_id: petsitter?.id,
+          petsitter_id: petsitter.id,
           statusdemande: statusDemande.Pending,
         },
       });
@@ -234,12 +246,12 @@ class UserAmisService {
 
       const [updated] = await UserAmis.update(
         { statusdemande: status_demande },
-        { where: { petsitter_id: petsitter?.id, user_id: iddemandeur } }
+        { where: { petsitter_id: petsitter.id, user_id: iddemandeur } }
       );
       const updatedrequestami =
         updated > 0
           ? await UserAmis.findOne({
-              where: { petsitter_id: petsitter?.id, user_id: iddemandeur },
+              where: { petsitter_id: petsitter.id, user_id: iddemandeur },
             })
           : null;
 
@@ -263,13 +275,11 @@ class UserAmisService {
       }
 
       const userami = await UserAmis.findByPk(id);
-
       if (!userami) {
         throw ApiError.notFound('demande de petsitting not found.');
       }
 
       const [updated] = await UserAmis.update(data, { where: { id } });
-
       const updatedUserAmi = updated > 0 ? await UserAmis.findByPk(id) : null;
 
       return [updated > 0, updatedUserAmi];
@@ -282,4 +292,5 @@ class UserAmisService {
     }
   }
 }
+
 export default UserAmisService;
