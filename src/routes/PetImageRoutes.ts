@@ -69,12 +69,33 @@ swaggerRouter.route('/:petId').get(
     summary: 'Retrieve all images for a specific pet',
     tags: ['Pet Images'],
     security: true,
+    
     parameters: [
       {
         in: 'path',
         name: 'petId',
         required: true,
         schema: { type: 'string', format: 'uuid' },
+      },
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
       },
     ],
     responses: {

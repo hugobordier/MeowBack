@@ -20,6 +20,14 @@ swaggerRouter.route('/').post(
         properties: {
           petsitter_id: { type: 'string',format:"uuid",example:"4f330bea-b96c-47d3-82ac-b6de6a577a6a"},
           message:{type:'string',example:"Salut pignouf"},
+          petidtable: {
+            type: 'array',
+            items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+            example: [
+              "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+              "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+            ]
+          },
         },
         required: ['petsitter_id'],
       },
@@ -35,6 +43,14 @@ swaggerRouter.route('/').post(
             petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             message: { type: 'string', example: 'Salut' },
+            petidtable: {
+              type: 'array',
+              items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+              example: [
+                "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+              ]
+            },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
@@ -81,6 +97,28 @@ swaggerRouter.route('/').post(
       summary: 'Retrieve a list of all petsitting requests for the current user',
       tags: ['Demande de Petsitting'],
       security:true,
+      parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
+      },
+      ],
       responses: {
         '200': { description: 'List of petsitting requests for the current user retrieved successfully' },
         '400': { description: 'Bad request' },
@@ -96,6 +134,28 @@ swaggerRouter.route('/').post(
       summary: 'Retrieve a list of all petsitting requests recieved if you have a petsitter acount',
       tags: ['Demande de Petsitting'],
       security:true,
+      parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
+      },
+      ],
       responses: {
         '200': { description: 'List of petsitting requests for the petsitter retrieved successfully' },
         '400': { description: 'Bad request' },
@@ -112,6 +172,28 @@ swaggerRouter.route('/').post(
       summary: 'Retrieve a list of all petsitting requests',
       tags: ['Demande de Petsitting'],
       security:true,
+      parameters: [
+      {
+        name: 'page',
+        in: 'query',
+        required: false,
+        description: 'Numéro de page',
+        schema: {
+          type: 'integer',
+          default: 1,
+        },
+      },
+      {
+        name: 'limit',
+        in: 'query',
+        required: false,
+        description: "Nombre d'éléments par page",
+        schema: {
+          type: 'integer',
+          default: 10,
+        },
+      },
+      ],
       responses: {
         '200': { description: 'List of petsitting requests retrieved successfully' },
         '400': { description: 'Bad request' },
@@ -164,6 +246,14 @@ swaggerRouter.route('/').post(
                   petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
+                  petidtable: {
+                    type: 'array',
+                    items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+                    example: [
+                      "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                      "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+                    ]
+                  },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },
@@ -206,6 +296,14 @@ swaggerRouter.route('/').post(
             petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             message: { type: 'string', example: 'Salut' },
+            petidtable: {
+              type: 'array',
+              items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+              example: [
+                "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+              ]
+            },
           },
         },
       },
@@ -225,6 +323,14 @@ swaggerRouter.route('/').post(
                   petsitter_id: { type: 'string', format: 'uuid', example: '4f330bea-b96c-47d3-82ac-b6de6a577a6a' },
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
+                  petidtable: {
+                    type: 'array',
+                    items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+                    example: [
+                      "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                      "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+                    ]
+                  },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },

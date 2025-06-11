@@ -2,20 +2,30 @@ import type { Request, Response } from 'express';
 import { ApiResponse } from '@utils/ApiResponse';
 import UserAmisService from '@/services/UserAmisService';
 import ApiError from '@utils/ApiError';
-
+import Pet from '@/models/pets';
 class UserAmisController{
     static async createRequestAmi(req: Request, res: Response) {
         try{
             
-            const { petsitter_id,message } = req.body;
-            
+            const { petsitter_id,message,petidtable } = req.body;
             if (!req.user?.id) {
                 return ApiResponse.badRequest(res, "Well t'as pas ta carte d'identitée");
             }
             if (!petsitter_id) {
                 return ApiResponse.badRequest(res, "Id de l'ami à envoyer la demande requis");
             }
-            const newdemande = await UserAmisService.createRequestAmi(req.user?.id,petsitter_id,message);
+            if(petidtable && Array.isArray(petidtable) && petidtable.length > 0){
+                if (petidtable.length > 5) {
+                    return ApiResponse.badRequest(res, "Tu ne peux pas faire de demande de petsitting pour plus de 5 pets");
+                }
+                const pettableuser = await Pet.findAll({where: {user_id: req.user?.id}});
+                const idpetsuser = pettableuser.map(pet => pet.id);
+                for (let i=0;i<petidtable.length;i++){
+                    if (!idpetsuser.includes(petidtable[i])) {
+                        return ApiResponse.badRequest(res, "Tu ne peux pas faire de demande de petsitting pour des pets qui ne t'appartiennent pas");
+                    }
+                }}
+            const newdemande = await UserAmisService.createRequestAmi(req.user?.id,petsitter_id,message,petidtable);
 
             return ApiResponse.created(res,"Demande de petsitting ajoutée avec succès",newdemande);
         }catch (error:any) {
@@ -51,7 +61,7 @@ class UserAmisController{
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
             }
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
 
             const {userAmis,total} = await UserAmisService.getAllUserAmisForAUser({userId: req.user!.id,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
@@ -71,7 +81,7 @@ class UserAmisController{
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
             }
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
             
             const {userAmis,total} = await UserAmisService.getAllUserAmisForAPetsitter({currentuserid: req.user!.id,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
@@ -91,7 +101,7 @@ class UserAmisController{
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
             }
             const page = parseInt(req.query.page as string) || 1;
-            const perPage = parseInt(req.query.perPage as string) || 10;
+            const perPage = parseInt(req.query.limit as string) || 10;
 
             const {userAmis,total} = await UserAmisService.getAllUserAmis({page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
@@ -158,7 +168,17 @@ class UserAmisController{
             if (!id){
                 return ApiResponse.badRequest(res,"ID de la Demande de petsitting requis");
             }
-
+            if(req.body.petidtable && Array.isArray(req.body.petidtable) && req.body.petidtable.length > 0){
+                if (req.body.petidtable.length > 5) {
+                    return ApiResponse.badRequest(res, "Tu ne peux pas faire de demande de petsitting pour plus de 5 pets");
+                }
+                const pettableuser = await Pet.findAll({where: {user_id: req.user?.id}});
+                const idpetsuser = pettableuser.map(pet => pet.id);
+                for (let i=0;i<req.body.petidtable.length;i++){
+                    if (!idpetsuser.includes(req.body.petidtable[i])) {
+                        return ApiResponse.badRequest(res, "Tu ne peux pas faire de demande de petsitting pour des pets qui ne t'appartiennent pas");
+                    }
+                }}
 
             const updatedfriendrequest = await UserAmisService.updateDemandeAmiWithAllParameters(id, req.body);
             return ApiResponse.ok(res, "Demande de petsitting mis à jour",updatedfriendrequest);
