@@ -45,7 +45,9 @@ class PetSitterService {
     }
   }
 
-  static async getPetSitterById(id: string): Promise<PetSitter | null> {
+  static async getPetSitterById(
+    id: string
+  ): Promise<{ petSitter: PetSitter; user: User | null } | null> {
     try {
       if (!id) {
         throw new Error('ID du petsitter non spécifié');
@@ -53,11 +55,15 @@ class PetSitterService {
 
       const petSitter = await PetSitter.findByPk(id);
 
+      const user = petSitter?.user_id
+        ? await UserService.getUserById(petSitter.user_id)
+        : null;
+
       if (!petSitter) {
         return null;
       }
 
-      return petSitter;
+      return { petSitter, user };
     } catch (error) {
       console.error(`Error in getPetSitterById(${id}):`, error);
       if (error instanceof Error) {
