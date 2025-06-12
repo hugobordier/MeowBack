@@ -24,8 +24,8 @@ swaggerRouter.route('/').post(
             type: 'array',
             items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
             example: [
-              "ed4244cc-e986-4a01-abfd-3d606dbf227c",
-              "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+              "38a5ad1a-ef05-42f4-b5c6-44e38a7c8734",
+              "0e9db21b-e95b-492b-a6f9-1bfab45e6ebe"
             ]
           },
         },
@@ -44,13 +44,61 @@ swaggerRouter.route('/').post(
             statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
             message: { type: 'string', example: 'Salut' },
             petidtable: {
-              type: 'array',
-              items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
-              example: [
-                "ed4244cc-e986-4a01-abfd-3d606dbf227c",
-                "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
-              ]
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+                name: { type: 'string', example: 'Miaou' },
+                breed: { type: 'string', example: 'Siamois' },
+                age: { type: 'integer', example: 3 },
+                species: { type: 'string', example: 'Chat' },
+                allergy: { type: 'string', example: 'aucune' },
+                weight: { type: 'number', example: 4.2 },
+                diet: { type: 'string', example: 'croquettes' },
+                description: { type: 'string', example: 'Très joueur' },
+                photo_url: { type: 'string', example: 'https://example.com/photo.jpg' },
+                gender: { type: 'string', enum: ['Male', 'Female', 'hermaphrodite'], example: 'Male' },
+                neutered: { type: 'boolean', example: true },
+                color: { type: 'string', example: 'gris' },
+                user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' }
+              }
             },
+            example: [
+              {
+                id: "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                name: "Miaou",
+                breed: "Siamois",
+                age: 3,
+                species: "Chat",
+                allergy: "aucune",
+                weight: 4.2,
+                diet: "croquettes",
+                description: "Très joueur",
+                photo_url: "https://example.com/photo.jpg",
+                gender: "Male",
+                neutered: true,
+                color: "gris",
+                user_id: "003a8b60-0032-4528-82b0-50307c161d56"
+              },
+              {
+                id: "f7ff2ad9-4d57-4091-8ea1-e231cc02da51",
+                name: "Gribouille",
+                breed: "Persan",
+                age: 5,
+                species: "Chat",
+                allergy: "pollen",
+                weight: 5.1,
+                diet: "pâtée",
+                description: "Calme et affectueux",
+                photo_url: "https://example.com/photo2.jpg",
+                gender: "Female",
+                neutered: false,
+                color: "blanc",
+                user_id: "003a8b60-0032-4528-82b0-50307c161d56"
+              }
+            ]
+          },
             createdAt: { type: 'string', format: 'date-time' },
             updatedAt: { type: 'string', format: 'date-time' },
           },
@@ -247,13 +295,61 @@ swaggerRouter.route('/').post(
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
                   petidtable: {
-                    type: 'array',
-                    items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
-                    example: [
-                      "ed4244cc-e986-4a01-abfd-3d606dbf227c",
-                      "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
-                    ]
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+                      name: { type: 'string', example: 'Miaou' },
+                      breed: { type: 'string', example: 'Siamois' },
+                      age: { type: 'integer', example: 3 },
+                      species: { type: 'string', example: 'Chat' },
+                      allergy: { type: 'string', example: 'aucune' },
+                      weight: { type: 'number', example: 4.2 },
+                      diet: { type: 'string', example: 'croquettes' },
+                      description: { type: 'string', example: 'Très joueur' },
+                      photo_url: { type: 'string', example: 'https://example.com/photo.jpg' },
+                      gender: { type: 'string', enum: ['Male', 'Female', 'hermaphrodite'], example: 'Male' },
+                      neutered: { type: 'boolean', example: true },
+                      color: { type: 'string', example: 'gris' },
+                      user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' }
+                    }
                   },
+                  example: [
+                    {
+                      id: "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                      name: "Miaou",
+                      breed: "Siamois",
+                      age: 3,
+                      species: "Chat",
+                      allergy: "aucune",
+                      weight: 4.2,
+                      diet: "croquettes",
+                      description: "Très joueur",
+                      photo_url: "https://example.com/photo.jpg",
+                      gender: "Male",
+                      neutered: true,
+                      color: "gris",
+                      user_id: "003a8b60-0032-4528-82b0-50307c161d56"
+                    },
+                    {
+                      id: "f7ff2ad9-4d57-4091-8ea1-e231cc02da51",
+                      name: "Gribouille",
+                      breed: "Persan",
+                      age: 5,
+                      species: "Chat",
+                      allergy: "pollen",
+                      weight: 5.1,
+                      diet: "pâtée",
+                      description: "Calme et affectueux",
+                      photo_url: "https://example.com/photo2.jpg",
+                      gender: "Female",
+                      neutered: false,
+                      color: "blanc",
+                      user_id: "003a8b60-0032-4528-82b0-50307c161d56"
+                    }
+                  ]
+                },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },
@@ -300,8 +396,8 @@ swaggerRouter.route('/').post(
               type: 'array',
               items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
               example: [
-                "ed4244cc-e986-4a01-abfd-3d606dbf227c",
-                "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
+                "2145a17d-a34e-4871-b9e7-2bb4c25c3779",
+                "0e9db21b-e95b-492b-a6f9-1bfab45e6ebe"
               ]
             },
           },
@@ -324,13 +420,61 @@ swaggerRouter.route('/').post(
                   statusdemande: { type: 'string', enum: ['accepted', 'refused', 'pending'], example: 'pending'},
                   message: { type: 'string', example: 'Salut' },
                   petidtable: {
-                    type: 'array',
-                    items: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
-                    example: [
-                      "ed4244cc-e986-4a01-abfd-3d606dbf227c",
-                      "f7ff2ad9-4d57-4091-8ea1-e231cc02da51"
-                    ]
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      id: { type: 'string', format: 'uuid', example: 'ed4244cc-e986-4a01-abfd-3d606dbf227c' },
+                      name: { type: 'string', example: 'Miaou' },
+                      breed: { type: 'string', example: 'Siamois' },
+                      age: { type: 'integer', example: 3 },
+                      species: { type: 'string', example: 'Chat' },
+                      allergy: { type: 'string', example: 'aucune' },
+                      weight: { type: 'number', example: 4.2 },
+                      diet: { type: 'string', example: 'croquettes' },
+                      description: { type: 'string', example: 'Très joueur' },
+                      photo_url: { type: 'string', example: 'https://example.com/photo.jpg' },
+                      gender: { type: 'string', enum: ['Male', 'Female', 'hermaphrodite'], example: 'Male' },
+                      neutered: { type: 'boolean', example: true },
+                      color: { type: 'string', example: 'gris' },
+                      user_id: { type: 'string', format: 'uuid', example: '003a8b60-0032-4528-82b0-50307c161d56' }
+                    }
                   },
+                  example: [
+                    {
+                      id: "ed4244cc-e986-4a01-abfd-3d606dbf227c",
+                      name: "Miaou",
+                      breed: "Siamois",
+                      age: 3,
+                      species: "Chat",
+                      allergy: "aucune",
+                      weight: 4.2,
+                      diet: "croquettes",
+                      description: "Très joueur",
+                      photo_url: "https://example.com/photo.jpg",
+                      gender: "Male",
+                      neutered: true,
+                      color: "gris",
+                      user_id: "003a8b60-0032-4528-82b0-50307c161d56"
+                    },
+                    {
+                      id: "f7ff2ad9-4d57-4091-8ea1-e231cc02da51",
+                      name: "Gribouille",
+                      breed: "Persan",
+                      age: 5,
+                      species: "Chat",
+                      allergy: "pollen",
+                      weight: 5.1,
+                      diet: "pâtée",
+                      description: "Calme et affectueux",
+                      photo_url: "https://example.com/photo2.jpg",
+                      gender: "Female",
+                      neutered: false,
+                      color: "blanc",
+                      user_id: "003a8b60-0032-4528-82b0-50307c161d56"
+                    }
+                  ]
+                },
                   createdAt: { type: 'string', format: 'date-time' },
                   updatedAt: { type: 'string', format: 'date-time' },
                 },

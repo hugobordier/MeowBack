@@ -26,8 +26,15 @@ class UserAmisController{
                     }
                 }}
             const newdemande = await UserAmisService.createRequestAmi(req.user?.id,petsitter_id,message,petidtable);
-
-            return ApiResponse.created(res,"Demande de petsitting ajoutée avec succès",newdemande);
+            let pets: Pet[] = [];
+            if (newdemande.petidtable && newdemande.petidtable.length > 0) {
+                pets = await Pet.findAll({ where: { id: newdemande.petidtable } });
+            }
+            const response = {
+                ...newdemande.toJSON(),
+                petidtable: pets
+            };
+            return ApiResponse.created(res,"Demande de petsitting ajoutée avec succès",response);
         }catch (error:any) {
             return ApiResponse.internalServerError(res, "Erreur lors de la création de la demande",error.message);
         }
@@ -48,7 +55,16 @@ class UserAmisController{
             if (demande?.user_id !== req.user?.id){
                 return ApiResponse.badRequest(res,"pas ta demande")
             }
-            return ApiResponse.ok(res,"Demande de petsitting récupérée",demande);
+
+            let pets: Pet[] = [];
+            if (demande.petidtable && demande.petidtable.length > 0) {
+                pets = await Pet.findAll({ where: { id: demande.petidtable } });
+            }
+            const response = {
+                ...demande.toJSON(),
+                petidtable: pets
+            };
+            return ApiResponse.ok(res,"Demande de petsitting récupérée",response);
         }catch (error:any) {
             return ApiResponse.internalServerError(res, "Erreur lors de getUserAmiById",error.message);
         }
@@ -66,7 +82,19 @@ class UserAmisController{
             const {userAmis,total} = await UserAmisService.getAllUserAmisForAUser({userId: req.user!.id,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
 
-            return ApiResponse.ok(res,"Toutes les demandes de petsitting envoyés pour l'utilisateur courant ont été récupérées",userAmis,pagination);
+            // Ajout du tableau de pets pour chaque demande
+            const userAmisWithPets = await Promise.all(userAmis.map(async (demande) => {
+                let pets: Pet[] = [];
+                if (demande.petidtable && demande.petidtable.length > 0) {
+                    pets = await Pet.findAll({ where: { id: demande.petidtable } });
+                }
+                return {
+                    ...demande.toJSON(),
+                    petidtable: pets
+                };
+            }));
+
+            return ApiResponse.ok(res,"Toutes les demandes de petsitting envoyées pour l'utilisateur courant ont été récupérées",userAmisWithPets,pagination);
         } catch (error) {
             if(error instanceof ApiError){
                 return ApiResponse.notFound(res,"Pas de Demande de petsitting trouvée")
@@ -75,7 +103,7 @@ class UserAmisController{
         }
     }
 
-        static async getAllUserAmisForAPetsitter(req: Request, res: Response) {
+    static async getAllUserAmisForAPetsitter(req: Request, res: Response) {
         try {
             if(!req.user?.id){
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
@@ -86,7 +114,19 @@ class UserAmisController{
             const {userAmis,total} = await UserAmisService.getAllUserAmisForAPetsitter({currentuserid: req.user!.id,page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
 
-            return ApiResponse.ok(res,"Toutes les demandes de petsitting reçues pour l'utilisateur courant ont été récupérées",userAmis,pagination);
+            // Ajout du tableau de pets pour chaque demande
+            const userAmisWithPets = await Promise.all(userAmis.map(async (demande) => {
+                let pets: Pet[] = [];
+                if (demande.petidtable && demande.petidtable.length > 0) {
+                    pets = await Pet.findAll({ where: { id: demande.petidtable } });
+                }
+                return {
+                    ...demande.toJSON(),
+                    petidtable: pets
+                };
+            }));
+
+            return ApiResponse.ok(res,"Toutes les demandes de petsitting reçues pour l'utilisateur courant ont été récupérées",userAmisWithPets,pagination);
         } catch (error) {
             if(error instanceof ApiError){
                 return ApiResponse.notFound(res,"Pas de Demande de petsitting trouvée")
@@ -95,7 +135,7 @@ class UserAmisController{
         }
     }
 
-        static async getAlldemandeamis(req: Request, res: Response) {
+    static async getAlldemandeamis(req: Request, res: Response) {
         try {
             if(!req.user?.id){
                 return ApiResponse.badRequest(res,"L'id utilisateur est inexistant")
@@ -106,7 +146,19 @@ class UserAmisController{
             const {userAmis,total} = await UserAmisService.getAllUserAmis({page,perPage});
             const pagination= ApiResponse.createPagination( total, page, perPage);
 
-            return ApiResponse.ok(res,"Toutes les demandes d'amis ont été récupérées",userAmis,pagination);
+            // Ajout du tableau de pets pour chaque demande
+            const userAmisWithPets = await Promise.all(userAmis.map(async (demande) => {
+                let pets: Pet[] = [];
+                if (demande.petidtable && demande.petidtable.length > 0) {
+                    pets = await Pet.findAll({ where: { id: demande.petidtable } });
+                }
+                return {
+                    ...demande.toJSON(),
+                    petidtable: pets
+                };
+            }));
+
+            return ApiResponse.ok(res,"Toutes les demandes d'amis ont été récupérées",userAmisWithPets,pagination);
         } catch (error) {
             return ApiResponse.internalServerError(res, "Erreur lors de getAlldemandeamis");
         }
@@ -179,9 +231,19 @@ class UserAmisController{
                         return ApiResponse.badRequest(res, "Tu ne peux pas faire de demande de petsitting pour des pets qui ne t'appartiennent pas");
                     }
                 }}
-
-            const updatedfriendrequest = await UserAmisService.updateDemandeAmiWithAllParameters(id, req.body);
-            return ApiResponse.ok(res, "Demande de petsitting mis à jour",updatedfriendrequest);
+            const [success, updatedfriendrequest] = await UserAmisService.updateDemandeAmiWithAllParameters(id, req.body);
+            if (!success || !updatedfriendrequest) {
+                return ApiResponse.notFound(res, "Demande de petsitting non trouvée");
+            }
+            let pets: Pet[] = [];
+            if (updatedfriendrequest.petidtable && updatedfriendrequest.petidtable.length > 0) {
+                pets = await Pet.findAll({ where: { id: updatedfriendrequest.petidtable } });
+            }
+            const response = {
+                ...updatedfriendrequest.toJSON(),
+                petidtable: pets
+            };
+            return ApiResponse.ok(res, "Demande de petsitting mis à jour", response);
         } catch (error) {
             return ApiResponse.internalServerError(res, "Erreur lors de la mise à jour");
         }
