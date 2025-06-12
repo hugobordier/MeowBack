@@ -36,9 +36,6 @@ class PetService {
           if (!data.species){
             throw new Error("L'espèce de l'animal doit être répertoriée")
           }
-          if (!data.diet){
-            throw new Error("Le régime alimentaire de l'animal doit être répertorié")
-          }
           if (!data.gender){
             throw new Error("Le genre de l'animal doit être répertorié")
           }
@@ -84,9 +81,6 @@ class PetService {
           }
           if (!data.species){
             throw new Error("L'espèce de l'animal doit être répertoriée")
-          }
-          if (!data.diet){
-            throw new Error("Le régime alimentaire de l'animal doit être répertorié")
           }
           if (!data.gender){
             throw new Error("Le genre de l'animal doit être répertorié")
