@@ -12,11 +12,11 @@ export const petSchema = z.object({
     .int("L'âge doit être un nombre entier")
     .min(0, "L'âge ne peut pas être négatif"),
   species: z.string().min(1, "L'espèce de l'animal est requise"),
-  allergy: z.string().min(2, "L'allergie doit contenir au moins 2 caractères").max(100, "L'allergie ne peut pas dépasser 100 caractères").optional(),
+  allergy: z.string().max(100, "L'allergie ne peut pas dépasser 100 caractères").optional(),
   weight: z
     .number()
     .min(0, "Le poids doit être un nombre positif"),
-  diet: z.string().min(1, "Le régime alimentaire est requis"),
+  diet: z.string().optional(),
   description: z.string().optional(),
   photo_url: z.string().url("L'URL de la photo doit être valide").optional(),
   gender: z.enum(["Male", "Female", "hermaphrodite"]).refine(
@@ -49,7 +49,6 @@ export const petPatchSchema = z.object({
   allergy: z
     .string()
     .trim()
-    .min(2, "L'allergie doit contenir au moins 2 caractères")
     .max(100, "L'allergie ne peut pas dépasser 100 caractères")
     .optional(),
   weight: z
@@ -57,7 +56,7 @@ export const petPatchSchema = z.object({
     .min(0.1, "Le poids doit être supérieur à 0")
     .max(200, "Le poids semble irréaliste")
     .optional(),
-  diet: z.string().trim().min(1, "Le régime alimentaire est requis").optional(),
+  diet: z.string().trim().optional(),
   description: z
     .string()
     .trim()

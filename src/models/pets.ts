@@ -52,9 +52,6 @@ pets.init(
     allergy: {
       type: DataTypes.TEXT,
       allowNull: true, 
-      validate: {
-        len: [2, 100], 
-      },
     },
     weight: {
       type: DataTypes.FLOAT, 
@@ -65,7 +62,7 @@ pets.init(
     },
     diet: {
       type: DataTypes.TEXT, 
-      allowNull: false,
+      allowNull: true,
     },
     description: {
       type: DataTypes.TEXT, 
