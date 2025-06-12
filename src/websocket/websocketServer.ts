@@ -110,8 +110,9 @@ export const initWebSocket = (io: Server): void => {
     });
     
     socket.on('message', async (msg) => { //Qd user envoie msg
-      const username = socket.data.user?.username || 'inconnu';
-      const senderId = socket.data.user?.id;
+      console.log('event message bien recu:', msg);
+      const username = socket.data.user.username || 'inconnu';
+      const senderId = socket.data.user.id;
       const recipientSocketId = users[msg.to];
       console.log('Tentative d\'insertion message', senderId, msg);
 
