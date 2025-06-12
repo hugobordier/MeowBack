@@ -4,6 +4,7 @@ import User from '@/models/User';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import UserService from '@/services/UserService';
+import Messenger from '@/models/Messenger';
 
 dotenv.config();
 console.log("🔥 Serveur WEBSOCKET démarré (c'est le bon fichier) !");
@@ -108,12 +109,28 @@ export const initWebSocket = (io: Server): void => {
       console.log(`${socket.id} a rejoint le chat ${roomID}`);
     });
     
-    socket.on('message', (msg) => { //Qd user envoie msg
+    socket.on('message', async (msg) => { //Qd user envoie msg
       const username = socket.data.user?.username || 'inconnu';
+      const senderId = socket.data.user?.id;
       const recipientSocketId = users[msg.to];
+      console.log('Tentative d\'insertion message', senderId, msg);
+
       console.log("Message reçu :", msg.message);
       console.log("Destinataire :", msg.to);
       console.log(`De : ${username}`);
+      
+      try{
+        await Messenger.create({ //remplir la BDD
+          sender: senderId,
+          recipientId: msg.to,
+          message: msg.message,
+          msgTimestamp: new Date(),
+          isRead: false,
+        });
+        console.log('Message enregistré dans la BDD');
+      }catch (e){
+        console.log('Erreur lors de l insertion du msg dans la bdd', e);
+      }
       io.to(recipientSocketId).emit('message',{
         from: username,
         to: msg.to,
