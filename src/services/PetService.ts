@@ -4,7 +4,8 @@ import CloudinaryService from './CloudinaryService';
 import path from 'path';
 import { FolderName } from '@/config/cloudinary.config';
 import ApiError from '@utils/ApiError';
-
+import UserAmis from '@/models/UserAmis';
+import db from '@/config/config';
 interface PetsResponse {
   pets: pets[];  
   total: number; 
@@ -113,7 +114,16 @@ class PetService {
           if (!id) {
             throw new Error("ID du pet requis pour la suppression");
           }
-    
+           await UserAmis.update(
+            {
+              petidtable: db.literal(`array_remove("petidtable", '${id}')`)
+            },
+            {
+              where: {
+                petidtable: { [Op.contains]: [id] }
+              }
+            }
+          );
           const deleted = await pets.destroy({ where: { id } });
 
           return deleted > 0;
