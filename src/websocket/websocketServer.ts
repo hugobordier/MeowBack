@@ -106,6 +106,7 @@ export const initWebSocket = (io: Server): void => {
 
     socket.on('join', (roomID) => {
       socket.join(roomID);
+      socket.data.roomID = roomID;
       console.log(`${socket.id} a rejoint le chat ${roomID}`);
     });
     
@@ -114,6 +115,7 @@ export const initWebSocket = (io: Server): void => {
       const username = socket.data.user.username || 'inconnu';
       const senderId = socket.data.user.id;
       const recipientSocketId = users[msg.to];
+      const roomID = socket.data.roomID;
       console.log('Tentative d\'insertion message', senderId, msg);
 
       console.log("Message reçu :", msg.message);
@@ -127,6 +129,7 @@ export const initWebSocket = (io: Server): void => {
           message: msg.message,
           msgTimestamp: new Date(),
           isRead: false,
+          roomId: roomID,
         });
         console.log('Message enregistré dans la BDD');
       }catch (e){

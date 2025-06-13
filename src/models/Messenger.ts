@@ -9,6 +9,7 @@ class Messenger extends Model{
     declare message: string;
     declare msgTimestamp: Date;
     declare isRead: boolean;
+    declare roomId: string;
 }
 
 Messenger.init(
@@ -39,6 +40,10 @@ Messenger.init(
             type: DataTypes.BOOLEAN,
             allowNull: false,
             defaultValue: false,
+        },
+        roomId:{
+            type: DataTypes.UUID,
+            allowNull: false,
         },
     },
     {
