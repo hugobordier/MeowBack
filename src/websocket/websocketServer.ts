@@ -116,6 +116,11 @@ export const initWebSocket = (io: Server): void => {
       const senderId = socket.data.user.id;
       const recipientSocketId = users[msg.to];
       const roomID = socket.data.roomID;
+
+      const socketsInRoom = await io.in(roomID).fetchSockets();
+
+      
+      const recipientSocket = socketsInRoom.find(s => s.data.user.id === msg.to);
       console.log('Tentative d\'insertion message', senderId, msg);
 
       console.log("Message reçu :", msg.message);
@@ -135,13 +140,14 @@ export const initWebSocket = (io: Server): void => {
       }catch (e){
         console.log('Erreur lors de l insertion du msg dans la bdd', e);
       }
-      io.to(recipientSocketId).emit('message',{
-        from: username,
-        to: msg.to,
-        message: msg.message
-      }); 
-      console.log(`👽 Message privé envoyé à ${recipientSocketId} :`, msg);
-      // Envoie le message à tout le monde: io.emit(eventName, args   )
+      if (recipientSocket) {
+        recipientSocket.emit('message', {
+          from: senderId,
+          to: msg.to,
+          message: msg.message 
+        });
+      console.log(`Message privé envoyé à ${recipientSocketId} :`, msg);
+      }
     });
     handlePrivateMessages(socket, io); //pour le chat privé
     socket.on('disconnect', () => {
