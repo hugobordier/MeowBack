@@ -42,7 +42,7 @@ Messenger.init(
             defaultValue: false,
         },
         roomId:{
-            type: DataTypes.UUID,
+            type: DataTypes.TEXT,
             allowNull: false,
         },
     },
